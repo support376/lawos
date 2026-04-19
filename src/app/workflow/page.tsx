@@ -5,6 +5,7 @@ import { getMyRoleContext, canAccessView, type PipelineView, type DomainKey } fr
 import { ConsultantPipeline } from './views/ConsultantPipeline';
 import { BillingPipeline } from './views/BillingPipeline';
 import { WriterPipeline } from './views/WriterPipeline';
+import { PartnerDashboard } from './views/PartnerDashboard';
 import { ViewSwitcher } from './components/ViewSwitcher';
 import { RoleSimulator } from './components/RoleSimulator';
 import { CaseDetailView } from './views/CaseDetailView';
@@ -98,7 +99,7 @@ export default async function WorkflowPage({
           {view === 'consultant' && <ConsultantPipeline domain={domain} ctx={ctx} />}
           {view === 'writer' && <WriterPipeline domain={domain} ctx={ctx} />}
           {view === 'billing' && <BillingPipeline domain={domain} ctx={ctx} />}
-          {view === 'partner' && <PlaceholderView label="대표 종합 뷰" note="Phase P5 — 도메인별 KPI + Workload" />}
+          {view === 'partner' && <PartnerDashboard ctx={ctx} />}
         </div>
       </main>
     </div>
