@@ -311,12 +311,50 @@ export default async function CaseDetailPage({
     requiredDocKeys: template
       ? template.document_keys.filter((k) => DOCUMENTS[k]?.required)
       : [],
-    monthlyIncome: c.client?.monthly_income_krw ?? null,
-    totalDebt: c.client?.total_debt_krw ?? null,
-    dependentsCount: c.client?.dependents_count ?? null,
-    occupation: c.client?.occupation ?? null,
-    assetsCount: (c.client?.assets ?? []).length,
-    riskFlags: c.client?.risk_flags ?? {},
+    // 이혼: our_side actor.profile에서 재무 읽기 (MECE 분리).
+    // 개인회생: 기존대로 clients 테이블.
+    monthlyIncome: c.case_type === 'divorce'
+      ? ((actorMap['our_side']?.[0]?.profile?.['monthly_income_krw'] as number | null) ?? null)
+      : (c.client?.monthly_income_krw ?? null),
+    totalDebt: c.case_type === 'divorce'
+      ? ((actorMap['our_side']?.[0]?.profile?.['total_debt_krw'] as number | null) ?? null)
+      : (c.client?.total_debt_krw ?? null),
+    dependentsCount: c.case_type === 'divorce'
+      ? null
+      : (c.client?.dependents_count ?? null),
+    occupation: c.case_type === 'divorce'
+      ? ((actorMap['our_side']?.[0]?.profile?.['occupation'] as string | null) ?? null)
+      : (c.client?.occupation ?? null),
+    assetsCount: c.case_type === 'divorce'
+      ? ((actorMap['our_side']?.[0]?.profile?.['total_assets_krw'] as number | null) ? 1 : 0)
+      : (c.client?.assets ?? []).length,
+    // 이혼: actor profile + case_intel의 boolean 플래그들을 조립.
+    // 개인회생: 기존대로 clients.risk_flags.
+    riskFlags: c.case_type === 'divorce'
+      ? (() => {
+          const op = actorMap['opposing_side']?.[0]?.profile ?? {};
+          const our = actorMap['our_side']?.[0]?.profile ?? {};
+          return {
+            // 상대 유책사유 (opposing_side.profile)
+            infidelity_evidence: !!op['committed_infidelity'],
+            domestic_violence: !!op['domestic_violence_history'],
+            in_law_abuse: !!op['committed_in_law_abuse'],
+            economic_abandonment: !!op['committed_economic_abandonment'],
+            sex_refusal: !!op['sex_refusal'],
+            religious_imposition: !!op['religious_imposition'],
+            child_abuse_suspected: !!op['child_abuse_suspected'],
+            drug_abuse: !!op['has_drug_abuse'],
+            gambling_addiction: !!op['has_gambling_addiction'],
+            hidden_assets_suspected: op['hidden_assets_suspicion'] != null &&
+              op['hidden_assets_suspicion'] !== 'none',
+            foreign_spouse: !!op['is_foreign_national'],
+            // 우리측 리스크 (our_side.profile)
+            our_dv_allegation_risk: !!our['my_dv_allegation_risk'],
+            // 사건 속성 (case_intel)
+            marriage_fraud: !!(ci['marriage_fraud_suspected']),
+          } as Record<string, boolean>;
+        })()
+      : (c.client?.risk_flags ?? {}),
     hasPreferentialAnalysis,
     preferentialFoundCount: preferentialCount,
     hasRepaymentSim,
@@ -622,19 +660,23 @@ export default async function CaseDetailPage({
               }
               left={
                 <div className="space-y-3">
-                  <ClientProfile client={clientSummary} caseId={c.id} caseType={c.case_type} />
-                  {domain?.caseType === 'divorce' && (() => {
-                    const ourSpec = domain.actors.find((a) => a.role === 'our_side');
-                    if (!ourSpec) return null;
-                    return (
-                      <ActorPanel
-                        spec={ourSpec}
-                        actor={actorMap['our_side']?.[0] ?? null}
-                        caseId={c.id}
-                        accentColor="amber"
-                      />
-                    );
-                  })()}
+                  {/* 이혼: 의뢰인 정보는 페이지 상단 헤더로 대체, 재무·자기진단은 our_side 패널 일원화 */}
+                  {domain?.caseType === 'divorce' ? (
+                    (() => {
+                      const ourSpec = domain.actors.find((a) => a.role === 'our_side');
+                      if (!ourSpec) return null;
+                      return (
+                        <ActorPanel
+                          spec={ourSpec}
+                          actor={actorMap['our_side']?.[0] ?? null}
+                          caseId={c.id}
+                          accentColor="amber"
+                        />
+                      );
+                    })()
+                  ) : (
+                    <ClientProfile client={clientSummary} caseId={c.id} caseType={c.case_type} />
+                  )}
                 </div>
               }
               right={

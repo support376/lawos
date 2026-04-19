@@ -15,9 +15,31 @@ export const divorceActors: ActorRoleSpec[] = [
     persuasive: false,
     icon: '🤝',
     description:
-      '대리하는 당사자의 전략 자기진단. 재무는 ClientProfile에서 관리. 여기엔 "상대가 공격할 약점·협상 의향·보유 증거 준비도"를 기록.',
+      '의뢰인 당사자의 이혼 사건 시점 스냅샷 + 전략 자기진단. 재무·자산·위험·협상의향 전부 여기서 관리 (clients 테이블 재무 필드는 사용하지 않음).',
     autoCreate: true,
     intelSchema: [
+      // --- 재무 (이혼 시점 스냅샷) ---
+      {
+        key: 'monthly_income_krw',
+        label: '우리측 월소득',
+        kind: 'number_krw',
+        required: true,
+        description: '양육비 표준산정·재산분할 기여도 기초',
+        usedBy: ['divorce_custody_sole', 'divorce_property_maximize'],
+      },
+      {
+        key: 'total_debt_krw',
+        label: '우리측 총부채',
+        kind: 'number_krw',
+        description: '공동채무 여부 판정 기초',
+        usedBy: ['divorce_property_maximize'],
+      },
+      {
+        key: 'occupation',
+        label: '우리측 직업',
+        kind: 'text',
+        description: '기여도 비교 + 양육환경 평가',
+      },
       {
         key: 'total_assets_krw',
         label: '우리측 총 자산',
@@ -176,11 +198,73 @@ export const divorceActors: ActorRoleSpec[] = [
         ],
         usedBy: ['divorce_fault_aggregation'],
       },
+      // --- 상대 유책사유 플래그 (민법 §840) ---
+      {
+        key: 'committed_infidelity',
+        label: '상대 부정행위',
+        kind: 'boolean',
+        description: '민법 §840 1호',
+        usedBy: ['divorce_fault_aggregation', 'divorce_affair_suit'],
+      },
       {
         key: 'domestic_violence_history',
-        label: '상대의 폭력 이력',
+        label: '상대 가정폭력',
         kind: 'boolean',
-        usedBy: ['divorce_protective_order', 'divorce_fault_aggregation'],
+        description: '민법 §840 3호 · 가폭방지법',
+        usedBy: ['divorce_protective_order', 'divorce_fault_aggregation', 'divorce_custody_sole'],
+      },
+      {
+        key: 'committed_in_law_abuse',
+        label: '상대(또는 인척)의 인척 학대',
+        kind: 'boolean',
+        description: '민법 §840 3·4호',
+        usedBy: ['divorce_fault_aggregation'],
+      },
+      {
+        key: 'committed_economic_abandonment',
+        label: '상대의 경제적 유기',
+        kind: 'boolean',
+        description: '민법 §840 2호',
+        usedBy: ['divorce_fault_aggregation'],
+      },
+      {
+        key: 'sex_refusal',
+        label: '상대의 성관계 거부',
+        kind: 'boolean',
+        description: '민법 §840 6호',
+        usedBy: ['divorce_fault_aggregation'],
+      },
+      {
+        key: 'religious_imposition',
+        label: '상대의 종교 강요',
+        kind: 'boolean',
+        description: '민법 §840 6호',
+        usedBy: ['divorce_fault_aggregation'],
+      },
+      {
+        key: 'child_abuse_suspected',
+        label: '상대의 아동학대·방임 의심',
+        kind: 'boolean',
+        description: '아동복지법 §17',
+        usedBy: ['divorce_custody_sole', 'divorce_child_interim'],
+      },
+      {
+        key: 'has_drug_abuse',
+        label: '상대의 약물 남용',
+        kind: 'boolean',
+        usedBy: ['divorce_custody_sole'],
+      },
+      {
+        key: 'has_gambling_addiction',
+        label: '상대의 도박 중독',
+        kind: 'boolean',
+        usedBy: ['divorce_custody_sole', 'divorce_fault_aggregation'],
+      },
+      {
+        key: 'is_foreign_national',
+        label: '상대가 외국인 배우자',
+        kind: 'boolean',
+        description: '국제사법 §39',
       },
       {
         key: 'personality_notes',

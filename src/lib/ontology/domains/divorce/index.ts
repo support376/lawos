@@ -350,18 +350,10 @@ export const divorceDomain: DomainOntology = {
   label: '이혼',
   version: '0.4.0',
   actors: divorceActors,
-  // 사람 속성 (clients 테이블 공유) — 양육비·재산분할 산정 기초
-  // 자녀 수는 case_intel.children_count 쪽에서 관리 (이 사건의 혼인 자녀)
-  clientFields: [
-    { key: 'monthly_income_krw', label: '월 소득', kind: 'number_krw', required: true,
-      description: '양육비 산정 · 재산분할 기여도',
-      usedBy: ['divorce_custody_sole', 'divorce_property_maximize'] },
-    { key: 'total_debt_krw', label: '총 부채', kind: 'number_krw',
-      description: '공동채무 여부 판정',
-      usedBy: ['divorce_property_maximize'] },
-    { key: 'occupation', label: '직업', kind: 'text',
-      description: '기여도 비교' },
-  ],
+  // 이혼 도메인에선 clients 테이블의 재무 필드를 사용하지 않음 (MECE 분리).
+  // clients 테이블은 "사람 자체" (이름·연락처·메모)만 담당.
+  // 이혼 사건 시점의 재무·자산은 our_side actor.profile에 저장.
+  clientFields: [],
   // 사건 특수 (cases.case_intel JSONB)
   caseFields: [
     { key: 'client_position', label: '의뢰인 소송상 지위', kind: 'enum',
@@ -396,6 +388,9 @@ export const divorceDomain: DomainOntology = {
       usedBy: ['divorce_consensual_conversion'] },
     { key: 'protective_order_active', label: '접근금지 발령 상태', kind: 'boolean',
       usedBy: ['divorce_protective_order'] },
+    { key: 'marriage_fraud_suspected', label: '혼인 사기·강박·중혼 정황', kind: 'boolean',
+      description: '민법 §815~§825 — 혼인 자체 무효·취소 사유',
+      usedBy: ['divorce_marriage_invalidation'] },
   ],
   riskFlags: [
     // 이혼 사유 (민법 §840)

@@ -72,7 +72,8 @@
       "Bash(gh repo *)",
       "Bash(vercel --yes)",
       "Bash(git push *)",
-      "Bash(vercel inspect *)"
+      "Bash(vercel inspect *)",
+      "Bash(git rm *)"
     ]
   }
 }
