@@ -4,19 +4,30 @@ import { CommandPalette } from './CommandPalette';
 import { CommandOpener } from './CommandOpener';
 import { CreateMenu } from './CreateMenu';
 import { UserMenu } from './UserMenu';
+import { getMyRoleContext, type PipelineView, type DomainKey } from '@/lib/auth/my-roles';
+import { RoleSimulatorHeader } from '@/app/workflow/components/RoleSimulatorHeader';
 import type { Client, Case } from '@/lib/types';
 
-export type HeaderActive = 'dashboard' | 'cases' | 'clients' | 'workflow' | 'team';
+export type HeaderActive = 'dashboard' | 'cases' | 'clients' | 'workflow' | 'workbench' | 'team';
 
 const TABS: { key: HeaderActive; href: string; label: string }[] = [
   { key: 'dashboard', href: '/dashboard', label: '대시보드' },
+  { key: 'workbench', href: '/workbench', label: '업무' },
+  { key: 'workflow', href: '/workflow', label: '워크플로우' },
   { key: 'cases', href: '/cases', label: '사건' },
   { key: 'clients', href: '/clients', label: '고객' },
-  { key: 'workflow', href: '/workflow', label: '워크플로우' },
   { key: 'team', href: '/settings/team', label: '팀' },
 ];
 
-export async function AppHeader({ active }: { active: HeaderActive }) {
+export async function AppHeader({
+  active,
+  simulatedView,
+  simulatedDomain,
+}: {
+  active: HeaderActive;
+  simulatedView?: PipelineView;
+  simulatedDomain?: DomainKey;
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -32,15 +43,18 @@ export async function AppHeader({ active }: { active: HeaderActive }) {
     );
   }
 
-  const [profileRes, clientsRes, casesRes] = await Promise.all([
+  const [profileRes, clientsRes, casesRes, ctx] = await Promise.all([
     supabase.from('users').select('name, email').eq('id', user.id).maybeSingle(),
     supabase.from('clients').select('*').order('created_at', { ascending: false }),
     supabase.from('cases').select('*').order('created_at', { ascending: false }),
+    getMyRoleContext(),
   ]);
 
   const profile = profileRes.data;
   const clients = (clientsRes.data ?? []) as Client[];
   const cases = (casesRes.data ?? []) as Case[];
+
+  const isManagingPartner = ctx?.isManagingPartner ?? false;
 
   return (
     <header className="border-b border-zinc-200 dark:border-zinc-800 px-6 py-2.5 flex items-center justify-between bg-white dark:bg-zinc-900 shrink-0 gap-4">
@@ -66,6 +80,12 @@ export async function AppHeader({ active }: { active: HeaderActive }) {
       </div>
 
       <div className="flex items-center gap-2 shrink-0">
+        {isManagingPartner && (
+          <RoleSimulatorHeader
+            initialView={simulatedView ?? 'partner'}
+            initialDomain={simulatedDomain ?? '*'}
+          />
+        )}
         <CommandOpener />
         <CreateMenu clients={clients} cases={cases} />
         <UserMenu name={profile?.name ?? null} email={profile?.email ?? user.email ?? null} />
