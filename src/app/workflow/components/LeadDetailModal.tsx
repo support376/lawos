@@ -8,7 +8,8 @@ import { updateLeadStatus, convertLeadToCase } from '@/app/actions/leads';
 import { logCommunication, listCommunications } from '@/app/actions/communications';
 import type { Communication } from '@/lib/ontology/core/objects';
 
-const STATUS_OPTIONS: LeadStatus[] = ['new', 'contacted', 'qualified', 'converted', 'lost', 'cold'];
+// 하단 퀵 전환에선 'converted' 제외 — 수임 확정은 [실행] 탭에서 Case·계약까지 생성해야 함
+const STATUS_OPTIONS: LeadStatus[] = ['new', 'contacted', 'qualified', 'lost', 'cold'];
 
 export function LeadDetailModal({
   lead,
@@ -401,13 +402,25 @@ function ActionPanel({
           Case · 고객 자동 생성 + Lead = converted. 수임료 계약을 여기서 바로 찍으면 재무팀에 즉시 노출.
         </p>
         {!converting ? (
-          <button
-            onClick={() => setConverting(true)}
-            disabled={lead.status === 'converted'}
-            className="text-xs px-3 py-1.5 rounded bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 disabled:opacity-50"
-          >
-            → 수임 확정
-          </button>
+          <div className="space-y-1">
+            <button
+              onClick={() => setConverting(true)}
+              disabled={lead.status === 'converted' && !!lead.case_id}
+              className="text-xs px-3 py-1.5 rounded bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 disabled:opacity-50"
+            >
+              → 수임 확정
+            </button>
+            {lead.status === 'converted' && lead.case_id && (
+              <p className="text-[10px] text-zinc-500">
+                이미 수임 확정됨. Case 상세에서 계약 추가·수정 가능.
+              </p>
+            )}
+            {lead.status === 'converted' && !lead.case_id && (
+              <p className="text-[10px] text-amber-600">
+                ⚠ 상태는 converted인데 Case 연결 안 됨 — 재시도로 생성 가능
+              </p>
+            )}
+          </div>
         ) : (
           <div className="space-y-3">
             <div>
