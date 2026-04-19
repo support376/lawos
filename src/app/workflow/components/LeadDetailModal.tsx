@@ -7,6 +7,7 @@ import { LEAD_STATUS_LABEL, COMM_CHANNEL_LABEL } from '@/lib/ontology/core/objec
 import { updateLeadStatus, convertLeadToCase } from '@/app/actions/leads';
 import { logCommunication, listCommunications } from '@/app/actions/communications';
 import type { Communication } from '@/lib/ontology/core/objects';
+import { ConsultationLogPanel } from './ConsultationLogPanel';
 
 // 하단 퀵 전환에선 'converted' 제외 — 수임 확정은 [실행] 탭에서 Case·계약까지 생성해야 함
 const STATUS_OPTIONS: LeadStatus[] = ['new', 'contacted', 'qualified', 'lost', 'cold'];
@@ -21,7 +22,7 @@ export function LeadDetailModal({
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<'info' | 'log' | 'action'>('info');
+  const [tab, setTab] = useState<'info' | 'log' | 'consultation' | 'action'>('info');
 
   const [comms, setComms] = useState<Communication[]>([]);
   useEffect(() => {
@@ -64,7 +65,7 @@ export function LeadDetailModal({
         </div>
 
         <div className="border-b border-zinc-200 dark:border-zinc-800 flex">
-          {(['info', 'log', 'action'] as const).map((t) => (
+          {(['info', 'log', 'consultation', 'action'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -74,7 +75,7 @@ export function LeadDetailModal({
                   : 'text-zinc-500'
               }`}
             >
-              {t === 'info' ? '정보' : t === 'log' ? `접촉 이력 (${comms.length})` : '실행'}
+              {t === 'info' ? '정보' : t === 'log' ? `접촉 이력 (${comms.length})` : t === 'consultation' ? '📋 상담일지' : '실행'}
             </button>
           ))}
         </div>
@@ -99,6 +100,8 @@ export function LeadDetailModal({
           )}
 
           {tab === 'log' && <ConsultationLog leadId={lead.id} comms={comms} onLogged={(c) => setComms([c, ...comms])} />}
+
+          {tab === 'consultation' && <ConsultationLogPanel leadId={lead.id} />}
 
           {tab === 'action' && (
             <ActionPanel
