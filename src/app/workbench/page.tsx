@@ -3,10 +3,12 @@ import { redirect } from 'next/navigation';
 import { differenceInCalendarDays, format, parseISO } from 'date-fns';
 import { createClient } from '@/lib/supabase/server';
 import { AppHeader } from '@/components/AppHeader';
-import { getMyRoleContext, type PipelineView, type DomainKey } from '@/lib/auth/my-roles';
+import { getMyRoleContext, hasAnyRole, type PipelineView, type DomainKey } from '@/lib/auth/my-roles';
 import { ACTION_STATUS_LABEL, PAYMENT_KIND_LABEL } from '@/lib/ontology/core/objects';
 import { getActionSpec } from '@/lib/ontology/core/action-registry';
 import type { ActionRecord, Lead, PaymentSchedule } from '@/lib/ontology/core/objects';
+import { listPendingConfirms } from '@/app/actions/case-approval';
+import { PendingConfirmsBanner } from '@/app/workflow/components/PendingConfirmsBanner';
 import { WorkbenchActionItem } from './WorkbenchActionItem';
 
 function krw(n: number): string {
@@ -69,6 +71,10 @@ export default async function WorkbenchPage({
   // 역할별 추가 큐
   const roleSpecific = await loadRoleSpecific(view, domain, ctx, supabase, asSelfOnly);
 
+  // 수임 컨펌 대기 (대표·변호사만)
+  const canConfirm = hasAnyRole(ctx, 'managing_partner') || hasAnyRole(ctx, 'attorney');
+  const pendingConfirms = canConfirm ? await listPendingConfirms() : [];
+
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
       <AppHeader
@@ -86,6 +92,9 @@ export default async function WorkbenchPage({
             )}
           </p>
         </div>
+
+        {/* 🔔 수임 컨펌 대기 (대표·변호사 최상단) */}
+        <PendingConfirmsBanner items={pendingConfirms} />
 
         {/* 역할별 특화 큐 */}
         {roleSpecific && <RoleSpecificSection view={view} data={roleSpecific} />}

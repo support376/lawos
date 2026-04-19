@@ -193,7 +193,48 @@ export async function convertLeadToCase(input: {
       if (r.ok) contractId = r.contractId;
     }
 
+    // 🔔 수임 컨펌 Action 자동 생성 — 대표변호사 한 명에게 자동 할당
+    try {
+      const { data: mp } = await supabase
+        .from('workspace_member_roles')
+        .select('user_id')
+        .eq('workspace_id', workspaceId)
+        .eq('role', 'managing_partner')
+        .limit(1)
+        .maybeSingle();
+      const assignTo = mp?.user_id ?? userId;
+      const clientName = lead.name;
+      const retainerInfo = input.contract
+        ? ` · 계약 ${Math.round(input.contract.total_amount_krw / 10000)}만원 (${input.contract.installment_count}회)`
+        : ' · 계약 없음';
+      await supabase.from('actions').insert({
+        workspace_id: workspaceId,
+        subject_type: 'case',
+        subject_id: newCase.id,
+        action_type: 'confirm_new_case',
+        title: `🔔 수임 컨펌: ${clientName}${retainerInfo}`,
+        description: `상담원이 '${clientName}' 리드를 수임 확정했습니다. 담당 변호사·서류팀 지정 후 승인해 주세요.`,
+        assigned_to: assignTo,
+        team_role: 'managing_partner',
+        due_date: new Date(Date.now() + 86_400_000).toISOString().slice(0, 10),
+        status: 'pending',
+        priority: 1,
+        auto_generated: true,
+        created_by: userId,
+        payload: {
+          lead_id: input.leadId,
+          client_id: finalClientId,
+          contract_id: contractId ?? null,
+          case_type: input.caseType,
+        },
+      });
+    } catch (e) {
+      console.warn('[convertLeadToCase] confirm_new_case action 생성 실패:', e);
+    }
+
     revalidatePath('/workflow');
+    revalidatePath('/workbench');
+    revalidatePath('/dashboard');
     revalidatePath('/cases');
     revalidatePath('/clients');
     return { ok: true, caseId: newCase.id, clientId: finalClientId, contractId };

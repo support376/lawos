@@ -221,6 +221,31 @@ export const ACTION_REGISTRY: ActionSpec[] = [
     required_params: { reason: 'string', amount_krw: 'number' },
   },
 
+  // ======================= 수임 컨펌·할당 (2단계 승인) =======================
+  {
+    key: 'confirm_new_case',
+    label: '신규 수임 컨펌·할당',
+    description: '수임 확정 후 대표변호사가 담당자 지정 + 승인. Stage 전이 + 후속 Action 자동 배포.',
+    subject_types: ['case'],
+    allowed_roles: ['managing_partner', 'attorney'],
+    required_params: { assigned_to: 'uuid' },
+    produces: { state_change: 'case.assigned_to + stage + follow-up actions' },
+  },
+  {
+    key: 'initial_writer_task',
+    label: '신규 사건 검토',
+    description: '담당 변호사에게 할당되는 첫 업무. 채무자 프로필 입력부터 시작.',
+    subject_types: ['case'],
+    allowed_roles: ['attorney', 'managing_partner'],
+  },
+  {
+    key: 'initial_document_request',
+    label: '필수 서류 요청 (20종)',
+    description: '서류팀에 자동 배정. 의뢰인에게 서류 목록 안내·수집 시작.',
+    subject_types: ['case'],
+    allowed_roles: ['document_staff', 'attorney', 'managing_partner'],
+  },
+
   // ======================= 시스템 자동 =======================
   {
     key: 'auto_overdue_check',

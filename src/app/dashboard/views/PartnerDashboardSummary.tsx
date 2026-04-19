@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { startOfMonth, startOfWeek, subMonths, subWeeks, format, parseISO } from 'date-fns';
 import type { MyRoleContext } from '@/lib/auth/my-roles';
+import { listPendingConfirms } from '@/app/actions/case-approval';
+import { PendingConfirmsBanner } from '@/app/workflow/components/PendingConfirmsBanner';
 
 function krw(n: number): string {
   if (n >= 100_000_000) return `${(n / 100_000_000).toFixed(2)}억`;
@@ -27,6 +29,8 @@ export async function PartnerDashboardSummary({ ctx }: { ctx: MyRoleContext }) {
     const m = startOfMonth(subMonths(now, i));
     monthKeys.push(format(m, 'yyyy-MM'));
   }
+
+  const pendingConfirms = await listPendingConfirms();
 
   const [casesRes, leadsRes, schedulesRes] = await Promise.all([
     supabase
@@ -99,6 +103,8 @@ export async function PartnerDashboardSummary({ ctx }: { ctx: MyRoleContext }) {
 
   return (
     <div className="space-y-5">
+      <PendingConfirmsBanner items={pendingConfirms} />
+
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <KPI label="활성 사건" value={`${activeCases}건`} sub={`이번달 신규 ${thisMonthCases}`} />
         <KPI label="이번달 수금" value={krw(thisMonthRevenue)} sub={`전체 수금률 ${collectionRate}%`} tone="emerald" />

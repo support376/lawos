@@ -254,6 +254,12 @@ export async function BillingDashboard({
         <MonthlyRevenueChart stats={monthlyStats} />
       </section>
 
+      {/* 미래 프로젝션 12개월 */}
+      <section className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
+        <h2 className="text-sm font-semibold mb-3">📆 향후 12개월 수금 프로젝션</h2>
+        <ProjectionChart schedules={schedules} />
+      </section>
+
       {/* 연체 기간 분포 + 월별 신규계약 */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <section className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
@@ -361,6 +367,154 @@ export async function BillingDashboard({
       </section>
 
       <p className="text-[10px] text-zinc-500 text-right italic">갱신: {format(now, 'yyyy-MM-dd HH:mm')}</p>
+    </div>
+  );
+}
+
+function ProjectionChart({ schedules }: { schedules: Array<PaymentSchedule & { case: { id: string; case_type: string | null; client: { name: string } | null } | null }> }) {
+  const now = new Date();
+  const monthKeys: string[] = [];
+  for (let i = 0; i < 12; i++) monthKeys.push(format(startOfMonth(subMonths(now, -i)), 'yyyy-MM'));
+
+  // 연체(과거인데 미납)는 별도 버킷 "지연"
+  const overdueSum = schedules
+    .filter((s) => s.status === 'overdue')
+    .reduce(
+      (acc, s) => {
+        const due = s.amount_krw - s.paid_amount_krw;
+        if (s.kind === 'retainer') acc.retainer += due;
+        else if (s.kind === 'success_fee') acc.success += due;
+        else acc.installment += due;
+        return acc;
+      },
+      { retainer: 0, installment: 0, success: 0 },
+    );
+
+  // 월별 예정 (미래 또는 부분지급)
+  const monthly = monthKeys.map((k) => {
+    const inMonth = schedules.filter(
+      (s) =>
+        s.status !== 'paid' &&
+        s.status !== 'waived' &&
+        s.status !== 'refunded' &&
+        s.status !== 'overdue' &&
+        format(parseISO(s.due_date), 'yyyy-MM') === k,
+    );
+    const retainer = inMonth.filter((s) => s.kind === 'retainer').reduce((sum, s) => sum + (s.amount_krw - s.paid_amount_krw), 0);
+    const installment = inMonth.filter((s) => s.kind === 'installment').reduce((sum, s) => sum + (s.amount_krw - s.paid_amount_krw), 0);
+    const success = inMonth.filter((s) => s.kind === 'success_fee').reduce((sum, s) => sum + (s.amount_krw - s.paid_amount_krw), 0);
+    const other = inMonth.filter((s) => s.kind !== 'retainer' && s.kind !== 'installment' && s.kind !== 'success_fee').reduce((sum, s) => sum + (s.amount_krw - s.paid_amount_krw), 0);
+    return { month: k, retainer, installment, success, other, total: retainer + installment + success + other };
+  });
+
+  const overdueTotal = overdueSum.retainer + overdueSum.installment + overdueSum.success;
+  const grandMax = Math.max(overdueTotal, ...monthly.map((m) => m.total), 1);
+  const totalSum = overdueTotal + monthly.reduce((s, m) => s + m.total, 0);
+
+  return (
+    <div>
+      {totalSum === 0 ? (
+        <p className="text-xs text-zinc-500 text-center py-6">예정 수금 없음</p>
+      ) : (
+        <>
+          <div className="flex items-end gap-2 h-56 overflow-x-auto">
+            {/* 지연 버킷 */}
+            {overdueTotal > 0 && (
+              <div className="flex-1 min-w-[50px] max-w-[80px] flex flex-col items-center gap-1">
+                <div className="flex-1 flex items-end w-full justify-center">
+                  <div className="w-full max-w-[28px] flex flex-col-reverse" style={{ height: `${(overdueTotal / grandMax) * 100}%` }}>
+                    <div className="bg-red-500" style={{ height: `${(overdueSum.retainer / overdueTotal) * 100}%` }} title={`지연 착수: ${overdueSum.retainer.toLocaleString()}원`} />
+                    <div className="bg-red-400" style={{ height: `${(overdueSum.installment / overdueTotal) * 100}%` }} title={`지연 분납: ${overdueSum.installment.toLocaleString()}원`} />
+                    <div className="bg-red-300" style={{ height: `${(overdueSum.success / overdueTotal) * 100}%` }} title={`지연 성공: ${overdueSum.success.toLocaleString()}원`} />
+                  </div>
+                </div>
+                <p className="text-[10px] text-red-600 font-semibold">지연</p>
+                <p className="text-[9px] text-red-600 tabular-nums">
+                  {overdueTotal >= 10000 ? `${Math.round(overdueTotal / 10000).toLocaleString()}만` : overdueTotal.toLocaleString()}
+                </p>
+              </div>
+            )}
+            <div className="w-px bg-zinc-300 dark:bg-zinc-700 h-48 shrink-0" />
+            {/* 월별 프로젝션 */}
+            {monthly.map((m) => {
+              const isCurrent = m.month === format(now, 'yyyy-MM');
+              return (
+                <div key={m.month} className="flex-1 min-w-[50px] max-w-[80px] flex flex-col items-center gap-1">
+                  <div className="flex-1 flex items-end w-full justify-center">
+                    <div className="w-full max-w-[28px] flex flex-col-reverse" style={{ height: `${(m.total / grandMax) * 100}%` }}>
+                      {m.retainer > 0 && <div className="bg-emerald-500" style={{ height: `${(m.retainer / m.total) * 100}%` }} title={`착수: ${m.retainer.toLocaleString()}원`} />}
+                      {m.installment > 0 && <div className="bg-blue-500" style={{ height: `${(m.installment / m.total) * 100}%` }} title={`분납: ${m.installment.toLocaleString()}원`} />}
+                      {m.success > 0 && <div className="bg-amber-500" style={{ height: `${(m.success / m.total) * 100}%` }} title={`성공: ${m.success.toLocaleString()}원`} />}
+                      {m.other > 0 && <div className="bg-zinc-400" style={{ height: `${(m.other / m.total) * 100}%` }} />}
+                    </div>
+                  </div>
+                  <p className={`text-[10px] ${isCurrent ? 'font-bold text-zinc-900 dark:text-zinc-100' : 'text-zinc-500'}`}>
+                    {m.month.slice(5)}월
+                  </p>
+                  <p className="text-[9px] text-zinc-400 tabular-nums">
+                    {m.total > 0 ? (m.total >= 10000 ? `${Math.round(m.total / 10000).toLocaleString()}만` : m.total.toLocaleString()) : '—'}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+          <div className="flex justify-between items-center mt-3 text-[10px] text-zinc-500">
+            <div className="flex gap-3 flex-wrap">
+              <span className="flex items-center gap-1"><span className="w-3 h-3 bg-emerald-500 rounded-sm" /> 착수금</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 bg-blue-500 rounded-sm" /> 분납</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 bg-amber-500 rounded-sm" /> 성공보수</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 bg-red-500 rounded-sm" /> 지연(미납)</span>
+            </div>
+            <span className="text-zinc-700 dark:text-zinc-300">
+              전체 예정 합계:{' '}
+              <span className="font-semibold tabular-nums">
+                {totalSum >= 100_000_000
+                  ? `${(totalSum / 100_000_000).toFixed(2)}억`
+                  : totalSum >= 10_000
+                    ? `${Math.round(totalSum / 10_000).toLocaleString()}만`
+                    : totalSum.toLocaleString()}원
+              </span>
+            </span>
+          </div>
+          {/* 월별 테이블 */}
+          <details className="mt-3">
+            <summary className="text-xs text-zinc-500 cursor-pointer hover:text-zinc-900 dark:hover:text-zinc-100">
+              월별 상세 테이블
+            </summary>
+            <table className="w-full text-xs mt-2">
+              <thead>
+                <tr className="text-left text-zinc-500 border-b border-zinc-200 dark:border-zinc-800">
+                  <th className="py-1 pr-3">월</th>
+                  <th className="py-1 pr-3 text-right">착수</th>
+                  <th className="py-1 pr-3 text-right">분납</th>
+                  <th className="py-1 pr-3 text-right">성공</th>
+                  <th className="py-1 pr-3 text-right">합계</th>
+                </tr>
+              </thead>
+              <tbody>
+                {overdueTotal > 0 && (
+                  <tr className="border-b border-zinc-100 dark:border-zinc-800 bg-red-50 dark:bg-red-950/20">
+                    <td className="py-1 pr-3 text-red-700 dark:text-red-400 font-semibold">지연</td>
+                    <td className="py-1 pr-3 text-right tabular-nums">{overdueSum.retainer.toLocaleString()}</td>
+                    <td className="py-1 pr-3 text-right tabular-nums">{overdueSum.installment.toLocaleString()}</td>
+                    <td className="py-1 pr-3 text-right tabular-nums">{overdueSum.success.toLocaleString()}</td>
+                    <td className="py-1 pr-3 text-right tabular-nums font-semibold">{overdueTotal.toLocaleString()}</td>
+                  </tr>
+                )}
+                {monthly.map((m) => (
+                  <tr key={m.month} className="border-b border-zinc-100 dark:border-zinc-800">
+                    <td className="py-1 pr-3">{m.month}</td>
+                    <td className="py-1 pr-3 text-right tabular-nums">{m.retainer > 0 ? m.retainer.toLocaleString() : '—'}</td>
+                    <td className="py-1 pr-3 text-right tabular-nums">{m.installment > 0 ? m.installment.toLocaleString() : '—'}</td>
+                    <td className="py-1 pr-3 text-right tabular-nums">{m.success > 0 ? m.success.toLocaleString() : '—'}</td>
+                    <td className="py-1 pr-3 text-right tabular-nums font-semibold">{m.total > 0 ? m.total.toLocaleString() : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </details>
+        </>
+      )}
     </div>
   );
 }
