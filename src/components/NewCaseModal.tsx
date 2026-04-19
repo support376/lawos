@@ -2,8 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, useTransition } from 'react';
-import { createCase } from '@/app/kanban/actions';
-import { createClientRecord } from '@/app/kanban/actions';
+import { createCase, createClientRecord } from '@/app/actions/cases';
 import { CASE_TYPE_LABEL, type Client, type CaseType } from '@/lib/types';
 
 export function NewCaseModal({

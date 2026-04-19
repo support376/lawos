@@ -85,10 +85,7 @@ export function CommandPalette() {
           {result && (
             <div className="p-3">
               <div className="text-xs text-zinc-500 mb-2 px-1 flex items-center justify-between">
-                <span>
-                  <strong>{entityLabel(result.query.entity)}</strong>{' '}
-                  {result.count}건 · {result.query.explanation}
-                </span>
+                <span>검색 결과 {result.count}건</span>
               </div>
 
               {result.rows.length === 0 ? (
@@ -147,11 +144,3 @@ export function CommandPalette() {
   );
 }
 
-function entityLabel(e: 'cases' | 'tickets' | 'clients' | 'events'): string {
-  switch (e) {
-    case 'cases': return '사건';
-    case 'tickets': return '할일';
-    case 'clients': return '고객';
-    case 'events': return '이력';
-  }
-}

@@ -35,7 +35,6 @@ export function AttachmentList({
     setError(null);
     const fd = new FormData();
     fd.set('file', file);
-    if (target.ticketId) fd.set('ticketId', target.ticketId);
     if (target.caseId) fd.set('caseId', target.caseId);
     if (target.eventId) fd.set('eventId', target.eventId);
     if (target.clientId) fd.set('clientId', target.clientId);

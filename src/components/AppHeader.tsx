@@ -6,13 +6,13 @@ import { CreateMenu } from './CreateMenu';
 import { UserMenu } from './UserMenu';
 import type { Client, Case } from '@/lib/types';
 
-export type HeaderActive = 'dashboard' | 'cases' | 'clients' | 'kanban' | 'team';
+export type HeaderActive = 'dashboard' | 'cases' | 'clients' | 'workflow' | 'team';
 
 const TABS: { key: HeaderActive; href: string; label: string }[] = [
   { key: 'dashboard', href: '/dashboard', label: '대시보드' },
   { key: 'cases', href: '/cases', label: '사건' },
   { key: 'clients', href: '/clients', label: '고객' },
-  { key: 'kanban', href: '/kanban', label: '칸반' },
+  { key: 'workflow', href: '/workflow', label: '워크플로우' },
   { key: 'team', href: '/settings/team', label: '팀' },
 ];
 
