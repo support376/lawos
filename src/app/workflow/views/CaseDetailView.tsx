@@ -1,18 +1,27 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import { fetchRehabCaseFullView } from '@/app/actions/rehab';
+import { listCaseContracts, listCaseSchedules } from '@/app/actions/payments';
+import { getActiveHold } from '@/app/actions/finance-holds';
 import { getPossibleNextStages } from '@/lib/ontology/domains/personal_rehab/stages';
 import { StageTimeline } from '../components/StageTimeline';
 import { DebtorProfileSection } from '../components/DebtorProfileSection';
 import { FinancialSummary } from '../components/FinancialSummary';
 import { StageAdvanceControl } from '../components/StageAdvanceControl';
+import { PaymentContractSection } from '../components/PaymentContractSection';
+import { CaseFinanceInputs } from '../components/CaseFinanceInputs';
 
 export async function CaseDetailView({ caseId }: { caseId: string }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const view = await fetchRehabCaseFullView(caseId);
+  const [view, contracts, schedules, hold] = await Promise.all([
+    fetchRehabCaseFullView(caseId),
+    listCaseContracts(caseId),
+    listCaseSchedules(caseId),
+    getActiveHold(caseId),
+  ]);
   if (!view) {
     return (
       <div className="max-w-4xl mx-auto p-6">
@@ -62,6 +71,21 @@ export async function CaseDetailView({ caseId }: { caseId: string }) {
       </section>
 
       <DebtorProfileSection caseId={view.case.id} debtor={view.debtor} />
+
+      <PaymentContractSection
+        caseId={view.case.id}
+        contracts={contracts}
+        schedules={schedules}
+        hold={hold}
+      />
+
+      <CaseFinanceInputs
+        caseId={view.case.id}
+        debts={view.debts}
+        assets={view.assets}
+        incomes={view.incomes}
+        dependents={view.dependents}
+      />
 
       <FinancialSummary
         debts={view.debts}
