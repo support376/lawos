@@ -41,3 +41,10 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# client/marketing docs (민감자료 — 커밋 금지)
+*.docx
+*.doc
+*.pdf
+*.xlsx
+*.xls
