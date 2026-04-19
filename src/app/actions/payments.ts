@@ -39,10 +39,23 @@ export async function createPaymentContract(input: {
   dunning_schedule_days?: number[];
   retainer_ratio?: number;                                 // 0~1, 착수금 비율. 기본 1/N
   notes?: string;
+  // 정밀 모드: 회차별 날짜·금액 명시. 지정 시 total/count/cycle 자동계산 우회.
+  installments?: Array<{
+    installment_no: number;
+    kind: PaymentKind;
+    amount_krw: number;
+    due_date: string;
+  }>;
 }): Promise<{ ok: boolean; contractId?: string; error?: string }> {
   try {
     const { supabase, userId, workspaceId } = await getContext();
-    const n = Math.max(1, input.installment_count);
+
+    // 정밀 모드: installments 명시
+    const useExplicit = input.installments && input.installments.length > 0;
+    const n = useExplicit ? input.installments!.length : Math.max(1, input.installment_count);
+    const total = useExplicit
+      ? input.installments!.reduce((s, i) => s + i.amount_krw, 0)
+      : input.total_amount_krw;
 
     // 계약 생성
     const { data: contract, error: cErr } = await supabase
@@ -50,10 +63,10 @@ export async function createPaymentContract(input: {
       .insert({
         workspace_id: workspaceId,
         case_id: input.caseId,
-        total_amount_krw: input.total_amount_krw,
+        total_amount_krw: total,
         plan_type: input.plan_type,
         installment_count: n,
-        first_due_date: input.first_due_date,
+        first_due_date: useExplicit ? input.installments![0].due_date : input.first_due_date,
         cycle_days: input.cycle_days ?? 30,
         payment_gate: input.payment_gate ?? 'hard',
         auto_dunning_enabled: input.auto_dunning_enabled ?? true,
@@ -67,36 +80,48 @@ export async function createPaymentContract(input: {
     if (cErr || !contract) return { ok: false, error: cErr?.message };
 
     // 회차 생성
-    const retainerRatio = input.retainer_ratio ?? 1 / n;
-    const retainerAmount = Math.round(input.total_amount_krw * retainerRatio);
-    const remaining = input.total_amount_krw - retainerAmount;
-    const perInstallment = n > 1 ? Math.round(remaining / (n - 1)) : 0;
-
-    const schedules: Array<Record<string, unknown>> = [];
-    const firstDue = new Date(input.first_due_date);
-    const cycleDays = input.cycle_days ?? 30;
-
-    for (let i = 1; i <= n; i++) {
-      const dueDate = new Date(firstDue);
-      dueDate.setDate(dueDate.getDate() + cycleDays * (i - 1));
-      const kind: PaymentKind = i === 1 ? 'retainer' : 'installment';
-      const amount =
-        i === 1
-          ? retainerAmount
-          : i === n
-            ? remaining - perInstallment * (n - 2)
-            : perInstallment;
-      schedules.push({
+    let schedules: Array<Record<string, unknown>> = [];
+    if (useExplicit) {
+      schedules = input.installments!.map((inst) => ({
         workspace_id: workspaceId,
         case_id: input.caseId,
         contract_id: contract.id,
-        installment_no: i,
-        kind,
-        amount_krw: amount,
-        due_date: dueDate.toISOString().slice(0, 10),
+        installment_no: inst.installment_no,
+        kind: inst.kind,
+        amount_krw: inst.amount_krw,
+        due_date: inst.due_date,
         status: 'scheduled',
         gate_blocks_stages: input.gate_blocks_stages ?? [],
-      });
+      }));
+    } else {
+      const retainerRatio = input.retainer_ratio ?? 1 / n;
+      const retainerAmount = Math.round(input.total_amount_krw * retainerRatio);
+      const remaining = input.total_amount_krw - retainerAmount;
+      const perInstallment = n > 1 ? Math.round(remaining / (n - 1)) : 0;
+      const firstDue = new Date(input.first_due_date);
+      const cycleDays = input.cycle_days ?? 30;
+      for (let i = 1; i <= n; i++) {
+        const dueDate = new Date(firstDue);
+        dueDate.setDate(dueDate.getDate() + cycleDays * (i - 1));
+        const kind: PaymentKind = i === 1 ? 'retainer' : 'installment';
+        const amount =
+          i === 1
+            ? retainerAmount
+            : i === n
+              ? remaining - perInstallment * (n - 2)
+              : perInstallment;
+        schedules.push({
+          workspace_id: workspaceId,
+          case_id: input.caseId,
+          contract_id: contract.id,
+          installment_no: i,
+          kind,
+          amount_krw: amount,
+          due_date: dueDate.toISOString().slice(0, 10),
+          status: 'scheduled',
+          gate_blocks_stages: input.gate_blocks_stages ?? [],
+        });
+      }
     }
     const { error: sErr } = await supabase.from('payment_schedules').insert(schedules);
     if (sErr) return { ok: false, error: sErr.message };

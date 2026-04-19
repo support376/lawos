@@ -98,7 +98,25 @@ export async function convertLeadToCase(input: {
   caseType: 'personal_rehab' | 'divorce' | 'criminal' | 'other';
   clientId?: string | null;                    // 기존 고객 연결 시
   createClientIfMissing?: boolean;
-}): Promise<{ ok: boolean; caseId?: string; clientId?: string; error?: string }> {
+  // 선택: 계약도 함께 생성
+  contract?: {
+    total_amount_krw: number;
+    plan_type: 'lump_sum' | 'installment' | 'conditional';
+    installment_count: number;
+    first_due_date: string;
+    cycle_days?: number;
+    retainer_ratio?: number;
+    payment_gate?: 'hard' | 'soft';
+    gate_blocks_stages?: string[];
+    notes?: string;
+    installments?: Array<{
+      installment_no: number;
+      kind: 'retainer' | 'installment' | 'success_fee' | 'court_fee' | 'misc';
+      amount_krw: number;
+      due_date: string;
+    }>;
+  };
+}): Promise<{ ok: boolean; caseId?: string; clientId?: string; contractId?: string; error?: string }> {
   try {
     const { supabase, userId, workspaceId } = await getContext();
 
@@ -155,10 +173,30 @@ export async function convertLeadToCase(input: {
       })
       .eq('id', input.leadId);
 
+    // 계약 생성 (선택)
+    let contractId: string | undefined;
+    if (input.contract) {
+      const { createPaymentContract } = await import('./payments');
+      const r = await createPaymentContract({
+        caseId: newCase.id,
+        total_amount_krw: input.contract.total_amount_krw,
+        plan_type: input.contract.plan_type,
+        installment_count: input.contract.installment_count,
+        first_due_date: input.contract.first_due_date,
+        cycle_days: input.contract.cycle_days,
+        retainer_ratio: input.contract.retainer_ratio,
+        payment_gate: input.contract.payment_gate,
+        gate_blocks_stages: input.contract.gate_blocks_stages,
+        notes: input.contract.notes,
+        installments: input.contract.installments,
+      });
+      if (r.ok) contractId = r.contractId;
+    }
+
     revalidatePath('/workflow');
     revalidatePath('/cases');
     revalidatePath('/clients');
-    return { ok: true, caseId: newCase.id, clientId: finalClientId };
+    return { ok: true, caseId: newCase.id, clientId: finalClientId, contractId };
   } catch (e) {
     return { ok: false, error: e instanceof Error ? e.message : '전환 실패' };
   }

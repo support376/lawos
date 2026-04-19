@@ -264,6 +264,11 @@ function ConsultationLog({
   );
 }
 
+type PaymentKind = 'retainer' | 'installment' | 'success_fee' | 'court_fee' | 'misc';
+type PlanType = 'lump_sum' | 'installment' | 'conditional';
+type PaymentGate = 'hard' | 'soft';
+type Mode = 'simple' | 'precise' | 'none';
+
 function ActionPanel({
   lead,
   onStatusChange,
@@ -279,14 +284,86 @@ function ActionPanel({
   const [convPending, startConvert] = useTransition();
   const [convErr, setConvErr] = useState<string | null>(null);
 
+  // 계약 입력
+  const [contractMode, setContractMode] = useState<Mode>('simple');
+  const [totalAmount, setTotalAmount] = useState('3000000');
+  const [planType, setPlanType] = useState<PlanType>('installment');
+  const [count, setCount] = useState(3);
+  const [firstDueDate, setFirstDueDate] = useState(new Date().toISOString().slice(0, 10));
+  const [cycleDays, setCycleDays] = useState(30);
+  const [retainerRatio, setRetainerRatio] = useState(0.33);
+  const [paymentGate, setPaymentGate] = useState<PaymentGate>('hard');
+
+  // 정밀 모드 회차 리스트
+  const [installments, setInstallments] = useState<Array<{
+    due_date: string;
+    amount_krw: string;
+    kind: PaymentKind;
+  }>>([
+    { due_date: new Date().toISOString().slice(0, 10), amount_krw: '1000000', kind: 'retainer' },
+    { due_date: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10), amount_krw: '1000000', kind: 'installment' },
+    { due_date: new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10), amount_krw: '1000000', kind: 'installment' },
+  ]);
+
+  const addInstallment = () => {
+    const last = installments[installments.length - 1];
+    const nextDate = last
+      ? new Date(new Date(last.due_date).getTime() + 30 * 86400000).toISOString().slice(0, 10)
+      : new Date().toISOString().slice(0, 10);
+    setInstallments([...installments, { due_date: nextDate, amount_krw: '1000000', kind: 'installment' }]);
+  };
+  const removeInstallment = (i: number) => setInstallments(installments.filter((_, idx) => idx !== i));
+  const updateInstallment = (i: number, patch: Partial<(typeof installments)[number]>) =>
+    setInstallments(installments.map((inst, idx) => (idx === i ? { ...inst, ...patch } : inst)));
+
+  const preciseTotal = installments.reduce((sum, i) => sum + (Number(i.amount_krw) || 0), 0);
+
   const runConvert = () => {
     setConvErr(null);
     startConvert(async () => {
+      const caseType = (lead.case_type_hint === 'undetermined' ? 'other' : lead.case_type_hint) as
+        | 'personal_rehab' | 'divorce' | 'criminal' | 'other';
+
+      // 계약 payload 빌드
+      let contract: Parameters<typeof convertLeadToCase>[0]['contract'];
+      if (contractMode === 'simple') {
+        const n = Number(totalAmount);
+        if (!Number.isFinite(n) || n <= 0) return setConvErr('총액 오류');
+        contract = {
+          total_amount_krw: n,
+          plan_type: planType,
+          installment_count: planType === 'lump_sum' ? 1 : count,
+          first_due_date: firstDueDate,
+          cycle_days: cycleDays,
+          retainer_ratio: retainerRatio,
+          payment_gate: paymentGate,
+          gate_blocks_stages: paymentGate === 'hard' ? ['filing', 'opening_decision'] : [],
+        };
+      } else if (contractMode === 'precise') {
+        if (installments.length === 0) return setConvErr('최소 1개 회차 필요');
+        const invalid = installments.find((i) => !i.due_date || !(Number(i.amount_krw) > 0));
+        if (invalid) return setConvErr('회차 날짜·금액 확인');
+        contract = {
+          total_amount_krw: preciseTotal,
+          plan_type: installments.length === 1 ? 'lump_sum' : 'installment',
+          installment_count: installments.length,
+          first_due_date: installments[0].due_date,
+          payment_gate: paymentGate,
+          gate_blocks_stages: paymentGate === 'hard' ? ['filing', 'opening_decision'] : [],
+          installments: installments.map((inst, idx) => ({
+            installment_no: idx + 1,
+            due_date: inst.due_date,
+            amount_krw: Number(inst.amount_krw),
+            kind: inst.kind,
+          })),
+        };
+      }
+
       const r = await convertLeadToCase({
         leadId: lead.id,
         caseTitle: caseTitle.trim() || `${lead.name} 사건`,
-        caseType: (lead.case_type_hint === 'undetermined' ? 'other' : lead.case_type_hint) as
-          | 'personal_rehab' | 'divorce' | 'criminal' | 'other',
+        caseType,
+        contract,
       });
       if (!r.ok) return setConvErr(r.error ?? '전환 실패');
       if (r.caseId) router.push(`/workflow?case=${r.caseId}`);
@@ -319,9 +396,9 @@ function ActionPanel({
       </div>
 
       <div className="pt-4 border-t border-zinc-200 dark:border-zinc-800">
-        <div className="text-xs font-semibold mb-2">수임 확정 (convert_to_case)</div>
+        <div className="text-xs font-semibold mb-2">수임 확정</div>
         <p className="text-[10px] text-zinc-500 mb-2">
-          Case 생성 + 고객 생성 + Lead 상태 converted로 전환. 결제 계약은 재무팀이 Case 생성 후 등록.
+          Case · 고객 자동 생성 + Lead = converted. 수임료 계약을 여기서 바로 찍으면 재무팀에 즉시 노출.
         </p>
         {!converting ? (
           <button
@@ -332,32 +409,138 @@ function ActionPanel({
             → 수임 확정
           </button>
         ) : (
-          <div className="space-y-2">
-            <input
-              value={caseTitle}
-              onChange={(e) => setCaseTitle(e.target.value)}
-              placeholder="사건명"
-              className="w-full px-3 py-1.5 text-sm border border-zinc-300 dark:border-zinc-700 rounded bg-transparent"
-            />
+          <div className="space-y-3">
+            <div>
+              <label className="text-[10px] text-zinc-500 block mb-0.5">사건명</label>
+              <input
+                value={caseTitle}
+                onChange={(e) => setCaseTitle(e.target.value)}
+                placeholder="사건명"
+                className="w-full px-3 py-1.5 text-sm border border-zinc-300 dark:border-zinc-700 rounded bg-transparent"
+              />
+            </div>
+
+            <div className="pt-2 border-t border-zinc-200 dark:border-zinc-800">
+              <label className="text-[10px] font-semibold text-zinc-500 block mb-1.5 uppercase tracking-wide">
+                💰 수임료 계약
+              </label>
+              <div className="flex gap-1 mb-2">
+                <button type="button" onClick={() => setContractMode('simple')} className={`text-[10px] px-2 py-1 rounded ${contractMode === 'simple' ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900' : 'border border-zinc-300 dark:border-zinc-700'}`}>간단 (총액·주기)</button>
+                <button type="button" onClick={() => setContractMode('precise')} className={`text-[10px] px-2 py-1 rounded ${contractMode === 'precise' ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900' : 'border border-zinc-300 dark:border-zinc-700'}`}>정밀 (회차별 날짜)</button>
+                <button type="button" onClick={() => setContractMode('none')} className={`text-[10px] px-2 py-1 rounded ${contractMode === 'none' ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900' : 'border border-zinc-300 dark:border-zinc-700'}`}>계약 생략</button>
+              </div>
+
+              {contractMode === 'simple' && (
+                <div className="space-y-2">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Field label="총 계약금액 (원)">
+                      <input type="number" value={totalAmount} onChange={(e) => setTotalAmount(e.target.value)} className="inp-sm" />
+                    </Field>
+                    <Field label="방식">
+                      <select value={planType} onChange={(e) => setPlanType(e.target.value as PlanType)} className="inp-sm">
+                        <option value="lump_sum">일시</option>
+                        <option value="installment">분할</option>
+                        <option value="conditional">조건부</option>
+                      </select>
+                    </Field>
+                    {planType === 'installment' && (
+                      <>
+                        <Field label="회차 수">
+                          <input type="number" min={2} max={24} value={count} onChange={(e) => setCount(Number(e.target.value))} className="inp-sm" />
+                        </Field>
+                        <Field label="주기 (일)">
+                          <input type="number" value={cycleDays} onChange={(e) => setCycleDays(Number(e.target.value))} className="inp-sm" />
+                        </Field>
+                        <Field label="착수금 비율 (0~1)">
+                          <input type="number" step="0.05" min={0} max={1} value={retainerRatio} onChange={(e) => setRetainerRatio(Number(e.target.value))} className="inp-sm" />
+                        </Field>
+                      </>
+                    )}
+                    <Field label="첫 납입일">
+                      <input type="date" value={firstDueDate} onChange={(e) => setFirstDueDate(e.target.value)} className="inp-sm" />
+                    </Field>
+                  </div>
+                </div>
+              )}
+
+              {contractMode === 'precise' && (
+                <div className="space-y-1.5">
+                  <p className="text-[10px] text-zinc-500">
+                    각 회차 날짜·금액·유형 직접 지정. 실무 상담에서 의뢰인에게 말한 스케줄 그대로 입력.
+                  </p>
+                  {installments.map((inst, i) => (
+                    <div key={i} className="flex gap-1 items-center">
+                      <span className="text-[10px] text-zinc-500 w-6 shrink-0">{i + 1}회</span>
+                      <input type="date" value={inst.due_date} onChange={(e) => updateInstallment(i, { due_date: e.target.value })} className="flex-1 inp-sm" />
+                      <input type="number" value={inst.amount_krw} onChange={(e) => updateInstallment(i, { amount_krw: e.target.value })} placeholder="금액" className="flex-1 inp-sm" />
+                      <select value={inst.kind} onChange={(e) => updateInstallment(i, { kind: e.target.value as PaymentKind })} className="inp-sm w-20 shrink-0">
+                        <option value="retainer">착수</option>
+                        <option value="installment">중도</option>
+                        <option value="success_fee">성공</option>
+                        <option value="court_fee">법원</option>
+                        <option value="misc">기타</option>
+                      </select>
+                      <button type="button" onClick={() => removeInstallment(i)} disabled={installments.length <= 1} className="text-xs text-red-600 disabled:opacity-40 w-4">✕</button>
+                    </div>
+                  ))}
+                  <button type="button" onClick={addInstallment} className="text-[10px] px-2 py-1 rounded border border-zinc-300 dark:border-zinc-700">+ 회차 추가</button>
+                  <div className="text-[10px] text-zinc-500 text-right">
+                    총 {installments.length}회 · 합계 <span className="font-semibold tabular-nums">{preciseTotal.toLocaleString()}원</span>
+                  </div>
+                </div>
+              )}
+
+              {contractMode !== 'none' && (
+                <div className="pt-2 mt-2 border-t border-zinc-100 dark:border-zinc-800">
+                  <Field label="결제 Gate">
+                    <select value={paymentGate} onChange={(e) => setPaymentGate(e.target.value as PaymentGate)} className="inp-sm">
+                      <option value="hard">Hard (미납시 신청·개시 Stage 차단)</option>
+                      <option value="soft">Soft (경고만)</option>
+                    </select>
+                  </Field>
+                </div>
+              )}
+
+              {contractMode === 'none' && (
+                <p className="text-[10px] text-zinc-500 italic p-2 bg-zinc-50 dark:bg-zinc-800/30 rounded">
+                  계약 없이 Case만 생성. 재무팀이 나중에 Case 상세에서 등록.
+                </p>
+              )}
+            </div>
+
             {convErr && <p className="text-xs text-red-600">{convErr}</p>}
             <div className="flex gap-2">
-              <button
-                onClick={() => setConverting(false)}
-                className="px-3 py-1.5 text-xs rounded border border-zinc-300 dark:border-zinc-700"
-              >
-                취소
-              </button>
-              <button
-                onClick={runConvert}
-                disabled={convPending}
-                className="px-4 py-1.5 text-xs rounded bg-emerald-600 text-white disabled:opacity-50"
-              >
-                {convPending ? '전환중...' : '확정 · 사건 생성'}
+              <button onClick={() => setConverting(false)} className="px-3 py-1.5 text-xs rounded border border-zinc-300 dark:border-zinc-700">취소</button>
+              <button onClick={runConvert} disabled={convPending} className="flex-1 px-4 py-1.5 text-xs rounded bg-emerald-600 text-white disabled:opacity-50">
+                {convPending ? '전환중...' : contractMode === 'none' ? '확정 · 사건만 생성' : '확정 · 사건 + 계약 생성'}
               </button>
             </div>
+
+            <style jsx>{`
+              :global(.inp-sm) {
+                width: 100%;
+                padding: 4px 8px;
+                font-size: 12px;
+                border: 1px solid rgb(212 212 216);
+                border-radius: 4px;
+                background: transparent;
+              }
+              :global(.dark .inp-sm) {
+                border-color: rgb(63 63 70);
+              }
+            `}</style>
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="text-[10px] text-zinc-500 block mb-0.5">{label}</label>
+      {children}
     </div>
   );
 }
