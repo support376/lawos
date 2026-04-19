@@ -78,6 +78,9 @@ export interface IntelInput {
   sharedAssetsKrw?: number | null;
   mediationAttempted?: boolean;
   protectiveOrderActive?: boolean;
+  affairPartnersCount?: number;
+  opposingFaultEvidenceStrength?: 'none' | 'weak' | 'moderate' | 'strong' | null;
+  ourFaultDefenseEvidence?: 'none' | 'partial' | 'ready' | null;
 }
 
 // ============ 인풋 어댑터 ============
@@ -113,7 +116,9 @@ function toDivorceInput(input: IntelInput): DivorceIntelInput {
     riskFlags: input.riskFlags,
     mediationAttempted: input.mediationAttempted ?? false,
     protectiveOrderActive: input.protectiveOrderActive ?? false,
-    counterpartiesCount: input.counterpartiesCount,
+    affairPartnersCount: input.affairPartnersCount ?? 0,
+    opposingFaultEvidenceStrength: input.opposingFaultEvidenceStrength ?? null,
+    ourFaultDefenseEvidence: input.ourFaultDefenseEvidence ?? null,
   };
 }
 
@@ -198,8 +203,11 @@ export function analyzeIntel(input: IntelInput): IntelSnapshot {
   parts.push(`인텔 ${overallPct}%`);
   if (input.preferentialFoundCount > 0)
     parts.push(`🔴 의심거래 ${input.preferentialFoundCount}건`);
-  if (input.counterpartiesCount > 0)
-    parts.push(`상대 ${input.counterpartiesCount}명`);
+  if (input.caseType === 'personal_rehab' && input.counterpartiesCount > 0) {
+    parts.push(`채권자 ${input.counterpartiesCount}명`);
+  } else if (input.caseType === 'divorce' && (input.affairPartnersCount ?? 0) > 0) {
+    parts.push(`상간자 ${input.affairPartnersCount}명`);
+  }
   if (input.daysSinceRetainer > 0) parts.push(`수임 ${input.daysSinceRetainer}일`);
 
   return {

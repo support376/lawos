@@ -300,6 +300,13 @@ export default async function CaseDetailPage({
     hasCourtInfo: !!(c.case_number || c.court),
     hasRetainerDate: !!c.retainer_date,
     counterpartiesCount: counterparties.length,
+    affairPartnersCount: (actorMap['affair_partner'] ?? []).length,
+    opposingFaultEvidenceStrength:
+      (actorMap['opposing_side']?.[0]?.profile?.['fault_evidence_strength'] as
+        | 'none' | 'weak' | 'moderate' | 'strong' | null | undefined) ?? null,
+    ourFaultDefenseEvidence:
+      (actorMap['our_side']?.[0]?.profile?.['fault_defense_evidence'] as
+        | 'none' | 'partial' | 'ready' | null | undefined) ?? null,
     workflowDocs: workflowDocsData,
     requiredDocKeys: template
       ? template.document_keys.filter((k) => DOCUMENTS[k]?.required)

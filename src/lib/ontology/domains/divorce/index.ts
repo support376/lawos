@@ -22,7 +22,9 @@ export interface DivorceIntelInput {
   // 진행상황
   mediationAttempted: boolean;
   protectiveOrderActive: boolean;
-  counterpartiesCount: number;    // 상간자 포함 시 >1
+  affairPartnersCount: number;            // 실제 상간자 actor 수 (autoCreate 제외)
+  opposingFaultEvidenceStrength?: 'none' | 'weak' | 'moderate' | 'strong' | null;
+  ourFaultDefenseEvidence?: 'none' | 'partial' | 'ready' | null;
 }
 
 function cond(key: string, label: string, met: boolean): ActivationCondition {
@@ -129,7 +131,7 @@ const strategies: StrategySpec[] = [
       const i = input as DivorceIntelInput;
       const conds = [
         cond('affair_evidence', '부정행위 증거 플래그', !!i.riskFlags['infidelity_evidence']),
-        cond('affair_partner_known', '상간자 신원 확보 (상대방 추가)', i.counterpartiesCount >= 2),
+        cond('affair_partner_known', '상간자 등록 (actor 추가)', i.affairPartnersCount >= 1),
       ];
       return {
         conditions: conds,
@@ -153,8 +155,18 @@ const strategies: StrategySpec[] = [
     requiredEvidence: ['상대방 유책행위 기록', '혼인유지 노력 증빙', '상대방의 상습유책'],
     evaluate: (input) => {
       const i = input as DivorceIntelInput;
+      const hasOpposingFault =
+        i.opposingFaultEvidenceStrength != null &&
+        i.opposingFaultEvidenceStrength !== 'none' &&
+        i.opposingFaultEvidenceStrength !== 'weak';
+      const hasDefenseReady =
+        i.ourFaultDefenseEvidence != null && i.ourFaultDefenseEvidence !== 'none';
       const conds = [
-        cond('mutual_fault_signal', '쌍방 다툼 정황 또는 상대 유책 증거', i.counterpartiesCount > 0),
+        cond(
+          'mutual_fault_signal',
+          '상대 유책 증거 확보 또는 방어자료 준비',
+          hasOpposingFault || hasDefenseReady,
+        ),
       ];
       return {
         conditions: conds,
