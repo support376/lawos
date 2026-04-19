@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LawOS — 구조, 플로우, 장점</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, 'Malgun Gothic', 'Noto Sans KR', sans-serif;
+    background: #fafafa; color: #18181b; line-height: 1.6;
+    padding: 32px 20px; max-width: 1200px; margin: 0 auto;
+  }
+  h1 { font-size: 32px; margin-bottom: 8px; letter-spacing: -0.02em; }
+  h2 { font-size: 24px; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 2px solid #18181b; }
+  h3 { font-size: 18px; margin: 20px 0 8px; color: #27272a; }
+  h4 { font-size: 15px; margin: 12px 0 6px; color: #52525b; }
+  p { margin-bottom: 10px; }
+  .subtitle { font-size: 16px; color: #71717a; margin-bottom: 24px; }
+  .hero {
+    background: #18181b; color: #fafafa; padding: 28px 32px; border-radius: 12px;
+    margin-bottom: 32px;
+  }
+  .hero h1 { color: #fafafa; margin-bottom: 8px; }
+  .hero .tag { display: inline-block; padding: 4px 10px; background: #27272a; border-radius: 4px; font-size: 12px; margin-right: 6px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 12px; }
+  @media (max-width: 720px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+  .card {
+    background: white; border: 1px solid #e4e4e7; border-radius: 8px;
+    padding: 16px; margin-bottom: 12px;
+  }
+  .card-strong { border: 2px solid #18181b; background: white; }
+  .layer {
+    background: white; border: 1px solid #e4e4e7; border-left: 4px solid; border-radius: 8px;
+    padding: 16px 20px; margin-bottom: 10px;
+  }
+  .layer-1 { border-left-color: #71717a; }
+  .layer-2 { border-left-color: #3b82f6; }
+  .layer-3 { border-left-color: #10b981; }
+  .layer-4 { border-left-color: #f59e0b; }
+  .layer-5 { border-left-color: #ef4444; }
+  .layer-6 { border-left-color: #8b5cf6; }
+  .tag {
+    display: inline-block; padding: 2px 8px; background: #f4f4f5; color: #3f3f46;
+    border-radius: 4px; font-size: 11px; font-weight: 500; margin-right: 4px;
+  }
+  .tag-new { background: #fee2e2; color: #991b1b; }
+  .tag-done { background: #dcfce7; color: #14532d; }
+  .tag-partial { background: #fef3c7; color: #854d0e; }
+  code {
+    background: #f4f4f5; padding: 1px 6px; border-radius: 3px; font-size: 13px;
+    font-family: 'SF Mono', Consolas, monospace;
+  }
+  pre {
+    background: #18181b; color: #e4e4e7; padding: 14px 16px; border-radius: 6px;
+    font-size: 12px; overflow-x: auto; line-height: 1.5;
+    font-family: 'SF Mono', Consolas, monospace;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0 16px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid #e4e4e7; font-size: 14px; vertical-align: top; }
+  th { background: #f4f4f5; font-weight: 600; }
+  .flow-step {
+    display: flex; align-items: flex-start; gap: 12px; padding: 12px;
+    background: white; border: 1px solid #e4e4e7; border-radius: 8px; margin-bottom: 8px;
+  }
+  .flow-num {
+    width: 28px; height: 28px; border-radius: 50%; background: #18181b; color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 13px; flex-shrink: 0;
+  }
+  .flow-body { flex: 1; }
+  .flow-title { font-weight: 600; margin-bottom: 2px; }
+  .flow-sub { font-size: 13px; color: #71717a; }
+  .highlight {
+    background: #fef3c7; border-left: 4px solid #f59e0b; padding: 10px 14px;
+    border-radius: 4px; margin: 10px 0;
+  }
+  .win {
+    background: #dcfce7; border-left: 4px solid #10b981; padding: 10px 14px;
+    border-radius: 4px; margin: 10px 0;
+  }
+  .warn {
+    background: #fee2e2; border-left: 4px solid #ef4444; padding: 10px 14px;
+    border-radius: 4px; margin: 10px 0;
+  }
+  ul, ol { margin-left: 20px; margin-bottom: 10px; }
+  li { margin-bottom: 4px; }
+  .ascii {
+    background: #f4f4f5; padding: 14px; border-radius: 6px;
+    font-family: 'SF Mono', Consolas, monospace; font-size: 12px;
+    white-space: pre; overflow-x: auto; line-height: 1.5; color: #27272a;
+  }
+  .center { text-align: center; }
+  .small { font-size: 12px; color: #71717a; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>LawOS</h1>
+  <p class="subtitle" style="color: #a1a1aa;">변호사 업무 자동화 + 승리 전략 엔진 · 팔란티어식 온톨로지 플랫폼</p>
+  <div>
+    <span class="tag">Next.js 15</span>
+    <span class="tag">Supabase</span>
+    <span class="tag">Claude Sonnet 4.5</span>
+    <span class="tag">Vercel Seoul</span>
+    <span class="tag">Fly.io STT</span>
+    <span class="tag">Resend</span>
+  </div>
+</div>
+
+<h2>🎯 한 줄 요약</h2>
+<div class="card card-strong">
+  <p style="font-size: 18px;">
+    <strong>LawOS는 변호사를 "서류 자동화 도구 사용자"에서 "지능형 전투사령관"으로 만드는 플랫폼이다.</strong>
+  </p>
+  <p style="margin-top: 8px;">
+    단순 업무 자동화(Clio·Harvey)가 아니라, <strong>온톨로지(사건 구조) × 이벤트(새 정보) × 전술 카탈로그</strong>로 지금 이 순간 가장 효과적인 행동을 제안하는 <strong>팔란티어 Gotham</strong>의 법률판.
+  </p>
+</div>
+
+<h2>🏗️ 6단계 아키텍처 레이어</h2>
+<p class="subtitle">각 층은 독립적으로 확장 가능. 위로 갈수록 지능이 높아짐.</p>
+
+<div class="layer layer-6">
+  <h3>Layer 6. Strategic Recommendation <span class="tag tag-new">NEW</span></h3>
+  <p>현재 상태 + 새 정보를 보고 <strong>"지금 이 상황에서 가장 효과적인 행동"</strong>을 자동 제안.</p>
+  <p class="small">규칙엔진 (스테이지 × 서류 × 이벤트 × 약점) → 우선순위별 추천 카드</p>
+</div>
+
+<div class="layer layer-5">
+  <h3>Layer 5. Tactical Playbook <span class="tag tag-new">NEW</span></h3>
+  <p><strong>법정 전술 카탈로그</strong>. 15개 전술 각자 법적 근거·성공률·리스크 명시.</p>
+  <p class="small">이혼 5 · 개인회생 3 · 형사 3 · 민사 3 · 상속/노동 확장 여지</p>
+</div>
+
+<div class="layer layer-4">
+  <h3>Layer 4. Action Catalog</h3>
+  <p>변호사가 실행할 수 있는 <strong>모든 Action</strong>의 선언적 정의.</p>
+  <p class="small">입력 검증 · 권한 체크 · 감사 로그 · 사이드 이펙트 선언</p>
+</div>
+
+<div class="layer layer-3">
+  <h3>Layer 3. Workflow Engine</h3>
+  <p>사건 유형별 <strong>템플릿</strong>. 스테이지 진행 + 서류 체크리스트 + 자동 전환 규칙.</p>
+  <p class="small">개인회생 템플릿: 6 스테이지 + 20 서류 + 14 액션</p>
+</div>
+
+<div class="layer layer-2">
+  <h3>Layer 2. Ontology</h3>
+  <p><strong>데이터의 의미 구조</strong>. Client → Case → Ticket → Event → Attachment → Counterparty 그래프.</p>
+  <p class="small">DB 테이블은 11개. 모든 테이블이 workspace 격리 + RLS 적용.</p>
+</div>
+
+<div class="layer layer-1">
+  <h3>Layer 1. Data Sources</h3>
+  <p>원시 데이터 입구. <strong>다채널 입력</strong>으로 구조화 데이터로 전환.</p>
+  <p class="small">📋 텍스트 붙여넣기 · 🎙 실시간 음성(STT) · 📦 벌크 텍스트 · 📎 파일 업로드 · 🔗 고객 포털 · 📧 이메일</p>
+</div>
+
+<h2>📊 데이터 모델 (온톨로지)</h2>
+
+<div class="ascii">
+Workspace (사무소)
+  ├─ workspace_members (owner/admin/member)
+  ├─ workspace_invites (초대)
+  │
+  ├─ Clients (고객)
+  │    └─ Cases (사건)
+  │         ├─ case_type (personal_rehab / divorce / criminal / other)
+  │         ├─ workflow_stage, workflow_docs, workflow_history  [진행 상태]
+  │         ├─ visibility (workspace / assigned_only / owner_only)
+  │         │
+  │         ├─ Tickets (할일)
+  │         │    └─ 5 columns: triage → todo → in_progress → review → done
+  │         │
+  │         ├─ Events (이력)
+  │         │    └─ milestone / email / kakao / phone / copilot / import
+  │         │
+  │         ├─ Attachments (파일)
+  │         │
+  │         ├─ Counterparties (상대방 프로필)    ← 전략 층
+  │         │    └─ weaknesses[] + 출처 태그 + 의뢰인 동의
+  │         │
+  │         └─ Adopted Tactics (채택된 전술)      ← 전략 층
+  │
+  └─ Kanban Board + Columns
+</div>
+
+<h3>핵심 테이블 11개</h3>
+<table>
+  <tr><th>테이블</th><th>역할</th><th>핵심 특징</th></tr>
+  <tr><td><code>users</code></td><td>사용자 프로필</td><td>Supabase Auth 연동</td></tr>
+  <tr><td><code>workspaces</code></td><td>사무소/팀 경계</td><td>Multi-tenancy 루트</td></tr>
+  <tr><td><code>workspace_members</code></td><td>멤버십</td><td>owner/admin/member 역할</td></tr>
+  <tr><td><code>workspace_invites</code></td><td>초대 토큰</td><td>이메일 매칭 시 자동 합류</td></tr>
+  <tr><td><code>clients</code></td><td>고객</td><td>이름/연락처/메모</td></tr>
+  <tr><td><code>cases</code></td><td>사건</td><td><strong>워크플로우 상태 JSONB 저장</strong></td></tr>
+  <tr><td><code>tickets</code></td><td>할일</td><td>5 컬럼 칸반 + DnD</td></tr>
+  <tr><td><code>events</code></td><td>원본 이벤트</td><td>모든 입력의 unified log</td></tr>
+  <tr><td><code>attachments</code></td><td>파일</td><td>Supabase Storage 연동 + AI 자동 분류</td></tr>
+  <tr><td><code>case_counterparties</code></td><td>상대방 프로필</td><td><strong>동의 기록 필수</strong></td></tr>
+  <tr><td><code>case_tactics_adopted</code></td><td>채택 전술</td><td>계획→실행→완료 상태 관리</td></tr>
+</table>
+
+<h2>⚡ 구현된 핵심 기능 일람</h2>
+
+<div class="grid-2">
+  <div class="card">
+    <h4>🎙 상담 코파일럿 <span class="tag tag-done">완료</span></h4>
+    <p class="small">실시간 STT (리턴제로 RTZR) → 전사 → Claude 분석 → 할일 자동 추출 → Triage 삽입. 고객 컨텍스트(기존 사건·할일) 자동 주입.</p>
+  </div>
+  <div class="card">
+    <h4>📋 텍스트 분석 <span class="tag tag-done">완료</span></h4>
+    <p class="small">이메일/카톡/통화 녹취 붙여넣기 → LLM 구조화 추출 → 3가지 타입(promise / doc_request / follow_up) 티켓 자동 생성.</p>
+  </div>
+  <div class="card">
+    <h4>📦 벌크 온보딩 <span class="tag tag-done">완료</span></h4>
+    <p class="small">기존 사무소 데이터 자유 형식으로 붙여넣기 → 고객 N명 + 사건 + 진행이력 + 할일 한 번에 파싱 → 프리뷰 → 일괄 커밋.</p>
+  </div>
+  <div class="card">
+    <h4>🧠 자연어 검색 (Cmd+K) <span class="tag tag-done">완료</span></h4>
+    <p class="small">"이번 주 마감 지난 할일", "김민수 개인회생 중 진행중" → Claude가 구조화 필터로 변환 → 결정론적 조회 (RAG 아님).</p>
+  </div>
+  <div class="card">
+    <h4>🗂 개인회생 워크플로우 <span class="tag tag-done">완료</span></h4>
+    <p class="small">6 스테이지(수임→서류→조사→채권자→제출→변제) × 20 서류 × 14 Action. 진행률 / 다음 행동 자동.</p>
+  </div>
+  <div class="card">
+    <h4>⚖️ 법원별 전략 힌트 <span class="tag tag-done">완료</span></h4>
+    <p class="small">서울회생법원(매우 엄격 180일) / 수원(엄격 150일) / 부산 등 자동 감지. 법원별 보정명령 빈출사유 · 대응 팁.</p>
+  </div>
+  <div class="card">
+    <h4>🔍 편파변제 탐지 (AI) <span class="tag tag-done">완료</span></h4>
+    <p class="small">통장내역 붙여넣기 → Claude가 6개월 내 의심 거래 추출. 법정 쟁점 대비 소명자료 사전 구축.</p>
+  </div>
+  <div class="card">
+    <h4>🧮 변제계획 시뮬 <span class="tag tag-done">완료</span></h4>
+    <p class="small">소득/가족/채무 → 법정 기준 월 변제액 계산 + AI 경로 추천(회생/파산/워크아웃/프리워크아웃).</p>
+  </div>
+  <div class="card">
+    <h4>📄 PDF 자동 생성 <span class="tag tag-done">완료</span></h4>
+    <p class="small">수임계약서 · 내용증명(개인회생 예정 통보) 한국어 PDF 생성 → Storage 저장 → 첨부 자동 연결.</p>
+  </div>
+  <div class="card">
+    <h4>🔗 고객 포털 <span class="tag tag-done">완료</span></h4>
+    <p class="small">변호사가 14일 유효 magic link 생성 → 고객이 로그인 없이 서류 업로드. 사건 자동 연결.</p>
+  </div>
+  <div class="card">
+    <h4>🤖 AI 서류 자동 분류 <span class="tag tag-done">완료</span></h4>
+    <p class="small">업로드 파일 → Claude가 20종 서류 중 매칭 (confidence ≥ 70%) → workflow 상태 자동 업데이트.</p>
+  </div>
+  <div class="card">
+    <h4>✨ AI 초안 생성 <span class="tag tag-done">완료</span></h4>
+    <p class="small">In Progress 티켓 → 고객 컨텍스트 주입 → Claude가 이메일 초안 작성 → Review & Send 컬럼 이동 → 편집 → 실제 발송 (Resend).</p>
+  </div>
+  <div class="card">
+    <h4>📅 자동 리마인더 (Cron) <span class="tag tag-done">완료</span></h4>
+    <p class="small">매일 09:00 KST 일일 다이제스트. 09:30 KST 미수령 서류(3일+) 자동 재요청 이메일.</p>
+  </div>
+  <div class="card">
+    <h4>⚔️ 전술 플레이북 <span class="tag tag-new">NEW</span></h4>
+    <p class="small">15개 합법 전술(본인신문/가압류/재산개시/내용증명 등) × 상대방 약점 매칭 → 성공률·리스크 표시.</p>
+  </div>
+  <div class="card">
+    <h4>👥 팀 + 권한 <span class="tag tag-done">완료</span></h4>
+    <p class="small">owner/admin/member 역할. 이메일 초대 자동. 사건별 visibility(workspace/assigned_only/owner_only) 변호사법 §26 대응.</p>
+  </div>
+  <div class="card">
+    <h4>📊 대시보드 + 캘린더 <span class="tag tag-done">완료</span></h4>
+    <p class="small">KPI 4개(활성 사건/고객/팀원/할일) + 월별 수임·종결 차트 + 최근 활동. /calendar 월별 그리드.</p>
+  </div>
+</div>
+
+<h2>🔄 실제 사용 플로우 — 개인회생 A to Z</h2>
+
+<div class="flow-step">
+  <div class="flow-num">1</div>
+  <div class="flow-body">
+    <div class="flow-title">사건 생성</div>
+    <div class="flow-sub">헤더 [+ 만들기] → [새 사건] → 고객 선택(또는 신규) + 개인회생 유형 + 사건번호(선택) → 저장</div>
+    <div class="small">➡ 워크플로우 자동 초기화 (6 스테이지 + 20 서류 missing 상태)</div>
+  </div>
+</div>
+
+<div class="flow-step">
+  <div class="flow-num">2</div>
+  <div class="flow-body">
+    <div class="flow-title">법원 자동 감지</div>
+    <div class="flow-sub">사건번호 "2025개회..."면 서울회생법원 자동 매칭 → "매우 엄격 / 평균 180일 / 편파변제·재산정밀·청산가치 엄격" 힌트 표시</div>
+  </div>
+</div>
+
+<div class="flow-step">
+  <div class="flow-num">3</div>
+  <div class="flow-body">
+    <div class="flow-title">초기 상담 (Stage 1)</div>
+    <div class="flow-sub">추천: ① AI 변제계획 시뮬 ② 경로 추천(회생vs파산) ③ 수임계약서 PDF 자동 생성</div>
+    <div class="small">➡ 상담 코파일럿(STT)으로 녹음 시 → 약속·서류요청 자동 추출</div>
+  </div>
+</div>
+
+<div class="flow-step">
+  <div class="flow-num">4</div>
+  <div class="flow-body">
+    <div class="flow-title">서류 수집 (Stage 2)</div>
+    <div class="flow-sub">추천: "서류 18종 일괄 요청" 버튼 1번 → 고객 이메일 발송. 또는 🔗 고객 포털 링크 전송 → 고객이 직접 업로드</div>
+    <div class="small">➡ 업로드 시 Claude가 자동 분류(주민등록등본/통장내역 등) → workflow_docs 상태 자동 '수령'으로 변경</div>
+    <div class="small">➡ 3일+ 미수령 서류는 매일 09:30 자동 리마인더 발송</div>
+  </div>
+</div>
+
+<div class="flow-step">
+  <div class="flow-num">5</div>
+  <div class="flow-body">
+    <div class="flow-title">재산·소득 조사 (Stage 3)</div>
+    <div class="flow-sub">통장내역 수령 → 🔍 AI 편파변제 탐지 자동 추천(pulse)</div>
+    <div class="small">➡ 6개월 내 의심 거래 · 고위험/중/낮음 분류 · 사유 · 권장 후속조치 제시</div>
+  </div>
+</div>
+
+<div class="flow-step">
+  <div class="flow-num">6</div>
+  <div class="flow-body">
+    <div class="flow-title">채권자 대응 (Stage 4)</div>
+    <div class="flow-sub">추천: 내용증명 PDF 생성(채권자별 개인회생 예정 통보) → 추심 정지 요청</div>
+  </div>
+</div>
+
+<div class="flow-step">
+  <div class="flow-num">7</div>
+  <div class="flow-body">
+    <div class="flow-title">법원 제출 (Stage 5)</div>
+    <div class="flow-sub">추천: 신청서 초안 조립 → 법원 전자소송 수동 업로드 → [제출 완료] 표시</div>
+  </div>
+</div>
+
+<div class="flow-step">
+  <div class="flow-num">8</div>
+  <div class="flow-body">
+    <div class="flow-title">변제 모니터링 (Stage 6, 3년)</div>
+    <div class="flow-sub">매월 고객에게 변제 확인 리마인더 자동. 소득 변동 감지 시 시뮬 재계산 추천.</div>
+  </div>
+</div>
+
+<div class="win">
+  <strong>결과</strong>: 원래 변호사 1명당 주 10~15시간 걸리던 서류 수집·관리가 주 2~3시간으로. 처리 건수 <strong>3~5배</strong> 가능.
+</div>
+
+<h2>⚔️ 전략 자동화 (Palantir Combat 층)</h2>
+
+<p>단순 업무 자동화는 Clio/EvenUp도 함. LawOS의 진짜 해자는 <strong>승리 전략 제안</strong>.</p>
+
+<h3>예시: "공개 기피 회장 이혼" 케이스</h3>
+
+<div class="ascii">
+1. 사건: 김○○ vs ○○그룹 회장 이혼 (재산분할 50억)
+2. 상대방 프로필 생성 (의뢰인 동의 서명 기록 필수)
+3. 약점 추가:
+     - "공개석상 기피" (출처: 언론 기사 3건 · public_record)
+     - "평판 민감" (출처: 공인탐정 보고서 · detective)
+4. 시스템 자동 매칭:
+   ┌─────────────────────────────────────────────┐
+   │ ⚔️ 공격 · 본인신문 신청                      │
+   │ ● 약점 매칭 2개                             │
+   │ 성공률 55% · 리스크 중간                     │
+   │ 법적 근거: 민사소송법 §367, §150             │
+   │ 예상 효과: 출두 거부 → 의제자백 /           │
+   │           출두 → 진술 흐트러짐 + 합의 제안  │
+   │ [채택] [상세]                               │
+   ├─────────────────────────────────────────────┤
+   │ ⚔️ 공격 · 재산명시·조회 신청 (가사법 §48-2)  │
+   │ 성공률 70% · 리스크 낮음                     │
+   ├─────────────────────────────────────────────┤
+   │ ⚔️ 공격 · 재산분할 가압류                     │
+   │ 성공률 65% · 리스크 중간                     │
+   └─────────────────────────────────────────────┘
+5. 전술 채택 → 계획→실행→완료 상태 추적
+6. 상대 대응 들어오면 Ontology 업데이트 → 새 전술 자동 재계산
+</div>
+
+<h3>윤리 가드레일 (아키텍처에 내장)</h3>
+
+<div class="warn">
+  <strong>10가지 가드레일</strong>: 잘못 설계하면 "스토킹 앱" 낙인. 한 번만 걸려도 회사 끝. 타협 불가.
+</div>
+
+<ol>
+  <li><strong>상대방 프로필 생성 시 의뢰인 동의 필수</strong> — DB에 consent_recorded + scope 기록</li>
+  <li><strong>약점에 출처 태그 필수</strong> — public_record / interview / detective / news / sns_public / client_provided</li>
+  <li><strong>불법 출처 서버 차단</strong> — wiretap / hacking / stalking / bribery 값 거부</li>
+  <li><strong>전술 카탈로그에 불법 전술 아예 없음</strong> — 코드 레벨에서 배제</li>
+  <li><strong>고위험 전술 경고 배지</strong> — risk_level=high 시 빨간 박스 + 법적 리스크 명시</li>
+  <li>감사 로그 (누가 언제 생성/접근)</li>
+  <li>사건 종결 + 법정 보관기간 경과 시 자동 삭제 (V2)</li>
+  <li>변호사법 §26 비밀유지 명시 (UI 배너)</li>
+  <li>개인정보보호법 §15, §17 준수 안내</li>
+  <li>변호사 최종 책임 — 모든 전술 카드에 "채택 전 판단 필수"</li>
+</ol>
+
+<h2>🎖 팔란티어 개념 매핑</h2>
+
+<table>
+  <tr>
+    <th>팔란티어 Gotham</th>
+    <th>LawOS 구현</th>
+    <th>상태</th>
+  </tr>
+  <tr>
+    <td><strong>Ontology</strong><br><span class="small">객체·관계 그래프</span></td>
+    <td>case_type + 템플릿 (개인회생 1개)</td>
+    <td><span class="tag tag-done">V1 완료</span></td>
+  </tr>
+  <tr>
+    <td><strong>Action Types</strong><br><span class="small">선언적 Action + 감사</span></td>
+    <td>action_registry + 14 Action (5개 구현 완료)</td>
+    <td><span class="tag tag-partial">30% 구현</span></td>
+  </tr>
+  <tr>
+    <td><strong>Adversary Profile</strong><br><span class="small">적 프로필</span></td>
+    <td>case_counterparties + weaknesses[]</td>
+    <td><span class="tag tag-done">V1 완료</span></td>
+  </tr>
+  <tr>
+    <td><strong>Tactical Playbook</strong><br><span class="small">전술 카탈로그</span></td>
+    <td>tactics.ts (15 전술, 법적 근거 명시)</td>
+    <td><span class="tag tag-done">V1 시드</span></td>
+  </tr>
+  <tr>
+    <td><strong>Dynamic Response</strong><br><span class="small">상태 × 이벤트 → 제안</span></td>
+    <td>computeRecommendations + recommendTactics</td>
+    <td><span class="tag tag-done">V1 완료</span></td>
+  </tr>
+  <tr>
+    <td><strong>Natural Language → Query</strong><br><span class="small">NL → 구조화 쿼리</span></td>
+    <td>Cmd+K 검색 (4 엔티티 지원)</td>
+    <td><span class="tag tag-done">V1 완료</span></td>
+  </tr>
+  <tr>
+    <td><strong>Writeback</strong><br><span class="small">외부 시스템 양방향</span></td>
+    <td>이메일 발송만 (Resend). 정부24/우체국 API 미연동</td>
+    <td><span class="tag tag-partial">20%</span></td>
+  </tr>
+  <tr>
+    <td><strong>Object-level Permission</strong><br><span class="small">객체 단위 권한</span></td>
+    <td>cases.visibility (workspace/assigned_only/owner_only) + RLS</td>
+    <td><span class="tag tag-done">V1 완료</span></td>
+  </tr>
+  <tr>
+    <td><strong>Historical Outcome Learning</strong><br><span class="small">결과 피드백</span></td>
+    <td>case_tactics_adopted.outcome 기록 중. 학습 엔진은 V2</td>
+    <td><span class="tag tag-partial">데이터 수집 중</span></td>
+  </tr>
+</table>
+
+<h2>💎 왜 이게 차별화인가</h2>
+
+<div class="grid-2">
+  <div class="card">
+    <h4>✅ Clio / MyCase (북미 기존 강자)</h4>
+    <ul>
+      <li>타임트래킹 · 빌링 중심</li>
+      <li>문서 자동화 (일부)</li>
+      <li>한국어 × 법률 특화 없음</li>
+      <li>❌ 승리 전략 제안 없음</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>✅ Harvey / EvenUp (신흥 AI)</h4>
+    <ul>
+      <li>문서 초안 AI 작성</li>
+      <li>계약 분석</li>
+      <li>❌ 워크플로우 상태 관리 X</li>
+      <li>❌ 적 프로필 · 전술 플레이북 X</li>
+    </ul>
+  </div>
+  <div class="card card-strong">
+    <h4>🎯 LawOS</h4>
+    <ul>
+      <li>✅ 한국 법률 특화 (법원별, 조문 명시)</li>
+      <li>✅ 분야별 온톨로지 (템플릿 플러그인)</li>
+      <li>✅ 실시간 상담 → 할일 전환</li>
+      <li>✅ 고객 포털 + AI 분류 자동화</li>
+      <li>✅ <strong>전술 플레이북 (업계 최초)</strong></li>
+      <li>✅ <strong>상태×이벤트→추천 엔진</strong></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🏆 시간이 지날수록 강해지는 해자</h4>
+    <ul>
+      <li>전술 카탈로그 쌓임 (분야 × 약점 × 결과)</li>
+      <li>법원별 패턴 데이터베이스</li>
+      <li>사건별 Outcome 학습 (V2)</li>
+      <li>후발주자가 따라올 수 없는 축적물</li>
+    </ul>
+  </div>
+</div>
+
+<h2>📈 시장 규모 추정</h2>
+
+<table>
+  <tr><th>구분</th><th>대상</th><th>월 가격 (목표)</th><th>연 TAM</th></tr>
+  <tr><td>Basic</td><td>일반 변호사 업무 자동화</td><td>19만원</td><td>연 변호사 3.3만 × 월 19만 = <strong>75억</strong></td></tr>
+  <tr><td>Pro</td><td>AI 티켓 + 외부 연계</td><td>49만원</td><td>30% 전환 시 <strong>연 580억</strong></td></tr>
+  <tr><td>Combat <span class="tag tag-new">NEW</span></td><td>고액 분쟁 (이혼·기업)</td><td>149만원</td><td>고액 분쟁 3,500명 × 10% = <strong>연 60억</strong></td></tr>
+  <tr><td>Combat Plus</td><td>최상위 로펌</td><td>499만원 + 성과</td><td>5~10 계약 = <strong>연 30~60억</strong></td></tr>
+</table>
+
+<p class="small">합계 TAM <strong>연 700~800억</strong>. 개인회생 전문 변호사 기준 처리 건수 3~5배 증가 = 변호사당 추가 수익 월 300만~1,000만원. 149만원 수수료는 회수 가능.</p>
+
+<h2>🚧 현재 미완성 / 다음 단계</h2>
+
+<div class="grid-2">
+  <div class="card">
+    <h4>🔜 단기 (1~2주)</h4>
+    <ul>
+      <li>이혼 템플릿 시드 (8 스테이지 + 15 서류)</li>
+      <li>Action Registry 정식화</li>
+      <li>Historical Outcome Learning 1차 (단순 카운트)</li>
+      <li>정부24 본인인증 연동 (서류 자동 발급)</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🔮 중기 (1~3개월)</h4>
+    <ul>
+      <li>전자소송 수동 업로드 도우미 (API 없음)</li>
+      <li>우체국 내용증명 실발송 API</li>
+      <li>오픈뱅킹 (통장내역 자동 수집)</li>
+      <li>전술 카탈로그 30개까지 확장</li>
+      <li>판사별 성향 DB</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>🌟 장기 (6개월+)</h4>
+    <ul>
+      <li>Combat 티어 분리 + 윤리 가드레일 완전체</li>
+      <li>공인탐정 네트워크 연계</li>
+      <li>판례 RAG (pgvector)</li>
+      <li>일본·동남아 확장</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h4>⚠️ 알려진 한계</h4>
+    <ul>
+      <li>전자소송 API 비공개 → 수동 업로드</li>
+      <li>홈택스 스크래핑 법적 회색지대</li>
+      <li>개인회생 외 템플릿 미완성</li>
+      <li>결과 학습 데이터 부족</li>
+    </ul>
+  </div>
+</div>
+
+<h2>🏁 지금 상태 요약</h2>
+
+<div class="card card-strong">
+  <h3 style="margin-top: 0;">✅ 완성된 것 (V1)</h3>
+  <ul>
+    <li><strong>인프라</strong>: Next.js 15 + Supabase (Tokyo) + Vercel (Seoul) + Fly.io STT</li>
+    <li><strong>인증</strong>: 이메일/Google OAuth + 팀 초대</li>
+    <li><strong>온톨로지</strong>: 11 테이블 + RLS 격리</li>
+    <li><strong>워크플로우</strong>: 개인회생 템플릿 (6 스테이지 · 20 서류 · 14 Action)</li>
+    <li><strong>AI 기능</strong>: 추출 · 분류 · 편파변제 · 경로 추천 · 초안 생성 · NL 쿼리</li>
+    <li><strong>입력 채널</strong>: 음성 · 텍스트 · 벌크 · 파일 · 고객 포털</li>
+    <li><strong>출력</strong>: PDF 생성 · 이메일 발송 (Resend) · 자동 리마인더</li>
+    <li><strong>전략 층</strong>: 상대방 프로필 + 15 전술 카탈로그 + 매칭 엔진</li>
+    <li><strong>UI</strong>: 대시보드 · 칸반 · 사건 · 고객 · 팀 · 캘린더 + Cmd+K 검색</li>
+  </ul>
+
+  <h3>🎯 본질적 가치</h3>
+  <p>
+    <strong>변호사가 "지금 뭐 해야 하지?"를 고민할 필요가 없다.</strong><br>
+    시스템이 사건 상태와 새로 들어온 정보를 분석해서 <strong>가장 효과적인 다음 행동을 먼저 제안</strong>한다.
+    단순 행정이 아니라 <strong>승리 논리</strong>까지 확장되는 팔란티어식 구조.
+  </p>
+</div>
+
+<p class="small center" style="margin-top: 40px; color: #a1a1aa;">
+  작성일: 2026-04-19 · LawOS 아키텍처 v1
+</p>
+
+</body>
+</html>
