@@ -3,9 +3,11 @@ import { format, parseISO } from 'date-fns';
 import { createClient } from '@/lib/supabase/server';
 import { AppHeader } from '@/components/AppHeader';
 import { listTeamMembers, listPendingInvites } from '@/app/actions/team';
+import { listAllRoles } from '@/app/actions/workspace-roles';
 import { InviteForm } from './InviteForm';
 import { MemberRow } from './MemberRow';
 import { InviteRow } from './InviteRow';
+import { BootstrapRoleButton } from './BootstrapRoleButton';
 
 const ROLE_LABEL: Record<string, string> = {
   owner: '소유자',
@@ -25,15 +27,20 @@ export default async function TeamSettingsPage() {
     .select('workspace_id, role')
     .eq('user_id', user.id)
     .maybeSingle();
-  if (!membership) redirect('/kanban');
+  if (!membership) redirect('/dashboard');
 
-  const [members, invites] = await Promise.all([
+  const [members, invites, allRoles] = await Promise.all([
     listTeamMembers(),
     listPendingInvites(),
+    listAllRoles(),
   ]);
 
   const myRole = membership.role as 'owner' | 'admin' | 'member';
   const canInvite = myRole === 'owner' || myRole === 'admin';
+  const myDomainRoles = allRoles.filter((r) => r.user_id === user.id);
+  const iAmManagingPartner = myDomainRoles.some((r) => r.role === 'managing_partner');
+  const canEditRoles = myRole === 'owner' || myRole === 'admin' || iAmManagingPartner;
+  const hasNoRoleAtAll = myDomainRoles.length === 0;
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
@@ -42,9 +49,19 @@ export default async function TeamSettingsPage() {
         <div>
           <h1 className="text-2xl font-semibold">팀 설정</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
-            워크스페이스 멤버 · 초대 · 역할 관리
+            워크스페이스 멤버 · 초대 · 업무 역할(도메인×역할) 관리
           </p>
         </div>
+
+        {hasNoRoleAtAll && myRole === 'owner' && (
+          <section className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/50 rounded-lg p-4 space-y-2">
+            <p className="text-sm font-medium">⚠ 업무 역할이 부여되지 않았습니다</p>
+            <p className="text-xs text-zinc-600 dark:text-zinc-400">
+              현재 어떤 파이프라인도 접근할 수 없습니다. 소유자이므로 즉시 "대표변호사 · 전사" 역할을 본인에게 부여할 수 있습니다.
+            </p>
+            <BootstrapRoleButton />
+          </section>
+        )}
 
         {canInvite && (
           <section className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 p-5">
@@ -68,6 +85,8 @@ export default async function TeamSettingsPage() {
                 myRole={myRole}
                 currentUserId={user.id}
                 roleLabel={ROLE_LABEL[m.role]}
+                allRoles={allRoles}
+                canEditRoles={canEditRoles}
               />
             ))}
           </div>
