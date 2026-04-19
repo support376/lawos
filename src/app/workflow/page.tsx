@@ -1,156 +1,131 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { createClient } from '@/lib/supabase/server';
 import { AppHeader } from '@/components/AppHeader';
-import { fetchRehabCaseFullView } from '@/app/actions/rehab';
-import { STAGES, getPossibleNextStages } from '@/lib/ontology/domains/personal_rehab/stages';
-import { StageTimeline } from './components/StageTimeline';
-import { DebtorProfileSection } from './components/DebtorProfileSection';
-import { FinancialSummary } from './components/FinancialSummary';
-import { SidebarCaseList } from './components/SidebarCaseList';
-import { StageAdvanceControl } from './components/StageAdvanceControl';
-import type { StageKey } from '@/lib/ontology/domains/personal_rehab/entities';
+import { getMyRoleContext, canAccessView, type PipelineView, type DomainKey } from '@/lib/auth/my-roles';
+import { ConsultantPipeline } from './views/ConsultantPipeline';
+import { ViewSwitcher } from './components/ViewSwitcher';
+import { CaseDetailView } from './views/CaseDetailView';
 
 export default async function WorkflowPage({
   searchParams,
 }: {
-  searchParams: Promise<{ case?: string }>;
+  searchParams: Promise<{ view?: string; domain?: string; case?: string }>;
 }) {
-  const { case: caseId } = await searchParams;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect('/login');
+  const params = await searchParams;
+  const ctx = await getMyRoleContext();
+  if (!ctx) redirect('/login');
 
-  // 사이드바용: 도메인별 활성 사건
-  const { data: sidebarCases } = await supabase
-    .from('cases')
-    .select(`
-      id, title, case_type, status,
-      client:clients(id, name),
-      rehab_case_details(current_stage_key)
-    `)
-    .eq('status', 'active')
-    .order('created_at', { ascending: false });
+  // 사건 상세 진입 (기존 동작 유지)
+  if (params.case) {
+    return (
+      <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
+        <AppHeader active="workflow" />
+        <main className="flex-1 overflow-y-auto">
+          <CaseDetailView caseId={params.case} />
+        </main>
+      </div>
+    );
+  }
 
-  type SidebarCaseRow = {
-    id: string;
-    title: string;
-    case_type: string | null;
-    status: string;
-    client: { id: string; name: string } | null;
-    rehab_case_details: Array<{ current_stage_key: string | null }> | null;
-  };
-  const sidebarData = (sidebarCases ?? []) as unknown as SidebarCaseRow[];
-  const rehabCases = sidebarData
-    .filter((c) => c.case_type === 'personal_rehab')
-    .map((c) => ({
-      id: c.id,
-      title: c.title,
-      client_name: c.client?.name ?? '고객 미지정',
-      current_stage_key: (c.rehab_case_details?.[0]?.current_stage_key as StageKey) ?? null,
-    }));
-  const divorceCases = sidebarData
-    .filter((c) => c.case_type === 'divorce')
-    .map((c) => ({ id: c.id, title: c.title, client_name: c.client?.name ?? '고객 미지정' }));
+  // 뷰 결정: URL param → 없으면 본인 첫 뷰 자동 선택
+  let view = (params.view as PipelineView | undefined) ?? null;
+  let domain = (params.domain as DomainKey | undefined) ?? null;
 
-  // 본문
-  const view = caseId ? await fetchRehabCaseFullView(caseId) : null;
+  if (!view || !domain) {
+    const first = ctx.accessibleViews[0];
+    if (!first) {
+      return (
+        <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
+          <AppHeader active="workflow" />
+          <main className="flex-1 flex items-center justify-center">
+            <div className="text-center space-y-2 max-w-md">
+              <div className="text-5xl">🔒</div>
+              <p className="text-sm font-medium">접근 권한 없음</p>
+              <p className="text-xs text-zinc-500">
+                역할이 부여되지 않았거나 삭제되었습니다. 대표에게 문의하세요.
+              </p>
+            </div>
+          </main>
+        </div>
+      );
+    }
+    view = first.view;
+    domain = first.domain;
+  }
+
+  if (!canAccessView(ctx, view, domain)) {
+    return (
+      <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
+        <AppHeader active="workflow" />
+        <main className="flex-1 flex items-center justify-center">
+          <div className="text-center space-y-2 max-w-md">
+            <div className="text-5xl">🚫</div>
+            <p className="text-sm font-medium">이 뷰에 접근할 권한이 없습니다</p>
+            <p className="text-xs text-zinc-500">
+              권한: <code>{view} × {domain}</code>
+            </p>
+            <ViewSwitcher current={{ view, domain }} ctx={ctx} />
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
       <AppHeader active="workflow" />
-      <main className="flex-1 flex min-h-0">
-        <SidebarCaseList
-          rehabCases={rehabCases}
-          divorceCases={divorceCases}
-          selectedCaseId={caseId ?? null}
-        />
-        <section className="flex-1 overflow-y-auto p-6 space-y-5">
-          {!view && (
-            <div className="h-full flex items-center justify-center">
-              <div className="text-center space-y-2 max-w-md">
-                <div className="text-5xl">📂</div>
-                <p className="text-sm font-medium">사건을 선택하세요</p>
-                <p className="text-xs text-zinc-500">
-                  좌측에서 도메인과 고객을 고르면 해당 사건의 워크플로우가 표시됩니다.
-                </p>
-              </div>
-            </div>
-          )}
+      <main className="flex-1 flex flex-col min-h-0">
+        <div className="border-b border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-6 py-3 flex items-center justify-between gap-4">
+          <h1 className="text-lg font-semibold">
+            {viewLabel(view, domain)}
+          </h1>
+          <div className="flex items-center gap-2">
+            <ViewSwitcher current={{ view, domain }} ctx={ctx} />
+            <Link
+              href="/cases"
+              className="text-xs px-3 py-1.5 rounded border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+            >
+              사건 목록
+            </Link>
+          </div>
+        </div>
 
-          {view && (
-            <>
-              <div>
-                <Link
-                  href="/workflow"
-                  className="text-xs text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
-                >
-                  ← 워크플로우
-                </Link>
-                <div className="mt-1 flex items-center justify-between gap-3">
-                  <div>
-                    <h1 className="text-xl font-semibold">{view.client_name}</h1>
-                    <p className="text-xs text-zinc-500 mt-0.5">
-                      {view.case.court ?? '법원 미지정'} · {view.case.case_number ?? '사건번호 미발급'}
-                    </p>
-                  </div>
-                  <Link
-                    href={`/cases/${view.case.id}`}
-                    className="text-xs px-3 py-1.5 rounded border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800"
-                  >
-                    사건 메타로 →
-                  </Link>
-                </div>
-              </div>
-
-              <section className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h2 className="text-sm font-semibold">Stage</h2>
-                  <StageAdvanceControl
-                    caseId={view.case.id}
-                    currentStage={view.case.current_stage_key}
-                    nextStages={getPossibleNextStages(view.case.current_stage_key)}
-                  />
-                </div>
-                <StageTimeline
-                  currentStage={view.case.current_stage_key}
-                  stageHistory={view.stage_history}
-                />
-              </section>
-
-              <DebtorProfileSection caseId={view.case.id} debtor={view.debtor} />
-
-              <FinancialSummary
-                debts={view.debts}
-                assets={view.assets}
-                incomes={view.incomes}
-                dependents={view.dependents}
-                debtor={view.debtor}
-              />
-
-              <section className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
-                <h2 className="text-sm font-semibold mb-2">
-                  보정·상호작용 이력 ({view.interactions.length})
-                </h2>
-                {view.interactions.length === 0 ? (
-                  <p className="text-xs text-zinc-500">이력 없음</p>
-                ) : (
-                  <div className="space-y-1 text-xs">
-                    {view.interactions.slice(0, 10).map((i) => (
-                      <div key={i.id} className="flex gap-2">
-                        <span className="text-zinc-500 tabular-nums">#{i.iteration_number}</span>
-                        <span>{i.type}</span>
-                        <span className="text-zinc-500">{i.initiator} → {i.recipient}</span>
-                        <span className="text-zinc-400">{i.status}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </section>
-            </>
-          )}
-        </section>
+        <div className="flex-1 overflow-y-auto p-6">
+          {view === 'consultant' && <ConsultantPipeline domain={domain} ctx={ctx} />}
+          {view === 'writer' && <PlaceholderView label="작성팀 파이프라인" note="Phase P4 — Stage × 도메인 기반" />}
+          {view === 'billing' && <PlaceholderView label="재무팀 파이프라인" note="Phase P3 — Finance Hold 포함" />}
+          {view === 'partner' && <PlaceholderView label="대표 종합 뷰" note="Phase P5 — 도메인별 KPI + Workload" />}
+        </div>
       </main>
+    </div>
+  );
+}
+
+function viewLabel(view: PipelineView, domain: DomainKey): string {
+  const DOMAIN: Record<DomainKey, string> = {
+    '*': '전사',
+    personal_rehab: '개인회생',
+    divorce: '이혼',
+    criminal: '형사',
+    other: '기타',
+  };
+  const VIEW: Record<PipelineView, string> = {
+    consultant: '상담팀',
+    writer: '작성팀',
+    billing: '재무팀',
+    partner: '대표',
+  };
+  return view === 'partner' ? VIEW[view] : `${DOMAIN[domain]} · ${VIEW[view]}`;
+}
+
+function PlaceholderView({ label, note }: { label: string; note: string }) {
+  return (
+    <div className="h-full flex items-center justify-center">
+      <div className="text-center space-y-2 max-w-md">
+        <div className="text-5xl">🚧</div>
+        <p className="text-sm font-medium">{label}</p>
+        <p className="text-xs text-zinc-500">{note}</p>
+      </div>
     </div>
   );
 }
