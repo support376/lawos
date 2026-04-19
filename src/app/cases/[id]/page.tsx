@@ -617,12 +617,12 @@ export default async function CaseDetailPage({
                 <div className="space-y-3">
                   <ClientProfile client={clientSummary} caseId={c.id} caseType={c.case_type} />
                   {domain?.caseType === 'divorce' && (() => {
-                    const selfSpec = domain.actors.find((a) => a.role === 'client_self');
-                    if (!selfSpec) return null;
+                    const ourSpec = domain.actors.find((a) => a.role === 'our_side');
+                    if (!ourSpec) return null;
                     return (
                       <ActorPanel
-                        spec={selfSpec}
-                        actor={actorMap['client_self']?.[0] ?? null}
+                        spec={ourSpec}
+                        actor={actorMap['our_side']?.[0] ?? null}
                         caseId={c.id}
                         accentColor="amber"
                       />

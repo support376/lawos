@@ -65,7 +65,12 @@
       "Bash(vercel deploy *)",
       "Bash(git --version)",
       "Bash(git init *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(grep -iE 'env|secret|\\\\.key$|credential')",
+      "Bash(git commit *)",
+      "Bash(gh auth *)",
+      "Bash(gh repo *)",
+      "Bash(vercel --yes)"
     ]
   }
 }

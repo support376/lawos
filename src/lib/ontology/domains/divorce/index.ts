@@ -40,7 +40,7 @@ const strategies: StrategySpec[] = [
     key: 'divorce_fault_aggregation',
     label: '유책사유 축적 (민법 §840)',
     category: 'offensive',
-    targetActor: 'spouse',
+    targetActor: 'opposing_side',
     icon: '⚔️',
     requiredEvidence: ['대화 녹취', '카톡·문자 증거', '제3자 증언', '진단서'],
     evaluate: (input) => {
@@ -72,7 +72,7 @@ const strategies: StrategySpec[] = [
     key: 'divorce_property_maximize',
     label: '재산분할 과반 확보',
     category: 'offensive',
-    targetActor: 'spouse',
+    targetActor: 'opposing_side',
     icon: '💰',
     requiredEvidence: ['부동산등기부', '예금잔고증명', '차량등록증', '보험가입증명', '퇴직금추정'],
     evaluate: (input) => {
@@ -202,7 +202,6 @@ const strategies: StrategySpec[] = [
       const i = input as DivorceIntelInput;
       const conds = [
         cond('no_urgent_danger', '긴급 위해 없음', !i.riskFlags['domestic_violence']),
-        cond('children_involved', '자녀 있음 (합의 실익)', (i.childrenCount ?? 0) > 0 || true),
       ];
       return {
         conditions: conds,
@@ -219,7 +218,7 @@ const strategies: StrategySpec[] = [
     key: 'divorce_consensual_conversion',
     label: '협의이혼 전환 (합의 도달시)',
     category: 'settlement',
-    targetActor: 'spouse',
+    targetActor: 'opposing_side',
     icon: '✍️',
     requiredEvidence: ['재산분할 합의서', '양육비·친권 합의서'],
     evaluate: (input) => {
@@ -337,7 +336,7 @@ const strategies: StrategySpec[] = [
 export const divorceDomain: DomainOntology = {
   caseType: 'divorce',
   label: '이혼',
-  version: '0.3.0',
+  version: '0.4.0',
   actors: divorceActors,
   // 사람 속성 (clients 테이블 공유) — 양육비·재산분할 산정 기초
   // 자녀 수는 case_intel.children_count 쪽에서 관리 (이 사건의 혼인 자녀)
@@ -353,6 +352,24 @@ export const divorceDomain: DomainOntology = {
   ],
   // 사건 특수 (cases.case_intel JSONB)
   caseFields: [
+    { key: 'client_position', label: '의뢰인 소송상 지위', kind: 'enum',
+      required: true,
+      enumValues: [
+        { value: 'plaintiff', label: '원고 (제기자)' },
+        { value: 'defendant', label: '피고 (응소자)' },
+        { value: 'pre_suit', label: '제소 전 (상담·협의 단계)' },
+        { value: 'affair_defendant', label: '상간자 손배 피고' },
+      ],
+      description: '전략의 공수 프레임 결정',
+    },
+    { key: 'client_relation', label: '의뢰인의 혼인관계 위치', kind: 'enum',
+      enumValues: [
+        { value: 'spouse', label: '부부 당사자' },
+        { value: 'affair_partner', label: '상간자 (제3자)' },
+        { value: 'family_member', label: '가족·친족 대리' },
+      ],
+      description: '의뢰인이 부부 중 한 명인지, 제3자인지',
+    },
     { key: 'marriage_years', label: '혼인기간(년)', kind: 'integer', required: true,
       usedBy: ['divorce_property_maximize', 'divorce_marriage_intent'] },
     { key: 'separation_months', label: '별거 개월수', kind: 'integer',
@@ -458,7 +475,7 @@ export const divorceDomain: DomainOntology = {
   ],
   strategies,
   counterpartyRoles: [
-    { key: 'spouse', label: '배우자',
+    { key: 'opposing_side', label: '상대방측',
       typicalWeaknesses: ['유책행위 증거', '경제력 의존', '외도 기록'] },
     { key: 'in_law', label: '시댁/처가',
       typicalWeaknesses: ['학대 증언', '재산 개입 기록'] },
