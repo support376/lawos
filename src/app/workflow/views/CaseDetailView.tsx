@@ -12,6 +12,10 @@ import { CaseFinanceInputs } from '../components/CaseFinanceInputs';
 import { StageMap } from '../components/StageMap';
 import { StrategyStatusPanel } from '../components/StrategyStatusPanel';
 import { CaseActionBoard } from '../components/CaseActionBoard';
+import { CaseConsultationLog } from '../components/CaseConsultationLog';
+import { CaseDocumentChecklist } from '../components/CaseDocumentChecklist';
+import { CaseUnifiedTimeline } from '../components/CaseUnifiedTimeline';
+import { listCaseDocumentChecklist } from '@/app/actions/case-documents';
 
 // 종합 뷰 접근 가능 역할
 const FULL_VIEW_ROLES = ['managing_partner', 'attorney', 'admin'] as const;
@@ -50,11 +54,12 @@ export async function CaseDetailView({ caseId }: { caseId: string }) {
     );
   }
 
-  const [view, contracts, schedules, hold] = await Promise.all([
+  const [view, contracts, schedules, hold, docChecklist] = await Promise.all([
     fetchRehabCaseFullView(caseId),
     listCaseContracts(caseId),
     listCaseSchedules(caseId),
     getActiveHold(caseId),
+    listCaseDocumentChecklist(caseId, 'personal_rehab').catch(() => []),
   ]);
   if (!view) {
     return (
@@ -121,9 +126,19 @@ export async function CaseDetailView({ caseId }: { caseId: string }) {
         />
       )}
 
+      {/* [상담일지] — 수임 시점의 상담원 기록 */}
+      {(canFullView || canWrite) && (
+        <CaseConsultationLog caseId={view.case.id} />
+      )}
+
       {/* 채무자 프로필 — 작성팀도 볼 수 있음 (담당 업무) */}
       {(canFullView || canWrite) && (
         <DebtorProfileSection caseId={view.case.id} debtor={view.debtor} />
+      )}
+
+      {/* 서류 체크리스트 — 작성팀 중심 */}
+      {(canFullView || canWrite) && docChecklist.length > 0 && (
+        <CaseDocumentChecklist caseId={view.case.id} items={docChecklist} />
       )}
 
       {/* 결제 계약 — 재무팀·종합 뷰 */}
@@ -158,28 +173,8 @@ export async function CaseDetailView({ caseId }: { caseId: string }) {
         />
       )}
 
-      {/* 보정·법원 상호작용 이력 — 종합 뷰·작성팀 */}
-      {(canFullView || canWrite) && (
-        <section className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-lg p-4">
-          <h2 className="text-sm font-semibold mb-2">
-            ⚖️ 법원 상호작용 ({view.interactions.length})
-          </h2>
-          {view.interactions.length === 0 ? (
-            <p className="text-xs text-zinc-500">이력 없음</p>
-          ) : (
-            <div className="space-y-1 text-xs">
-              {view.interactions.slice(0, 10).map((i) => (
-                <div key={i.id} className="flex gap-2">
-                  <span className="text-zinc-500 tabular-nums">#{i.iteration_number}</span>
-                  <span>{i.type}</span>
-                  <span className="text-zinc-500">{i.initiator} → {i.recipient}</span>
-                  <span className="text-zinc-400">{i.status}</span>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-      )}
+      {/* 📜 통합 타임라인 — 전 역할 노출 (사건 역사) */}
+      <CaseUnifiedTimeline caseId={view.case.id} clientId={null} leadId={null} />
     </div>
   );
 }

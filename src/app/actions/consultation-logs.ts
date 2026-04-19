@@ -50,6 +50,19 @@ export async function getLeadConsultationLog(leadId: string): Promise<Consultati
   return (data as ConsultationLog) ?? null;
 }
 
+export async function getCaseConsultationLog(caseId: string): Promise<ConsultationLog | null> {
+  const { supabase, workspaceId } = await getContext();
+  const { data } = await supabase
+    .from('consultation_logs')
+    .select('*')
+    .eq('workspace_id', workspaceId)
+    .eq('case_id', caseId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return (data as ConsultationLog) ?? null;
+}
+
 export async function upsertConsultationLog(input: {
   leadId: string;
   consultation_date?: string;

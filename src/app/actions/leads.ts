@@ -193,6 +193,17 @@ export async function convertLeadToCase(input: {
       if (r.ok) contractId = r.contractId;
     }
 
+    // 상담일지를 Case로 자동 연결 (Lead 전환 시 상담일지는 Case 자산이 됨)
+    try {
+      await supabase
+        .from('consultation_logs')
+        .update({ case_id: newCase.id, updated_at: new Date().toISOString() })
+        .eq('lead_id', input.leadId)
+        .eq('workspace_id', workspaceId);
+    } catch (e) {
+      console.warn('[convertLeadToCase] consultation_log case_id 연결 실패:', e);
+    }
+
     // 🔔 수임 컨펌 Action 자동 생성 — 대표변호사 한 명에게 자동 할당
     try {
       const { data: mp } = await supabase
