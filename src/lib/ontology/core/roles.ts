@@ -21,7 +21,7 @@ export const ROLE_LABEL: Record<Role, string> = {
   analysis_staff: '분석팀',
   correction_staff: '법정 대응',
   billing_staff: '결제팀',
-  admin: '일반 사무',
+  admin: '행정팀',
 };
 
 export const ROLE_DESCRIPTION: Record<Role, string> = {
@@ -32,7 +32,7 @@ export const ROLE_DESCRIPTION: Record<Role, string> = {
   analysis_staff: '신청·보정루프 Stage (편파분석·시뮬)',
   correction_staff: '기각·즉시항고·폐지 Stage',
   billing_staff: '결제 · 미수금 · 독촉 자동화',
-  admin: '연락·접수·최소 접근',
+  admin: '행정·비서 · Case 종합 뷰 조망 · Action 할당',
 };
 
 // 역할 우선순위 (권한 체크 시 비교용)
