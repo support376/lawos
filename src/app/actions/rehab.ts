@@ -102,9 +102,19 @@ export async function advanceStage(input: {
   caseId: string;
   toStage: StageKey;
   note?: string;
-}): Promise<{ ok: boolean; error?: string }> {
+  force?: boolean;                          // 대표만 사용 (Hold 무시)
+}): Promise<{ ok: boolean; error?: string; blocked_reason?: string }> {
   try {
     const { supabase, workspaceId } = await getContext();
+
+    // Hold / Gate 체크
+    if (!input.force) {
+      const { checkStageBlock } = await import('./finance-holds');
+      const check = await checkStageBlock(input.caseId);
+      if (check.blocked) {
+        return { ok: false, error: '전이 차단', blocked_reason: check.reason ?? '' };
+      }
+    }
 
     // 기존 history 중 exit_date 없는 것 마감
     const { data: open } = await supabase

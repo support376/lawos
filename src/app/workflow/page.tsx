@@ -3,7 +3,10 @@ import { redirect } from 'next/navigation';
 import { AppHeader } from '@/components/AppHeader';
 import { getMyRoleContext, canAccessView, type PipelineView, type DomainKey } from '@/lib/auth/my-roles';
 import { ConsultantPipeline } from './views/ConsultantPipeline';
+import { BillingPipeline } from './views/BillingPipeline';
+import { WriterPipeline } from './views/WriterPipeline';
 import { ViewSwitcher } from './components/ViewSwitcher';
+import { RoleSimulator } from './components/RoleSimulator';
 import { CaseDetailView } from './views/CaseDetailView';
 
 export default async function WorkflowPage({
@@ -80,6 +83,7 @@ export default async function WorkflowPage({
             {viewLabel(view, domain)}
           </h1>
           <div className="flex items-center gap-2">
+            {ctx.isManagingPartner && <RoleSimulator current={{ view, domain }} />}
             <ViewSwitcher current={{ view, domain }} ctx={ctx} />
             <Link
               href="/cases"
@@ -92,8 +96,8 @@ export default async function WorkflowPage({
 
         <div className="flex-1 overflow-y-auto p-6">
           {view === 'consultant' && <ConsultantPipeline domain={domain} ctx={ctx} />}
-          {view === 'writer' && <PlaceholderView label="작성팀 파이프라인" note="Phase P4 — Stage × 도메인 기반" />}
-          {view === 'billing' && <PlaceholderView label="재무팀 파이프라인" note="Phase P3 — Finance Hold 포함" />}
+          {view === 'writer' && <WriterPipeline domain={domain} ctx={ctx} />}
+          {view === 'billing' && <BillingPipeline domain={domain} ctx={ctx} />}
           {view === 'partner' && <PlaceholderView label="대표 종합 뷰" note="Phase P5 — 도메인별 KPI + Workload" />}
         </div>
       </main>
