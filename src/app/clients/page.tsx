@@ -10,7 +10,7 @@ export default async function ClientsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  const [{ data: clients }, { data: cases }, { data: tickets }] = await Promise.all([
+  const [{ data: clients }, { data: cases }] = await Promise.all([
     supabase
       .from('clients')
       .select('id, name, phone, email, memo, created_at')
@@ -18,25 +18,19 @@ export default async function ClientsPage() {
     supabase
       .from('cases')
       .select('id, client_id, case_type, status'),
-    supabase
-      .from('tickets')
-      .select('id, client_id, column_key')
-      .neq('column_key', 'done'),
   ]);
 
   const clientsData = clients ?? [];
   const casesData = cases ?? [];
-  const ticketsData = tickets ?? [];
 
   const stats = clientsData.map((c) => {
     const myCases = casesData.filter((cs) => cs.client_id === c.id);
     const activeCases = myCases.filter((cs) => cs.status === 'active').length;
     const closedCases = myCases.filter((cs) => cs.status !== 'active').length;
-    const openTickets = ticketsData.filter((t) => t.client_id === c.id).length;
     const types = Array.from(
       new Set(myCases.map((cs) => cs.case_type).filter(Boolean)),
     ) as CaseType[];
-    return { client: c, activeCases, closedCases, openTickets, types };
+    return { client: c, activeCases, closedCases, types };
   });
 
   return (
@@ -57,12 +51,6 @@ export default async function ClientsPage() {
             <div className="flex gap-2 justify-center">
               <NewClientButton variant="cta" label="+ 첫 고객 추가" />
             </div>
-            <p className="text-xs text-zinc-500">
-              또는{' '}
-              <Link href="/kanban" className="underline">
-                여러 사건을 한 번에 불러오기
-              </Link>
-            </p>
           </div>
         ) : (
           <div className="bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 overflow-hidden">
@@ -74,11 +62,10 @@ export default async function ClientsPage() {
                   <th className="text-left px-4 py-2.5 font-medium">사건 유형</th>
                   <th className="text-right px-4 py-2.5 font-medium">활성 사건</th>
                   <th className="text-right px-4 py-2.5 font-medium">종결</th>
-                  <th className="text-right px-4 py-2.5 font-medium">미완 할일</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
-                {stats.map(({ client, activeCases, closedCases, openTickets, types }) => (
+                {stats.map(({ client, activeCases, closedCases, types }) => (
                   <tr key={client.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/30">
                     <td className="px-4 py-3">
                       <Link
@@ -113,9 +100,6 @@ export default async function ClientsPage() {
                     <td className="px-4 py-3 text-right tabular-nums">{activeCases}</td>
                     <td className="px-4 py-3 text-right tabular-nums text-zinc-400">
                       {closedCases}
-                    </td>
-                    <td className="px-4 py-3 text-right tabular-nums font-medium">
-                      {openTickets > 0 ? openTickets : '—'}
                     </td>
                   </tr>
                 ))}

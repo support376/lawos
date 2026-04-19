@@ -48,10 +48,6 @@ export default async function CasesPage({
   else if (statusFilter === 'closed') query = query.neq('status', 'active');
 
   const { data: cases } = await query;
-  const { data: tickets } = await supabase
-    .from('tickets')
-    .select('id, case_id, column_key')
-    .neq('column_key', 'done');
 
   const { data: clientsData } = await supabase
     .from('clients')
@@ -74,13 +70,6 @@ export default async function CasesPage({
     client: { id: string; name: string } | null;
     assignee: { id: string; name: string | null; email: string } | null;
   }>;
-  const ticketCountByCase = new Map<string, number>();
-  for (const t of tickets ?? []) {
-    if (t.case_id) {
-      ticketCountByCase.set(t.case_id, (ticketCountByCase.get(t.case_id) ?? 0) + 1);
-    }
-  }
-
   const mkHref = (t: string, s: string) => {
     const params = new URLSearchParams();
     if (t !== 'all') params.set('type', t);
@@ -175,11 +164,6 @@ export default async function CasesPage({
                     {c.assignee && (
                       <span className="text-xs text-zinc-500">
                         👤 {c.assignee.name ?? c.assignee.email.split('@')[0]}
-                      </span>
-                    )}
-                    {(ticketCountByCase.get(c.id) ?? 0) > 0 && (
-                      <span className="text-xs px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950/50 dark:text-amber-400">
-                        할일 {ticketCountByCase.get(c.id)}
                       </span>
                     )}
                   </div>

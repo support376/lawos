@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import {
-  differenceInCalendarDays,
   format,
   parseISO,
   startOfMonth,
@@ -22,7 +21,6 @@ export default async function DashboardPage() {
   const [
     clientsCountRes,
     casesRes,
-    ticketsRes,
     membersRes,
     recentEventsRes,
     invitesCountRes,
@@ -31,10 +29,6 @@ export default async function DashboardPage() {
     supabase
       .from('cases')
       .select('id, status, retainer_date, closed_date, created_at, assigned_to, case_type'),
-    supabase
-      .from('tickets')
-      .select('id, column_key, due_date, priority, type, title, ai_suggested, waiting_on')
-      .neq('column_key', 'done'),
     supabase
       .from('workspace_members')
       .select('user_id', { count: 'exact', head: true }),
@@ -59,31 +53,10 @@ export default async function DashboardPage() {
   const memberCount = membersRes.count ?? 0;
   const pendingInvites = invitesCountRes.count ?? 0;
   const cases = casesRes.data ?? [];
-  const tickets = ticketsRes.data ?? [];
   const recentEvents = recentEventsRes.data ?? [];
 
   const activeCases = cases.filter((c) => c.status === 'active').length;
   const closedCases = cases.filter((c) => c.status !== 'active').length;
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const withDue = tickets.filter((t) => t.due_date);
-  const overdue = withDue.filter(
-    (t) => differenceInCalendarDays(parseISO(t.due_date!), today) < 0,
-  ).length;
-  const dueToday = withDue.filter(
-    (t) => differenceInCalendarDays(parseISO(t.due_date!), today) === 0,
-  ).length;
-  const dueTomorrow = withDue.filter(
-    (t) => differenceInCalendarDays(parseISO(t.due_date!), today) === 1,
-  ).length;
-  const dueThisWeek = withDue.filter((t) => {
-    const d = differenceInCalendarDays(parseISO(t.due_date!), today);
-    return d >= 2 && d <= 7;
-  }).length;
-  const triageCount = tickets.filter((t) => t.column_key === 'triage').length;
-  const waitingCount = tickets.filter((t) => !!t.waiting_on).length;
 
   // 월별 트렌드 (최근 6개월)
   const monthKeys: string[] = [];
@@ -112,19 +85,11 @@ export default async function DashboardPage() {
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
       <AppHeader active="dashboard" />
       <main className="flex-1 max-w-6xl mx-auto w-full p-6 space-y-6">
-        <div className="flex items-start justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold">대시보드</h1>
-            <p className="text-sm text-zinc-500 mt-0.5">
-              안녕하세요 {profileName}. {format(new Date(), 'yyyy년 M월 d일')}
-            </p>
-          </div>
-          <Link
-            href="/calendar"
-            className="text-sm px-3 py-1.5 rounded-md border border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800"
-          >
-            📅 캘린더
-          </Link>
+        <div>
+          <h1 className="text-2xl font-semibold">대시보드</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">
+            안녕하세요 {profileName}. {format(new Date(), 'yyyy년 M월 d일')}
+          </p>
         </div>
 
         {isEmpty && (
@@ -132,26 +97,14 @@ export default async function DashboardPage() {
             <div>
               <h2 className="text-lg font-semibold">시작하는 방법</h2>
               <p className="text-sm text-zinc-500 mt-0.5">
-                제일 자연스러운 순서는 <strong>사건 1건 만들기</strong>입니다. 유형을 고르면 분야별 워크플로우(스테이지·서류·액션)가 자동 준비됩니다.
+                사건 1건을 먼저 만드세요. 유형을 고르면 해당 도메인의 워크플로우가 준비됩니다.
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <NewCaseButton clients={allClients} variant="cta" label="+ 첫 사건 시작하기" />
-              <Link
-                href="/kanban"
-                className="px-6 py-3 rounded-md border border-zinc-300 dark:border-zinc-700 font-medium text-sm hover:bg-zinc-50 dark:hover:bg-zinc-800"
-              >
-                📦 여러 사건 한 번에 불러오기
-              </Link>
-            </div>
-            <p className="text-xs text-zinc-500 pt-2">
-              이미 있는 상담/통화 내용이 있으면 상단의 <strong>🎙 상담 코파일럿</strong> 또는 <strong>📋 텍스트 분석</strong> 버튼으로 바로 분석할 수 있어요.
-            </p>
+            <NewCaseButton clients={allClients} variant="cta" label="+ 첫 사건 시작하기" />
           </section>
         )}
 
-        {/* KPI 4개 */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           <StatCard label="활성 사건" value={activeCases} sub={`종결 ${closedCases}`} href="/cases" />
           <StatCard label="고객" value={clientCount} href="/clients" />
           <StatCard
@@ -160,38 +113,8 @@ export default async function DashboardPage() {
             sub={pendingInvites > 0 ? `초대 ${pendingInvites} 대기` : undefined}
             href="/settings/team"
           />
-          <StatCard label="미완 할일" value={tickets.length} href="/kanban" />
         </div>
 
-        {/* 오늘 현황 */}
-        <section>
-          <h2 className="text-sm font-semibold mb-2">오늘</h2>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
-            <MiniCard label="지연" count={overdue} tone="danger" href="/kanban" />
-            <MiniCard label="오늘 마감" count={dueToday} tone="warning" href="/kanban" />
-            <MiniCard label="내일" count={dueTomorrow} tone="warning" href="/kanban" />
-            <MiniCard label="이번 주" count={dueThisWeek} href="/kanban" />
-            <MiniCard label="대기 중" count={waitingCount} tone="info" href="/kanban" />
-          </div>
-          {triageCount > 0 && (
-            <Link
-              href="/kanban"
-              className="mt-3 flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-900/50 rounded-md hover:shadow-sm"
-            >
-              <div>
-                <p className="text-sm font-medium text-purple-900 dark:text-purple-200">
-                  🟣 Triage에 검토 대기 {triageCount}개
-                </p>
-                <p className="text-xs text-purple-700 dark:text-purple-300 mt-0.5">
-                  AI가 제안한 할일이 승인 대기 중
-                </p>
-              </div>
-              <span className="text-xs text-purple-700 dark:text-purple-300">→ 칸반으로</span>
-            </Link>
-          )}
-        </section>
-
-        {/* 월별 차트 */}
         <section>
           <h2 className="text-sm font-semibold mb-2">월별 수임 / 종결 (최근 6개월)</h2>
           <MonthlyChart
@@ -201,7 +124,6 @@ export default async function DashboardPage() {
           />
         </section>
 
-        {/* 최근 활동 */}
         <section>
           <h2 className="text-sm font-semibold mb-2">최근 활동</h2>
           {recentEvents.length === 0 ? (
@@ -250,36 +172,6 @@ function StatCard({
       <p className="text-xs text-zinc-500">{label}</p>
       <p className="text-2xl font-semibold mt-1 tabular-nums">{value}</p>
       {sub && <p className="text-xs text-zinc-500 mt-0.5">{sub}</p>}
-    </Link>
-  );
-}
-
-function MiniCard({
-  label,
-  count,
-  href,
-  tone = 'default',
-}: {
-  label: string;
-  count: number;
-  href: string;
-  tone?: 'default' | 'danger' | 'warning' | 'info';
-}) {
-  const toneClass =
-    tone === 'danger'
-      ? 'text-red-600'
-      : tone === 'warning'
-        ? 'text-amber-600'
-        : tone === 'info'
-          ? 'text-blue-600'
-          : 'text-zinc-900 dark:text-zinc-100';
-  return (
-    <Link
-      href={href}
-      className="p-3 bg-white dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-800 hover:shadow-sm"
-    >
-      <p className="text-xs text-zinc-500">{label}</p>
-      <p className={`text-xl font-semibold mt-0.5 tabular-nums ${toneClass}`}>{count}</p>
     </Link>
   );
 }
