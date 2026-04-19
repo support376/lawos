@@ -4,6 +4,8 @@ import type { MyRoleContext, DomainKey } from '@/lib/auth/my-roles';
 import { ConsultantPipeline } from './ConsultantPipeline';
 import { WriterPipeline } from './WriterPipeline';
 import { BillingPipeline } from './BillingPipeline';
+import { listPendingConfirms } from '@/app/actions/case-approval';
+import { PendingConfirmsBanner } from '../components/PendingConfirmsBanner';
 
 function krw(n: number): string {
   if (n >= 100_000_000) return `${(n / 100_000_000).toFixed(2)}억`;
@@ -17,6 +19,8 @@ export async function PartnerDashboard({ ctx }: { ctx: MyRoleContext }) {
   const supabase = await createClient();
   const monthStart = startOfMonth(new Date());
   const prevMonthStart = startOfMonth(subMonths(new Date(), 1));
+
+  const pendingConfirms = await listPendingConfirms();
 
   const [casesRes, schedulesRes, actionsRes, holdsRes, stageHistRes, membersRes] = await Promise.all([
     supabase
@@ -107,6 +111,9 @@ export async function PartnerDashboard({ ctx }: { ctx: MyRoleContext }) {
 
   return (
     <div className="space-y-6">
+      {/* ======== 🔔 대기중 컨펌 (최상단 알람) ======== */}
+      <PendingConfirmsBanner items={pendingConfirms} />
+
       {/* ======== KPI 스트립 ======== */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
         <KPIChip label="이번달 수임" value={`${thisMonthCases}건`} delta={prevMonthCases > 0 ? `${thisMonthCases >= prevMonthCases ? '+' : ''}${thisMonthCases - prevMonthCases}` : '—'} tone={thisMonthCases >= prevMonthCases ? 'emerald' : 'red'} />

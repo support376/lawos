@@ -8,6 +8,7 @@ import type { ActionRecord, ActionStatus } from '@/lib/ontology/core/objects';
 import { ACTION_STATUS_LABEL } from '@/lib/ontology/core/objects';
 import { getActionSpec } from '@/lib/ontology/core/action-registry';
 import { differenceInCalendarDays, parseISO } from 'date-fns';
+import { ConfirmCaseModal } from '@/app/workflow/components/ConfirmCaseModal';
 
 export function WorkbenchActionItem({
   action,
@@ -22,9 +23,11 @@ export function WorkbenchActionItem({
   const [pending, startTransition] = useTransition();
   const [expand, setExpand] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
 
   const spec = getActionSpec(action.action_type);
   const dDays = action.due_date ? differenceInCalendarDays(parseISO(action.due_date), new Date()) : null;
+  const isConfirmCase = action.action_type === 'confirm_new_case';
 
   const setStatus = (s: ActionStatus) => {
     setErr(null);
@@ -41,12 +44,19 @@ export function WorkbenchActionItem({
     action.priority === 3 ? 'border-l-blue-500' :
     'border-l-zinc-300';
 
+  const bgClass = isConfirmCase
+    ? 'bg-gradient-to-r from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-2 border-amber-300 dark:border-amber-900/50'
+    : `bg-white dark:bg-zinc-900 border-l-4 ${priorityBorder}`;
+
   return (
-    <div className={`bg-white dark:bg-zinc-900 rounded border-l-4 ${priorityBorder} p-2 shadow-sm`}>
+    <div className={`rounded p-2 shadow-sm ${bgClass}`}>
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs font-medium">{action.title}</span>
+            {isConfirmCase && <span className="text-base">🔔</span>}
+            <span className={`text-xs font-medium ${isConfirmCase ? 'text-amber-900 dark:text-amber-300' : ''}`}>
+              {action.title}
+            </span>
             {spec && <span className="text-[10px] text-zinc-500">· {spec.label}</span>}
           </div>
           <div className="text-[10px] text-zinc-500 mt-0.5 flex gap-1.5 flex-wrap">
@@ -65,13 +75,22 @@ export function WorkbenchActionItem({
           </div>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
-          <button
-            onClick={() => setStatus('done')}
-            disabled={pending}
-            className="text-[10px] px-2 py-0.5 rounded bg-emerald-600 text-white disabled:opacity-40"
-          >
-            ✓ 완료
-          </button>
+          {isConfirmCase ? (
+            <button
+              onClick={() => setConfirmModalOpen(true)}
+              className="text-xs px-3 py-1 rounded bg-amber-600 text-white font-medium"
+            >
+              🔔 컨펌 →
+            </button>
+          ) : (
+            <button
+              onClick={() => setStatus('done')}
+              disabled={pending}
+              className="text-[10px] px-2 py-0.5 rounded bg-emerald-600 text-white disabled:opacity-40"
+            >
+              ✓ 완료
+            </button>
+          )}
           <button
             onClick={() => setExpand((v) => !v)}
             className="text-[10px] text-zinc-500 hover:text-zinc-900 dark:hover:text-zinc-100"
@@ -80,6 +99,15 @@ export function WorkbenchActionItem({
           </button>
         </div>
       </div>
+
+      {confirmModalOpen && isConfirmCase && (
+        <ConfirmCaseModal
+          actionId={action.id}
+          caseId={action.subject_id}
+          clientName={caseClientName ?? '—'}
+          onClose={() => setConfirmModalOpen(false)}
+        />
+      )}
 
       {expand && (
         <div className="mt-2 pt-2 border-t border-zinc-100 dark:border-zinc-800 space-y-2">
