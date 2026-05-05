@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>콘텐츠 작성 — LawOS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="lawos_styles.css" />
+<style>
+  .writer-shell {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .editor-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px 28px;
+    min-height: 600px;
+  }
+  .editor-meta {
+    display: flex; gap: 12px; align-items: center;
+    margin-bottom: 16px; padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px; color: var(--text-3);
+  }
+  .editor-meta-pill {
+    padding: 3px 8px;
+    background: var(--surface-2);
+    border-radius: 4px;
+    color: var(--text-2);
+  }
+  .format-select {
+    padding: 4px 10px;
+    background: var(--surface-2);
+    border-radius: 4px;
+    border: none;
+    font-size: 12px;
+    font-family: inherit;
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .editor-title {
+    font-size: 26px; font-weight: 600;
+    letter-spacing: -0.025em; line-height: 1.3;
+    border: none; outline: none;
+    width: 100%;
+    padding: 4px 0;
+    margin-bottom: 16px;
+    background: transparent;
+    font-family: inherit;
+    color: var(--text);
+  }
+  .editor-title::placeholder { color: var(--text-3); }
+
+  .editor-body {
+    font-size: 15px; line-height: 1.8;
+  }
+  .editor-h2 {
+    font-size: 19px; font-weight: 600;
+    margin: 28px 0 12px;
+    letter-spacing: -0.015em;
+  }
+  .editor-blank {
+    background: var(--surface-2);
+    border: 1px dashed var(--border-2);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    color: var(--text-3);
+    font-size: 14px;
+    margin: 12px 0;
+    cursor: pointer;
+  }
+  .editor-blank:hover { border-color: var(--text-3); }
+  .editor-text {
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .editor-faq {
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin: 20px 0;
+  }
+  .editor-faq-q {
+    font-size: 14px; font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .editor-faq-a {
+    font-size: 13px; color: var(--text-2);
+    line-height: 1.6;
+  }
+
+  .side-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+    position: sticky;
+    top: 20px;
+    display: flex; flex-direction: column; gap: 18px;
+  }
+  .panel-section h4 {
+    font-size: 11px; font-weight: 500;
+    color: var(--text-3);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .ai-slider-row {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 8px;
+  }
+  .ai-slider {
+    flex: 1;
+    -webkit-appearance: none; appearance: none;
+    height: 4px; border-radius: 2px;
+    background: var(--border);
+    outline: none;
+  }
+  .ai-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--text);
+    cursor: pointer;
+  }
+  .ai-slider-value {
+    font-size: 14px; font-weight: 600;
+    min-width: 40px; text-align: right;
+  }
+
+  .score-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0;
+    font-size: 13px;
+  }
+  .score-row + .score-row { border-top: 1px solid var(--border); }
+  .score-bar {
+    flex: 1; height: 6px; margin: 0 12px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+  }
+  .score-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+  .score-good { background: #10B981; }
+  .score-warn { background: #F59E0B; }
+  .score-bad { background: #EF4444; }
+
+  .check-row {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 6px 0;
+    font-size: 13px;
+  }
+  .check-icon {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600;
+    margin-top: 1px;
+  }
+  .check-ok { background: var(--success-bg); color: var(--success-fg); }
+  .check-warn { background: var(--warn-bg); color: var(--warn-fg); }
+  .check-bad { background: var(--danger-bg); color: var(--danger-fg); }
+  .check-pending { background: var(--surface-2); color: var(--text-3); }
+
+  .ad-detail {
+    background: var(--warn-bg);
+    color: var(--warn-fg);
+    padding: 10px 12px;
+    border-radius: var(--radius);
+    font-size: 12px;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  .publish-row {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;
+    margin-bottom: 12px;
+  }
+  .channel-check {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 10px;
+    background: var(--surface-2);
+    border-radius: 5px;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .channel-check.checked {
+    background: var(--text);
+    color: #fff;
+  }
+
+  .delegate-card {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+  }
+  .delegate-text {
+    font-size: 12px; color: var(--warn-fg);
+    margin-bottom: 8px; line-height: 1.5;
+  }
+  .delegate-btn {
+    width: 100%;
+    padding: 8px 12px;
+    background: var(--warn-fg);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  @media (max-width: 1100px) {
+    .writer-shell { grid-template-columns: 1fr; }
+    .side-panel { position: static; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-logo">L</div>
+    <div class="brand-name">LawOS</div>
+  </div>
+  <a href="lawos_v0_dashboard.html"><div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+    대시보드
+  </div></a>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+    신뢰자산
+  </div>
+  <a href="lawos_agents.html"><div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+    사무장
+    <span class="badge">16</span>
+  </div></a>
+  <div class="nav-item active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+    콘텐츠
+  </div>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/></svg>
+    모델 마켓
+  </div>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/></svg>
+    행정
+  </div>
+
+  <div class="nav-section">콘텐츠 큐</div>
+  <div class="channel-list">
+    <div class="channel-row">아이디어 4</div>
+    <div class="channel-row">작성중 2</div>
+    <div class="channel-row">검토 대기 1</div>
+    <div class="channel-row">발행 예정 3</div>
+    <div class="channel-row">발행 완료 8</div>
+  </div>
+</aside>
+
+<main class="main">
+
+  <div class="topbar">
+    <div>
+      <div class="crumb">welcome 법률사무소 / 콘텐츠 / 작성</div>
+      <h1>콘텐츠 작성</h1>
+      <div class="sub">트렌드 토픽 · 전세사기 처벌강화법 · 사례분석형 포맷 · 김마케터 작성 → 양변호사 검토</div>
+    </div>
+    <div style="display: flex; gap: 8px;">
+      <button class="btn-secondary">임시 저장</button>
+      <button class="btn">검토 요청</button>
+    </div>
+  </div>
+
+  <div class="writer-shell">
+
+    <div class="editor-card">
+      <div class="editor-meta">
+        <span>포맷:</span>
+        <select class="format-select">
+          <option>사례분석형</option>
+          <option>Q&A형</option>
+          <option>체크리스트형</option>
+          <option>비교·분류형</option>
+          <option>타임라인형</option>
+        </select>
+        <span class="editor-meta-pill">개인회생·임대차</span>
+        <span class="editor-meta-pill">2,340자</span>
+        <span style="margin-left: auto;">자동 저장 · 방금 전</span>
+      </div>
+
+      <input class="editor-title" value="전세사기 처벌강화법 통과 — 세입자가 알아야 할 5가지" placeholder="제목을 입력하세요" />
+
+      <div class="editor-body">
+        <div class="editor-h2">1. 무엇이 바뀌었나</div>
+        <div class="editor-text">2026년 4월 국회 본회의를 통과한 전세사기 처벌강화법은 임대인의 보증금 반환 의무 위반에 대한 처벌을 대폭 강화했습니다. 종전 7년 이하 징역에서 10년 이하로 상향되었으며, 피해 규모에 따른 가중처벌 조항이 신설되었습니다.</div>
+
+        <div class="editor-h2">2. 사례: 김OO 씨의 경우</div>
+        <div class="editor-blank">+ 사무실 사례 1개 추가하기 (변호사 본인 경험 — EEAT 강화)</div>
+
+        <div class="editor-h2">3. 핵심 쟁점 3가지</div>
+        <div class="editor-text">개정법의 적용 시점, 보증보험 가입 의무화 범위, 그리고 피해자의 우선변제권 강화가 가장 큰 쟁점입니다.</div>
+
+        <div class="editor-h2">4. 적용 판례</div>
+        <div class="editor-blank">+ 판례 번호 추가 (대법원 2024다XXXXXX 형식)</div>
+
+        <div class="editor-h2">5. 변호사 조언</div>
+        <div class="editor-blank">+ 본인 의견·경험 추가</div>
+
+        <div class="editor-faq">
+          <div class="editor-faq-q">Q. 개정 전에 발생한 사건도 강화된 처벌을 받나요?</div>
+          <div class="editor-faq-a">소급 적용되지 않습니다. 시행일 이후 발생한 사건부터 적용됩니다.</div>
+        </div>
+
+        <div class="editor-faq">
+          <div class="editor-faq-q">Q. 보증금을 못 받았을 때 가장 먼저 해야 할 일은?</div>
+          <div class="editor-faq-a">계약서·임대인 연락 기록을 확보하고, 변호사 상담 후 임차권등기명령부터 신청하는 것이 일반적입니다.</div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="side-panel">
+
+      <div class="panel-section">
+        <h4>AI 비율</h4>
+        <div class="ai-slider-row">
+          <input type="range" class="ai-slider" min="0" max="100" value="60" step="10" id="aiSlider" oninput="updateAi()" />
+          <div class="ai-slider-value" id="aiVal">60%</div>
+        </div>
+        <div style="font-size: 11px; color: var(--text-3); line-height: 1.5;">권장 40~60%. 골격은 AI, 사례·판례·의견은 변호사 본인.</div>
+      </div>
+
+      <div class="panel-section">
+        <h4>SEO 점수 <span style="float: right; font-weight: 600; color: var(--text);">78</span></h4>
+        <div class="score-row">
+          <span style="color: var(--text-2); font-size: 12px;">키워드 커버리지</span>
+          <div class="score-bar"><div class="score-bar-fill score-good" style="width: 88%;"></div></div>
+          <span style="font-size: 12px; min-width: 24px; text-align: right;">88</span>
+        </div>
+        <div class="score-row">
+          <span style="color: var(--text-2); font-size: 12px;">H2 구조 (4/5)</span>
+          <div class="score-bar"><div class="score-bar-fill score-warn" style="width: 80%;"></div></div>
+          <span style="font-size: 12px; min-width: 24px; text-align: right;">80</span>
+        </div>
+        <div class="score-row">
+          <span style="color: var(--text-2); font-size: 12px;">내부 링크 (1/3)</span>
+          <div class="score-bar"><div class="score-bar-fill score-warn" style="width: 33%;"></div></div>
+          <span style="font-size: 12px; min-width: 24px; text-align: right;">33</span>
+        </div>
+        <div class="score-row">
+          <span style="color: var(--text-2); font-size: 12px;">FAQ 섹션</span>
+          <div class="score-bar"><div class="score-bar-fill score-good" style="width: 100%;"></div></div>
+          <span style="font-size: 12px; min-width: 24px; text-align: right;">✓</span>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h4>AI 탐지 점수 <span style="float: right; font-weight: 600; color: var(--warn-fg);">42</span></h4>
+        <div class="check-row">
+          <div class="check-icon check-warn">!</div>
+          <div>문장 길이 균일 → 분산 권장</div>
+        </div>
+        <div class="check-row">
+          <div class="check-icon check-bad">×</div>
+          <div>1인칭 경험 0건 (사례 추가 필요)</div>
+        </div>
+        <div class="check-row">
+          <div class="check-icon check-bad">×</div>
+          <div>판례 인용 0건</div>
+        </div>
+        <div style="margin-top: 8px;">
+          <button class="btn-secondary" style="width: 100%;">인간화 패스 자동 적용</button>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h4>변협 광고규정 검증</h4>
+        <div class="check-row">
+          <div class="check-icon check-ok">✓</div>
+          <div>§23 광고 일반 — 통과</div>
+        </div>
+        <div class="check-row">
+          <div class="check-icon check-ok">✓</div>
+          <div>§31 전관·과장 — 통과</div>
+        </div>
+        <div class="check-row">
+          <div class="check-icon check-warn">!</div>
+          <div>§34 비교광고 — "최고" 표현 2회</div>
+        </div>
+        <div class="ad-detail">
+          "처벌이 최고 10년" → "처벌이 10년 이하로 상향" 권장. 자동 수정 적용 가능.
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h4>발행 체크리스트</h4>
+        <div class="check-row">
+          <div class="check-icon check-bad">×</div>
+          <div>사례 1개 이상 (현재 0)</div>
+        </div>
+        <div class="check-row">
+          <div class="check-icon check-bad">×</div>
+          <div>판례 번호 명시 (현재 0)</div>
+        </div>
+        <div class="check-row">
+          <div class="check-icon check-warn">!</div>
+          <div>AI 탐지 &lt; 30 (현재 42)</div>
+        </div>
+        <div class="check-row">
+          <div class="check-icon check-warn">!</div>
+          <div>변협 검증 통과 (1건 수정 필요)</div>
+        </div>
+        <div class="check-row">
+          <div class="check-icon check-ok">✓</div>
+          <div>SEO 점수 &gt; 70 (78)</div>
+        </div>
+        <div class="check-row">
+          <div class="check-icon check-pending">−</div>
+          <div>변호사 검수 (양변호사 대기)</div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h4>발행 채널 <span class="pill-lock" style="float: right; font-weight: 500;"><svg class="lock-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>활성화</span></h4>
+        <div class="publish-row">
+          <div class="channel-check checked" onclick="this.classList.toggle('checked')">홈페이지 ✓</div>
+          <div class="channel-check checked" onclick="this.classList.toggle('checked')">네이버블로그 ✓</div>
+          <div class="channel-check" onclick="this.classList.toggle('checked')">티스토리</div>
+          <div class="channel-check" onclick="this.classList.toggle('checked')">미디엄</div>
+        </div>
+        <div style="font-size: 11px; color: var(--text-3); margin-bottom: 8px;">쇼츠 자동 추출:</div>
+        <div class="publish-row">
+          <div class="channel-check" onclick="this.classList.toggle('checked')">60초 쇼츠</div>
+          <div class="channel-check" onclick="this.classList.toggle('checked')">30초 쇼츠</div>
+        </div>
+      </div>
+
+      <div class="panel-section">
+        <h4>위임</h4>
+        <div class="delegate-card">
+          <div class="delegate-text">시간 부족하시면 이작가에게 위임. 변호사 검수 후 발행. 건당 5만~30만.</div>
+          <button class="delegate-btn" onclick="window.location.href='lawos_agents.html'">이작가에게 위임</button>
+        </div>
+      </div>
+
+    </aside>
+
+  </div>
+
+</main>
+</div>
+
+<script>
+function updateAi() {
+  var v = document.getElementById('aiSlider').value;
+  document.getElementById('aiVal').textContent = v + '%';
+}
+</script>
+
+</body>
+</html>

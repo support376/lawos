@@ -1,0 +1,2432 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LawOS</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #FAFAFA;
+  --surface: #FFFFFF;
+  --surface-2: #F4F4F5;
+  --border: #E4E4E7;
+  --border-2: #D4D4D8;
+  --text: #18181B;
+  --text-2: #52525B;
+  --text-3: #A1A1AA;
+  --warn-bg: #FEF3C7;
+  --warn-fg: #92400E;
+  --warn-border: #FDE68A;
+  --danger-bg: #FEE2E2;
+  --danger-fg: #991B1B;
+  --success-bg: #D1FAE5;
+  --success-fg: #065F46;
+  --info-bg: #DBEAFE;
+  --info-fg: #1E40AF;
+  --r: 8px;
+  --rl: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard Variable", Pretendard, system-ui, "Segoe UI", "Malgun Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+}
+.shell { display: grid; grid-template-columns: 200px 1fr; min-height: 100vh; }
+@media (max-width: 700px) {
+  .shell { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+}
+
+.sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 14px 10px;
+  display: flex; flex-direction: column;
+  gap: 2px;
+}
+.sidebar-brand {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 8px 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 10px;
+}
+.sidebar-site {
+  margin: 0 0 10px;
+  padding: 9px 10px;
+  background: var(--surface-2);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex; align-items: center; gap: 6px;
+  position: relative;
+}
+.sidebar-site:hover { background: var(--border); }
+.site-name { font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.site-chev { width: 12px; height: 12px; color: var(--text-3); flex-shrink: 0; }
+
+.sidebar-nav-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  color: var(--text-2);
+  font-size: 13px;
+  cursor: pointer;
+  user-select: none;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+}
+.sidebar-nav-item:hover { background: var(--surface-2); color: var(--text); }
+.sidebar-nav-item.active { background: var(--surface-2); color: var(--text); font-weight: 500; }
+.sidebar-nav-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+
+.sidebar-section {
+  font-size: 10px; color: var(--text-3);
+  padding: 14px 10px 6px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.sidebar-tag {
+  font-size: 11px; color: var(--text-2);
+  padding: 4px 10px;
+}
+
+.sidebar-bottom {
+  margin-top: auto;
+  padding: 10px;
+  border-top: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--text-3);
+  display: flex; gap: 6px;
+}
+
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+@media (max-width: 700px) {
+  .topbar { padding: 10px 12px; gap: 8px; }
+  .main { padding: 14px !important; }
+  .h1 { font-size: 18px !important; }
+}
+.brand { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.brand-logo {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: var(--text); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 12px;
+}
+.brand-name { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+.brand-meta { font-size: 11px; color: var(--text-3); margin-left: 6px; }
+
+.topnav {
+  display: flex; gap: 2px;
+  background: var(--surface-2);
+  padding: 3px;
+  border-radius: var(--r);
+  flex-wrap: wrap;
+}
+.topnav button {
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-2);
+  cursor: pointer;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.topnav button:hover { color: var(--text); }
+.topnav button.active {
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+.user-pill {
+  display: flex; align-items: center; gap: 8px;
+  padding: 5px 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.guest-banner {
+  background: var(--info-bg);
+  color: var(--info-fg);
+  padding: 10px 16px;
+  margin: 16px 20px 0;
+  border-radius: var(--r);
+  font-size: 12px;
+  display: flex; align-items: center; gap: 10px;
+  line-height: 1.5;
+}
+.guest-banner strong { font-weight: 600; }
+.guest-banner-action {
+  margin-left: auto;
+  padding: 5px 10px;
+  background: var(--info-fg);
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+.main { padding: 20px; flex: 1; }
+
+.view { display: none; }
+.view.active { display: block; }
+
+.h1 {
+  font-size: 20px; font-weight: 600;
+  letter-spacing: -0.02em; line-height: 1.2;
+  margin-bottom: 4px;
+}
+.sub { font-size: 12px; color: var(--text-2); margin-bottom: 18px; }
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.kpi-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  padding: 14px 16px;
+}
+.kpi-label { font-size: 11px; color: var(--text-2); margin-bottom: 4px; }
+.kpi-value { font-size: 22px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; }
+.kpi-delta { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+.delta-up { color: #10B981; }
+.delta-down { color: #EF4444; }
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+@media (max-width: 700px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  padding: 14px 16px;
+}
+.card h3 {
+  font-size: 12px; font-weight: 500;
+  margin-bottom: 10px;
+  display: flex; align-items: center;
+  gap: 8px;
+}
+.row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 0;
+  font-size: 13px;
+}
+.row + .row { border-top: 1px solid var(--border); }
+.row-meta { color: var(--text-3); font-size: 11px; }
+.row-meta.up { color: #10B981; }
+.row-meta.down { color: #EF4444; }
+
+.pill {
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+.pill-demo { background: var(--surface-2); color: var(--text-2); }
+.pill-mine { background: var(--success-bg); color: var(--success-fg); }
+.pill-lock { background: var(--warn-bg); color: var(--warn-fg); }
+
+.btn {
+  padding: 8px 14px;
+  background: var(--text); color: #fff;
+  border: none; border-radius: 6px;
+  font-family: inherit; font-size: 13px;
+  font-weight: 500; cursor: pointer;
+}
+.btn:hover { opacity: 0.9; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-2 {
+  padding: 5px 10px;
+  background: var(--surface-2); color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font-family: inherit; font-size: 11px;
+  cursor: pointer;
+}
+.btn-2:hover { background: var(--border); }
+.btn-warn {
+  padding: 5px 10px;
+  background: var(--warn-bg); color: var(--warn-fg);
+  border: 1px solid var(--warn-border);
+  border-radius: 5px;
+  font-family: inherit; font-size: 11px;
+  font-weight: 500; cursor: pointer;
+}
+.btn-warn:hover { background: #FDE68A; }
+
+.input {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--text);
+}
+.input:focus { outline: none; border-color: var(--text); }
+.input::placeholder { color: var(--text-3); }
+textarea.input { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+.dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+.d-ok { background: #10B981; }
+.d-warn { background: #F59E0B; }
+.d-bad { background: #EF4444; }
+.d-off { background: var(--border-2); }
+
+.action-q {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  padding: 14px 16px;
+}
+.act-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0;
+  font-size: 13px;
+}
+.act-row + .act-row { border-top: 1px solid var(--border); }
+.act-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--surface-2); color: var(--text-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 500;
+  flex-shrink: 0;
+}
+.act-text { flex: 1; line-height: 1.45; }
+
+.guide-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+.guide-head { display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center; }
+.guide-head .meta { font-size: 11px; color: var(--text-3); }
+.guide-bar { width: 100px; height: 5px; background: var(--surface-2); border-radius: 3px; overflow: hidden; }
+.guide-bar-fill { height: 100%; background: var(--success-fg); }
+.guide-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.guide-step {
+  padding: 9px 10px;
+  background: var(--surface-2);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.guide-step.done { background: var(--success-bg); }
+.guide-step.done .label { color: var(--success-fg); }
+.guide-step.next .label { color: var(--info-fg); }
+.guide-step .label { font-size: 10px; margin-bottom: 2px; font-weight: 500; }
+.guide-step .name { font-size: 11px; font-weight: 500; }
+@media (max-width: 600px) {
+  .guide-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.diagnose-form {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  padding: 16px;
+  margin-bottom: 16px;
+}
+.diagnose-form-row { display: flex; gap: 8px; }
+.diagnose-form-row .input { flex: 1; }
+
+.diagnose-result {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  padding: 16px;
+  margin-bottom: 16px;
+  display: none;
+  white-space: pre-wrap;
+  font-size: 13px;
+  line-height: 1.7;
+  font-family: inherit;
+}
+.diagnose-result.shown { display: block; }
+.diagnose-loading {
+  display: none;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  margin-bottom: 16px;
+}
+.diagnose-loading.shown { display: block; }
+.loading-bar {
+  height: 4px; background: var(--surface-2);
+  border-radius: 2px; overflow: hidden; margin: 8px 0;
+}
+.loading-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--text), var(--text-2), var(--text));
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  width: 100%;
+}
+@keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+.loading-steps { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); }
+@keyframes dots {
+  0% { content: ''; }
+  25% { content: '.'; }
+  50% { content: '..'; }
+  75% { content: '...'; }
+}
+
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+.agent-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.agent-head { display: flex; align-items: center; gap: 10px; }
+.agent-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--surface-2); color: var(--text-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; flex-shrink: 0;
+}
+.agent-name { font-size: 13px; font-weight: 500; line-height: 1.2; }
+.agent-role { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+.agent-desc { font-size: 11px; color: var(--text-2); line-height: 1.5; }
+.agent-meta {
+  display: flex; justify-content: space-between;
+  font-size: 10px; color: var(--text-3);
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.agent-action {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.agent-price { font-size: 11px; font-weight: 500; }
+
+.modal-bg {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 10;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.modal-bg.shown { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: var(--rl);
+  padding: 24px;
+  max-width: 380px;
+  width: 100%;
+}
+.modal h3 { font-size: 17px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px; }
+.modal p { font-size: 12px; color: var(--text-2); margin-bottom: 16px; line-height: 1.5; }
+.modal .input { margin-bottom: 8px; }
+.modal .btn { width: 100%; padding: 10px; margin-bottom: 8px; }
+.modal-actions { display: flex; gap: 8px; }
+.modal-divider {
+  display: flex; align-items: center; gap: 10px;
+  margin: 12px 0;
+  font-size: 10px; color: var(--text-3);
+}
+.modal-divider::before, .modal-divider::after {
+  content: ""; flex: 1; height: 1px; background: var(--border);
+}
+.modal .skip {
+  text-align: center; margin-top: 10px;
+  font-size: 11px; color: var(--text-3);
+  cursor: pointer;
+}
+
+.ad-result {
+  margin-top: 12px;
+  padding: 12px 14px;
+  background: var(--surface-2);
+  border-radius: var(--r);
+  font-size: 12px;
+  line-height: 1.6;
+  display: none;
+  white-space: pre-wrap;
+}
+.ad-result.shown { display: block; }
+
+.writer-shell {
+  display: grid;
+  grid-template-columns: 1fr 240px;
+  gap: 12px;
+}
+@media (max-width: 800px) {
+  .writer-shell { grid-template-columns: 1fr; }
+}
+.writer-side {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.writer-side h4 {
+  font-size: 10px; font-weight: 500;
+  color: var(--text-3);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.score-row { display: flex; align-items: center; gap: 8px; font-size: 11px; padding: 4px 0; }
+.score-row .bar { flex: 1; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.score-row .bar-fill { height: 100%; }
+.bar-good { background: #10B981; }
+.bar-warn { background: #F59E0B; }
+.bar-bad { background: #EF4444; }
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  padding: 11px 20px;
+  background: var(--text); color: #fff;
+  border-radius: var(--r);
+  font-size: 12px;
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.shown { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #10B981; }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">L</div>
+    <div class="brand-name">LawOS</div>
+  </div>
+
+  <div class="sidebar-site" onclick="toggleSiteMenu()">
+    <div class="site-name" id="siteLabel">welcome-law.kr</div>
+    <svg class="site-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+    <div id="siteMenu" style="display:none; position: absolute; top: 38px; left: 0; right: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--r); padding: 6px; z-index: 5; box-shadow: 0 4px 12px rgba(0,0,0,0.06);">
+      <div onclick="event.stopPropagation(); selectSite('welcome-law.kr', 'welcome 법률사무소')" style="padding: 8px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;"><strong>welcome 법률사무소</strong><div style="font-size: 10px; color: var(--text-3);">welcome-law.kr</div></div>
+      <div onclick="event.stopPropagation(); selectSite('kim-law.com', '김변호사 사무소')" style="padding: 8px 10px; border-radius: 5px; cursor: pointer; font-size: 12px;"><strong>김변호사 사무소</strong><div style="font-size: 10px; color: var(--text-3);">kim-law.com</div></div>
+      <div onclick="event.stopPropagation(); openSignup('새 사이트 추가')" style="padding: 8px 10px; border-radius: 5px; cursor: pointer; font-size: 11px; color: var(--text-2); border-top: 1px solid var(--border); margin-top: 4px; padding-top: 10px;">+ 새 사이트 추가</div>
+    </div>
+  </div>
+
+  <button class="sidebar-nav-item active" data-view="dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+    대시보드
+  </button>
+  <button class="sidebar-nav-item" data-view="alerts">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+    알림 센터
+    <span style="margin-left: auto; font-size: 10px; padding: 1px 6px; background: var(--danger-bg); color: var(--danger-fg); border-radius: 4px; font-weight: 500;">5</span>
+  </button>
+
+  <div class="sidebar-section">성과 관리</div>
+  <button class="sidebar-nav-item" data-view="websites">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+    웹사이트 성과
+  </button>
+  <button class="sidebar-nav-item" data-view="sns">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+    SNS 성과
+  </button>
+  <button class="sidebar-nav-item" data-view="calls">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.37 1.9.72 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.35 1.85.59 2.81.72A2 2 0 0 1 22 16.92z"/></svg>
+    콜·전화
+  </button>
+  <button class="sidebar-nav-item" data-view="inbox">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+    인입 통합
+  </button>
+  <button class="sidebar-nav-item" data-view="qualify">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    리드 자격검증
+    <span style="margin-left: auto; font-size: 9px; padding: 1px 5px; background: var(--success-bg); color: var(--success-fg); border-radius: 4px; font-weight: 500;">NEW</span>
+  </button>
+  <button class="sidebar-nav-item" data-view="keywords">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    키워드 추적
+  </button>
+  <button class="sidebar-nav-item" data-view="feed">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>
+    컨텐츠 피드
+  </button>
+  <button class="sidebar-nav-item" data-view="writer">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+    콘텐츠 작성
+  </button>
+  <button class="sidebar-nav-item" data-view="review">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    검수 큐
+  </button>
+
+  <div class="sidebar-section">마켓 — 다 살 수 있다</div>
+  <button class="sidebar-nav-item" data-view="agents">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+    Agent 마켓
+  </button>
+  <button class="sidebar-nav-item" data-view="models">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+    사업모델 마켓
+  </button>
+  <button class="sidebar-nav-item" data-view="bpo">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    BPO·대행 마켓
+  </button>
+
+  <div class="sidebar-section">운영 (외부 시스템)</div>
+  <button class="sidebar-nav-item" data-view="ops">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    업무 워크플로우 →
+  </button>
+
+  <div class="sidebar-section">설정</div>
+  <button class="sidebar-nav-item" data-view="diagnose">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    사이트 진단
+  </button>
+  <button class="sidebar-nav-item" data-view="billing">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    플랜·결제
+  </button>
+  <button class="sidebar-nav-item" data-view="settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    설정
+  </button>
+
+  <div class="sidebar-section">누적 자산</div>
+  <div class="sidebar-tag">키워드 <span id="sbKw">0/5</span></div>
+  <div class="sidebar-tag">채널 <span id="sbCh">0개</span></div>
+  <div class="sidebar-tag">작성 <span id="sbCt">0건</span></div>
+  <div class="sidebar-tag">신청 <span id="sbReq">0건</span></div>
+
+  <div class="sidebar-bottom">
+    <button class="btn-2" onclick="exportData()" style="flex:1;" title="JSON 내보내기">⤓ 내보내기</button>
+    <button class="btn-2" onclick="resetData()" title="초기화">⟲</button>
+  </div>
+</aside>
+
+<div style="display: flex; flex-direction: column; min-width: 0;">
+<div class="topbar">
+  <div style="font-size: 12px; color: var(--text-3);" id="topbarCrumb">welcome 법률사무소 / 대시보드</div>
+  <div class="user-pill" id="userPill" onclick="openSignup('로그인')" style="cursor: pointer;">
+    <span class="dot d-warn"></span>
+    <span id="userText">비로그인</span>
+  </div>
+</div>
+
+<div class="guest-banner" id="guestBanner">
+  <span>ℹ</span>
+  <div><strong>비로그인 모드</strong> · 데이터는 브라우저에 임시 저장. 가입은 결과 영구 저장·사무장 활성화 시.</div>
+  <button class="guest-banner-action" onclick="openSignup('결과 저장')">결과 저장</button>
+</div>
+
+<main class="main">
+
+<!-- DASHBOARD -->
+<section class="view active" data-view="dashboard">
+  <h1 class="h1">이번 주 점검</h1>
+  <p class="sub">2026.05.04 — 5.10 · 점검할 것 5개</p>
+
+  <div class="card" style="margin-bottom: 18px;">
+    <h3>등록 사이트 점수 비교 <span class="pill pill-mine" id="siteCount">0개</span><button class="btn-2" style="margin-left: auto;" onclick="openSignup('새 사이트 추가')">+ 새 사이트</button></h3>
+    <div id="siteCompare" style="display: grid; gap: 8px;"></div>
+  </div>
+
+  <div class="guide-card">
+    <div class="guide-head">
+      <div>
+        <div style="font-size: 13px; font-weight: 500;">사무실 OS 셋업 — 5단계</div>
+        <div class="meta" id="guideMeta">1 / 5 완료</div>
+      </div>
+      <div class="guide-bar"><div class="guide-bar-fill" id="guideBar" style="width: 20%;"></div></div>
+    </div>
+    <div class="guide-grid">
+      <div class="guide-step done">
+        <div class="label">✓ 완료</div>
+        <div class="name">사이트 진단</div>
+      </div>
+      <div class="guide-step next" onclick="openSignup('가입')">
+        <div class="label">→ 다음</div>
+        <div class="name">가입 30초</div>
+      </div>
+      <div class="guide-step" onclick="goView('diagnose')">
+        <div class="label">대기</div>
+        <div class="name">채널 연결</div>
+      </div>
+      <div class="guide-step" onclick="openSignup('키워드')">
+        <div class="label">대기</div>
+        <div class="name">키워드 등록</div>
+      </div>
+      <div class="guide-step" onclick="goView('writer')">
+        <div class="label">대기</div>
+        <div class="name">첫 콘텐츠</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+    <div style="font-size: 12px; color: var(--text-2);">이번 주 KPI <span class="pill pill-demo">데모</span></div>
+    <button class="btn-2" onclick="openSignup('내 사이트 추적')">내 데이터로 바꾸기</button>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">사이트 헬스</div>
+      <div class="kpi-value">87</div>
+      <div class="kpi-delta delta-up">▲ 3 vs 지난주</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">광고 ROAS</div>
+      <div class="kpi-value">2.4x</div>
+      <div class="kpi-delta delta-up">▲ 잡콜 64%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">이번주 인입</div>
+      <div class="kpi-value">47</div>
+      <div class="kpi-delta">진성 17 · 미응답 5</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">GEO 인용</div>
+      <div class="kpi-value">8</div>
+      <div class="kpi-delta delta-up">ChatGPT 5</div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h3>트렌드 토픽 <span class="pill pill-mine">내 영역</span><button class="btn-2" style="margin-left: auto;" onclick="goView('feed')">전체 피드 →</button></h3>
+      <div id="trendMini"></div>
+    </div>
+    <div class="card">
+      <h3>채널 점검 <span class="pill pill-demo">데모</span></h3>
+      <div class="row"><div><span class="dot d-ok"></span> 홈페이지</div><div class="row-meta">정상</div></div>
+      <div class="row"><div><span class="dot d-bad"></span> 네이버 블로그</div><div class="row-meta down">7일 발행 X</div></div>
+      <div class="row"><div><span class="dot d-ok"></span> 인스타</div><div class="row-meta">@welcome_law</div></div>
+      <div class="row"><div><span class="dot d-warn"></span> 유튜브</div><div class="row-meta down">3주 X</div></div>
+      <div class="row"><div><span class="dot d-off"></span> 카카오 채널</div><div class="row-meta">미연결</div></div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h3>추적 키워드 <span class="pill pill-mine" id="kwCount">0/5</span><button class="btn-2" style="margin-left: auto; font-size: 10px;" onclick="sortKeywords()">검색량 순 정렬</button></h3>
+      <div id="kwList" style="margin-bottom: 8px;"></div>
+      <div style="display: flex; gap: 6px;">
+        <input class="input" id="kwInput" placeholder="예: 개인회생 변호사 서초" style="font-size: 12px; padding: 7px 10px;" />
+        <button class="btn-2" onclick="addKeyword()">추가</button>
+      </div>
+      <div style="font-size: 10px; color: var(--text-3); margin-top: 6px;">매일 자동 순위 측정 (가입 후) · Free 5개 한도</div>
+    </div>
+    <div class="card">
+      <h3>채널 등록 <span class="pill pill-mine" id="chCount">0개</span></h3>
+      <div id="chList" style="margin-bottom: 8px;"></div>
+      <div style="display: flex; gap: 6px;">
+        <select class="input" id="chType" style="font-size: 12px; padding: 7px 10px; flex: 0 0 90px;">
+          <option>홈페이지</option>
+          <option>네이버블로그</option>
+          <option>유튜브</option>
+          <option>인스타</option>
+          <option>카카오채널</option>
+        </select>
+        <input class="input" id="chUrl" placeholder="URL 또는 계정" style="font-size: 12px; padding: 7px 10px;" />
+        <button class="btn-2" onclick="addChannel()">등록</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h3>콘텐츠 큐 <span class="pill pill-mine" id="ctCount">0건</span></h3>
+      <div id="ctMini" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 8px;"></div>
+      <button class="btn-2" onclick="goView('writer')" style="width: 100%;">+ 글 작성으로</button>
+    </div>
+    <div class="card">
+      <h3>인입 inbox <span class="pill pill-demo">데모</span></h3>
+      <div id="inboxList"></div>
+    </div>
+  </div>
+
+  <div style="display: flex; align-items: center; justify-content: space-between; margin: 8px 0;">
+    <div style="font-size: 12px; color: var(--text-2);">이번 주 할 일</div>
+  </div>
+  <div class="card" style="margin-bottom: 12px;" id="reviewCard">
+    <h3>변호사 검수 대기 <span class="pill pill-mine" id="reviewCount">0건</span></h3>
+    <div id="reviewList"><div style="font-size: 11px; color: var(--text-3); padding: 6px 0;">대기 중인 검수 없음. 콘텐츠 작성 후 "검수 큐로" 클릭.</div></div>
+  </div>
+
+  <div class="action-q" id="actionQueue"></div>
+</section>
+
+<!-- FEED -->
+<section class="view" data-view="feed">
+  <h1 class="h1">컨텐츠 피드 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">매일 06:00 자동 갱신</span></h1>
+  <p class="sub">법률신문·네이버 뉴스·대법원·구글 트렌드·네이버 카페·블라인드·유튜브 — 우리 영역에 매칭되는 토픽 자동 수집</p>
+
+  <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px;">
+    <button class="btn-2" data-feed="all" onclick="filterFeed('all')" style="background: var(--text); color: #fff; border-color: var(--text);">전체 15</button>
+    <button class="btn-2" data-feed="형사" onclick="filterFeed('형사')">형사 4</button>
+    <button class="btn-2" data-feed="이혼" onclick="filterFeed('이혼')">이혼 2</button>
+    <button class="btn-2" data-feed="회생" onclick="filterFeed('회생')">회생 1</button>
+    <button class="btn-2" data-feed="임대차" onclick="filterFeed('임대차')">임대차 2</button>
+    <button class="btn-2" data-feed="기타" onclick="filterFeed('기타')">기타 6</button>
+  </div>
+
+  <div id="feedList" style="display: grid; gap: 10px;"></div>
+</section>
+
+<!-- DIAGNOSE -->
+<section class="view" data-view="diagnose">
+  <h1 class="h1">사이트 진단</h1>
+  <p class="sub">URL 입력 시 즉시 SEO·EEAT·변협·GEO·콘텐츠 23개 항목 분석</p>
+
+  <div class="diagnose-form">
+    <div class="diagnose-form-row">
+      <input class="input" id="diagnoseUrl" placeholder="https://welcome-law.kr" value="https://welcome-law.kr" />
+      <button class="btn" onclick="runDiagnose()">진단 시작</button>
+    </div>
+    <div style="margin-top: 8px; font-size: 11px; color: var(--text-3);">결과는 임시 저장. 가입 시 영구 저장 + 매일 자동 갱신.</div>
+  </div>
+
+  <div class="diagnose-loading" id="diagnoseLoading">
+    <div style="font-size: 13px; font-weight: 500; margin-bottom: 4px;">분석 중...</div>
+    <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+    <div class="loading-steps">
+      <span>사이트 헬스</span><span>SEO</span><span>변협</span><span>GEO</span><span>콘텐츠</span>
+    </div>
+  </div>
+  <div class="diagnose-result" id="diagnoseResult"></div>
+</section>
+
+<!-- QUALIFY (LEAD QUALIFICATION) -->
+<section class="view" data-view="qualify">
+  <h1 class="h1">리드 자격검증 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">잡콜·진성콜 자동 분리</span></h1>
+  <p class="sub">인입 텍스트·통화 → 룰 + Claude Haiku 분석 → 진성/잡콜 분류 + 사건유형 + 예상 수임금액 + 우선순위 1~5</p>
+
+  <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="kpi-card"><div class="kpi-label">월 분류 (시뮬)</div><div class="kpi-value">142</div><div class="kpi-delta">진성 38 · 잡콜 91 · 보류 13</div></div>
+    <div class="kpi-card"><div class="kpi-label">진성콜 비율</div><div class="kpi-value">26.8%</div><div class="kpi-delta delta-up">▲ 5%p · 시간 절감</div></div>
+    <div class="kpi-card"><div class="kpi-label">평균 예상 수임</div><div class="kpi-value">240만</div><div class="kpi-delta">진성콜 38건 평균</div></div>
+    <div class="kpi-card"><div class="kpi-label">분류 정확도</div><div class="kpi-value">87%</div><div class="kpi-delta">피드백 누적 187건</div></div>
+  </div>
+
+  <div class="card" style="margin-top: 14px;">
+    <h3>자격검증 시뮬레이터 <span class="pill pill-mine">로컬 휴리스틱 + 룰</span></h3>
+    <div style="font-size: 12px; color: var(--text-2); margin-bottom: 10px;">통화 전사 텍스트 또는 챗 문의를 입력 → 즉시 분류·우선순위 산출. 실제 운영 시 Claude Haiku + few-shot 학습으로 정확도 향상.</div>
+    <textarea id="qualifyInput" class="input" rows="4" style="resize: vertical; min-height: 80px; line-height: 1.5; margin-bottom: 8px;" placeholder="예시: '이혼 위자료 좀 받고 싶은데 상대방이 외도해서요. 변호사님 견적 어떻게 되나요?' 또는 '광고 관련 문의입니다 — 사이트 SEO 마케팅 도와드립니다'"></textarea>
+    <button class="btn" onclick="runQualify()">분류 시작</button>
+    <div id="qualifyResult" style="display: none; margin-top: 14px;"></div>
+  </div>
+
+  <div class="two-col" style="margin-top: 14px;">
+    <div class="card">
+      <h3>최근 분류 이력</h3>
+      <div id="qualifyHistory"></div>
+    </div>
+    <div class="card">
+      <h3>룰셋 — 자동 학습</h3>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.7;">
+        <div class="row" style="padding: 5px 0;"><div>잡콜 키워드</div><div class="row-meta">광고·마케팅·홍보·DB</div></div>
+        <div class="row" style="padding: 5px 0;"><div>보이스피싱 패턴</div><div class="row-meta">23개 정규식</div></div>
+        <div class="row" style="padding: 5px 0;"><div>사건유형 분류</div><div class="row-meta">12종 (이혼·회생·형사·임대차 등)</div></div>
+        <div class="row" style="padding: 5px 0;"><div>피드백 누적</div><div class="row-meta">187건 → few-shot 갱신</div></div>
+        <div class="row" style="padding: 5px 0;"><div>case_fee_table</div><div class="row-meta">20 사건유형 p50/p90</div></div>
+      </div>
+      <div style="font-size: 11px; color: var(--text-3); padding-top: 12px; margin-top: 8px; border-top: 1px solid var(--border); line-height: 1.5;">
+        피드백 500건+ 누적 시 사무실 특화 룰셋 자동 생성 (V1 출시).
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 14px; background: var(--surface-2);">
+    <div style="font-size: 13px; font-weight: 500; margin-bottom: 6px;">기술 스펙 — V0 출시 예정 (12~14일 빌드)</div>
+    <div style="font-size: 12px; color: var(--text-2); line-height: 1.7;">
+      <div>최종점수 = 0.4·룰스코어 + 0.6·LLM분류 (Claude Haiku, few-shot 20개)</div>
+      <div>우선순위 = f(예상수임금액, 긴급도, 잔여시효)</div>
+      <div>외부 의존: Claude Haiku · CLOVA Speech (통화 STT) · Twilio webhook</div>
+      <div>월 운영비 (100명 기준 5천 리드): $130</div>
+    </div>
+  </div>
+</section>
+
+<!-- WEBSITES -->
+<section class="view" data-view="websites">
+  <h1 class="h1">웹사이트 성과 관리 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;" id="webCount">4개 사이트</span></h1>
+  <p class="sub">등록한 모든 사이트의 SEO·트래픽·인입·전환을 한 화면에서. 클릭 시 상세 + Agent/대행 위임.</p>
+
+  <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="kpi-card"><div class="kpi-label">전체 인입 (월)</div><div class="kpi-value">187</div><div class="kpi-delta delta-up">▲ 23 vs 지난달</div></div>
+    <div class="kpi-card"><div class="kpi-label">평균 헬스</div><div class="kpi-value">78.5</div><div class="kpi-delta">4개 사이트</div></div>
+    <div class="kpi-card"><div class="kpi-label">총 발행 글</div><div class="kpi-value">142</div><div class="kpi-delta">월간 누적</div></div>
+    <div class="kpi-card"><div class="kpi-label">수임 전환율</div><div class="kpi-value">12.3%</div><div class="kpi-delta delta-up">▲ 1.2%</div></div>
+  </div>
+
+  <div class="card" style="margin-top: 14px;">
+    <h3>사이트별 성과 비교 <button class="btn-2" style="margin-left: auto;" onclick="openSignup('새 웹사이트 등록')">+ 사이트 추가</button></h3>
+    <div id="webList" style="display: grid; gap: 8px;"></div>
+  </div>
+</section>
+
+<!-- SNS -->
+<section class="view" data-view="sns">
+  <h1 class="h1">SNS·플레이스 성과 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">7개 채널</span></h1>
+  <p class="sub">인스타·유튜브·당근·카카오 채널·네이버 플레이스·로톡·블라인드 — 각 채널 점수와 운영 위임</p>
+
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;" id="snsList"></div>
+</section>
+
+<!-- CALLS -->
+<section class="view" data-view="calls">
+  <h1 class="h1">콜·전화 성과 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">월 47통</span></h1>
+  <p class="sub">콜 인입·응대 시간·잡콜 분류·콜 사무장 자동화·BPO 콜센터 위임</p>
+
+  <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="kpi-card"><div class="kpi-label">월 인입 콜</div><div class="kpi-value">47</div><div class="kpi-delta">홈페이지 클릭콜 32 · 직접 15</div></div>
+    <div class="kpi-card"><div class="kpi-label">잡콜 비율</div><div class="kpi-value">64%</div><div class="kpi-delta delta-down">▲ 5%p · 위험</div></div>
+    <div class="kpi-card"><div class="kpi-label">평균 응답</div><div class="kpi-value">12s</div><div class="kpi-delta delta-up">▲ 영업시간 내</div></div>
+    <div class="kpi-card"><div class="kpi-label">수임 전환</div><div class="kpi-value">11/47</div><div class="kpi-delta">23%</div></div>
+  </div>
+
+  <div class="two-col" style="margin-top: 14px;">
+    <div class="card">
+      <h3>콜 사무장 활성화 ★ 유료</h3>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.6; margin-bottom: 10px;">변호사 캘린더 부재 시간만 자동 ON. 변호사 폰 동시 울림 후 미수신 시 사무장 응대.</div>
+      <div class="row"><div>처리량</div><div class="row-meta">월 200건</div></div>
+      <div class="row"><div>응답</div><div class="row-meta">3초 이내</div></div>
+      <div class="row"><div>가격</div><div class="row-meta">시간 5천 · 월 9.9만</div></div>
+      <button class="btn-warn" style="width: 100%; margin-top: 10px;" onclick="openSignup('콜 사무장 김도우미')">활성화 신청</button>
+    </div>
+    <div class="card">
+      <h3>BPO 콜센터 위임 ★★ 사람</h3>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.6; margin-bottom: 10px;">검증된 외부 콜센터 BPO. 사람이 응대. 변호사 사무실 톤·매뉴얼 학습. 야간·주말 가능.</div>
+      <div class="row"><div>처리량</div><div class="row-meta">무제한</div></div>
+      <div class="row"><div>가용</div><div class="row-meta">24h · 야간 +20%</div></div>
+      <div class="row"><div>가격</div><div class="row-meta">건당 3천 · 월 정액 49만</div></div>
+      <button class="btn-warn" style="width: 100%; margin-top: 10px;" onclick="openSignup('BPO 콜센터 위임')">위임 신청</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 14px;">
+    <h3>최근 콜 이력</h3>
+    <div class="row"><div><span class="dot d-ok"></span> 김OO · 개인회생 상담 (12분)</div><div class="row-meta">수임 ✓ · 2시간 전</div></div>
+    <div class="row"><div><span class="dot d-warn"></span> 익명 · 음주운전 단순 문의 (3분)</div><div class="row-meta">잡콜 분류 · 4시간 전</div></div>
+    <div class="row"><div><span class="dot d-bad"></span> 박OO · 미응답 (2회)</div><div class="row-meta">사무장 권장 · 5시간 전</div></div>
+    <div class="row"><div><span class="dot d-ok"></span> 이OO · 상속 분쟁 상담 (18분)</div><div class="row-meta">상담 예약 · 1일 전</div></div>
+  </div>
+</section>
+
+<!-- BPO MARKET -->
+<section class="view" data-view="bpo">
+  <h1 class="h1">BPO·대행 마켓 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">사람 위임 12종</span></h1>
+  <p class="sub">검증된 외부 대행사·프리랜서. AI Agent로 부족한 영역은 사람에게.</p>
+
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;" id="bpoList"></div>
+</section>
+
+<!-- OPS WORKFLOW -->
+<section class="view" data-view="ops">
+  <h1 class="h1">업무 워크플로우 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">외부 시스템 연결</span></h1>
+  <p class="sub">사건 처리·서면 작성·일정 관리는 다른 단위. LawOS는 영업 성과 관리, 운영은 별도 시스템으로 넘기는 형태.</p>
+
+  <div style="background: var(--info-bg); color: var(--info-fg); padding: 14px 18px; border-radius: var(--rl); margin-bottom: 18px; font-size: 13px; line-height: 1.6;">
+    <strong>여기는 Placeholder입니다.</strong> LawOS는 마케팅·재무·세일즈(영업 성과) 관리 중심.
+    사건 처리·서면 작성·재판 일정 등 운영 업무는 <strong>외부 사건관리 시스템</strong>(케이스노트·로폼·자체 ERP)으로 넘깁니다.
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h3>여기서 → 사건관리 시스템으로 넘김</h3>
+      <div class="row"><div>인테이크봇 신규 의뢰인</div><div class="row-meta">→ 자동 핸드오프</div></div>
+      <div class="row"><div>콜 사무장 상담 메모</div><div class="row-meta">→ 의뢰인 카드 생성</div></div>
+      <div class="row"><div>인입 inbox 진성콜</div><div class="row-meta">→ 사건 등록</div></div>
+      <div class="row"><div>BPO 응대 결과</div><div class="row-meta">→ 활동 로그</div></div>
+      <button class="btn-2" style="width: 100%; margin-top: 10px;" onclick="openSignup('사건관리 시스템 연결')">연결 설정</button>
+    </div>
+    <div class="card">
+      <h3>외부 시스템에서 ← LawOS로 회수</h3>
+      <div class="row"><div>수임 결정 (사건관리)</div><div class="row-meta">→ 인입 ROI 갱신</div></div>
+      <div class="row"><div>사건 종결</div><div class="row-meta">→ Follow-up 사무장 활성</div></div>
+      <div class="row"><div>의뢰인 만족도</div><div class="row-meta">→ 리뷰 사무장 트리거</div></div>
+      <div class="row"><div>미수금 발생</div><div class="row-meta">→ 미수금 사무장</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 14px;">
+    <h3>지원 예정 외부 시스템 — 준비 중</h3>
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px;">
+      <div style="padding: 14px 12px; background: var(--surface-2); border-radius: 6px; text-align: center; font-size: 12px;">케이스노트</div>
+      <div style="padding: 14px 12px; background: var(--surface-2); border-radius: 6px; text-align: center; font-size: 12px;">로폼</div>
+      <div style="padding: 14px 12px; background: var(--surface-2); border-radius: 6px; text-align: center; font-size: 12px;">자체 ERP API</div>
+      <div style="padding: 14px 12px; background: var(--surface-2); border-radius: 6px; text-align: center; font-size: 12px;">Excel/CSV</div>
+      <div style="padding: 14px 12px; background: var(--surface-2); border-radius: 6px; text-align: center; font-size: 12px;">Notion API</div>
+      <div style="padding: 14px 12px; background: var(--surface-2); border-radius: 6px; text-align: center; font-size: 12px;">Google Sheets</div>
+    </div>
+  </div>
+</section>
+
+<!-- AD CHECK (deprecated, kept for back-compat) -->
+<section class="view" data-view="adcheck">
+  <h1 class="h1">변협 광고심사 검증</h1>
+  <p class="sub">광고 카피 · 블로그 글 · 안내 문구를 입력하면 §23·§31·§34 위반 가능성 검사</p>
+
+  <div class="card" style="margin-bottom: 12px;">
+    <h3>검증할 텍스트</h3>
+    <textarea class="input" id="adText" rows="4" placeholder="예: 전관 출신 변호사가 직접 상담합니다. 승소율 95% 보장."></textarea>
+    <div style="margin-top: 8px; display: flex; gap: 8px; align-items: center;">
+      <button class="btn" onclick="runAdCheck()">검증 시작</button>
+      <span style="font-size: 11px; color: var(--text-3);">변협 광고심사규정 룰북 기반</span>
+    </div>
+    <div class="ad-result" id="adResult"></div>
+  </div>
+
+  <div class="card">
+    <h3>최근 검증 이력 <span class="pill pill-mine">로컬 저장</span></h3>
+    <div id="adHistory" style="font-size: 12px; color: var(--text-2); padding: 4px 0;">아직 검증 이력 없음. 위에서 시작.</div>
+  </div>
+</section>
+
+<!-- WRITER -->
+<section class="view" data-view="writer">
+  <h1 class="h1">콘텐츠 작성</h1>
+  <p class="sub">트렌드 토픽 · 포맷 선택 → AI 골격 생성 → 변호사가 사례·판례 채움</p>
+
+  <div class="writer-shell">
+    <div>
+      <div class="card" style="margin-bottom: 10px;">
+        <h3>1. 토픽 + 포맷 선택</h3>
+        <input class="input" id="writerTopic" placeholder="예: 전세사기 처벌강화법" value="전세사기 처벌강화법 통과" style="margin-bottom: 8px;" />
+        <select class="input" id="writerFormat" style="margin-bottom: 8px;">
+          <option>사례분석형</option>
+          <option>Q&amp;A형</option>
+          <option>체크리스트형</option>
+          <option>비교·분류형</option>
+          <option>타임라인형</option>
+        </select>
+        <button class="btn" onclick="runSkeleton()">AI 골격 생성</button>
+      </div>
+
+      <div class="card">
+        <h3>2. 글 작성 <span class="pill pill-mine">로컬 저장</span><span id="autoSaveLabel" style="margin-left: auto; font-size: 10px; color: var(--text-3);">미저장</span></h3>
+        <input class="input" id="writerTitle" placeholder="제목" value="" style="margin-bottom: 8px; font-size: 16px; font-weight: 600;" oninput="scheduleAutoSave()" />
+        <textarea class="input" id="writerBody" rows="14" placeholder="AI 골격 생성 후 내용이 여기에 채워집니다. 사례·판례·의견은 변호사 본인이 추가." oninput="scheduleAutoSave()"></textarea>
+        <div style="display: flex; gap: 8px; margin-top: 10px;">
+          <button class="btn-2" onclick="saveDraft()">임시 저장</button>
+          <button class="btn-2" onclick="requestReview()">검수 큐로</button>
+          <button class="btn-warn" onclick="openSignup('발행 신청')">발행 (가입 필요)</button>
+        </div>
+      </div>
+    </div>
+
+    <aside class="writer-side">
+      <div>
+        <h4>AI 비율</h4>
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+          <input type="range" id="aiRatio" min="0" max="100" value="60" step="10" style="flex: 1;" oninput="updateAiRatio()" />
+          <span id="aiRatioVal" style="font-size: 12px; font-weight: 600; min-width: 32px;">60%</span>
+        </div>
+        <div style="font-size: 10px; color: var(--text-3); margin-top: 4px;">권장 40~60%. 사례·판례는 변호사 본인.</div>
+      </div>
+
+      <div>
+        <h4>검증 점수</h4>
+        <div class="score-row">
+          <span style="min-width: 50px; color: var(--text-2);">SEO</span>
+          <div class="bar"><div class="bar-fill bar-good" style="width: 78%;"></div></div>
+          <span style="min-width: 24px; font-weight: 500;">78</span>
+        </div>
+        <div class="score-row">
+          <span style="min-width: 50px; color: var(--text-2);">AI 탐지</span>
+          <div class="bar"><div class="bar-fill bar-warn" style="width: 42%;"></div></div>
+          <span style="min-width: 24px; font-weight: 500;">42</span>
+        </div>
+        <div class="score-row">
+          <span style="min-width: 50px; color: var(--text-2);">변협</span>
+          <div class="bar"><div class="bar-fill bar-good" style="width: 92%;"></div></div>
+          <span style="min-width: 24px; font-weight: 500;">92</span>
+        </div>
+      </div>
+
+      <div>
+        <h4>발행 채크리스트</h4>
+        <div style="font-size: 11px; line-height: 1.8;">
+          <div>○ 사례 1개 이상</div>
+          <div>○ 판례 번호 명시</div>
+          <div>● SEO &gt; 70</div>
+          <div>○ AI 탐지 &lt; 30</div>
+          <div>● 변협 검증 통과</div>
+        </div>
+      </div>
+
+      <div style="background: var(--warn-bg); border: 1px solid var(--warn-border); border-radius: var(--r); padding: 10px;">
+        <div style="font-size: 11px; color: var(--warn-fg); margin-bottom: 6px; line-height: 1.5;">시간 부족하면 이작가에게 위임. 건당 5~30만.</div>
+        <button class="btn-warn" style="width: 100%;" onclick="openSignup('이작가 위임')">위임 신청</button>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- AGENTS -->
+<section class="view" data-view="agents">
+  <h1 class="h1">Agent 마켓 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">AI 사무장 16종</span></h1>
+  <p class="sub">시간제 또는 건당 위임 · ★ 유료 활성화 · 신청 → 1:1 견적 → 자동 작동</p>
+
+  <div class="agent-grid">
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">콜</div>
+        <div>
+          <div class="agent-name">콜 사무장 김도우미</div>
+          <div class="agent-role">재판·외근 시 1차 응대</div>
+        </div>
+      </div>
+      <div class="agent-desc">캘린더 부재 시간만 자동 ON. 변호사 폰 동시 울림 후 미수신 시 응대.</div>
+      <div class="agent-meta"><span>월 200건</span><span>응답 3초</span></div>
+      <div class="agent-action">
+        <div class="agent-price">시간 5천 · 월 9.9만</div>
+        <button class="btn-warn" onclick="openSignup('콜 사무장 김도우미')">신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">챗</div>
+        <div>
+          <div class="agent-name">인테이크봇 박매니저</div>
+          <div class="agent-role">24h 챗 1차 응대</div>
+        </div>
+      </div>
+      <div class="agent-desc">홈·카카오·로톡 문의 자동 분류. 사건 유형별 핸드오프.</div>
+      <div class="agent-meta"><span>무제한</span><span>응답 2초</span></div>
+      <div class="agent-action">
+        <div class="agent-price">셋업 19만 + 건당 1천</div>
+        <button class="btn-warn" onclick="openSignup('인테이크봇 박매니저')">신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">작</div>
+        <div>
+          <div class="agent-name">콘텐츠 작가 이작가</div>
+          <div class="agent-role">블로그·쇼츠 작성</div>
+        </div>
+      </div>
+      <div class="agent-desc">AI 60% + 변호사 40% 검수. 변협 검증 통과한 글만 발행.</div>
+      <div class="agent-meta"><span>주 7건</span><span>건당 30분</span></div>
+      <div class="agent-action">
+        <div class="agent-price">건당 5~30만</div>
+        <button class="btn-warn" onclick="openSignup('콘텐츠 작가 이작가')">신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">검</div>
+        <div>
+          <div class="agent-name">광고규제 검증 최감독</div>
+          <div class="agent-role">발신 전 자동 차단</div>
+        </div>
+      </div>
+      <div class="agent-desc">변협 §23·§31·§34 자동 검증. 위반 이력 자동 기록.</div>
+      <div class="agent-meta"><span>무제한</span><span>실시간</span></div>
+      <div class="agent-action">
+        <div class="agent-price">무료 (Pro)</div>
+        <button class="btn-2" onclick="goView('adcheck')">바로 사용</button>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">탐</div>
+        <div>
+          <div class="agent-name">GEO 추적 정탐색</div>
+          <div class="agent-role">AI 검색 인용</div>
+        </div>
+      </div>
+      <div class="agent-desc">ChatGPT·Cue·Gemini 인용 주 1회 자동 체크.</div>
+      <div class="agent-meta"><span>키워드 30개</span><span>주 1회</span></div>
+      <div class="agent-action">
+        <div class="agent-price">무료 (Pro)</div>
+        <button class="btn-warn" onclick="openSignup('GEO 추적')">활성화</button>
+      </div>
+    </div>
+
+    <div class="card" style="grid-column: 1 / -1;">
+      <h3>신청 이력 <span class="pill pill-mine" id="requestCount">0건</span></h3>
+      <div id="requestList"></div>
+    </div>
+    <div class="agent-card" style="background: var(--surface-2); opacity: 0.7;">
+      <div class="agent-head">
+        <div class="agent-avatar">+9</div>
+        <div>
+          <div class="agent-name">사무장 9명 더</div>
+          <div class="agent-role">SEO·이메일·리뷰·DM 등</div>
+        </div>
+      </div>
+      <div class="agent-desc">전체 16개 사무장. 가입 시 다 열림.</div>
+      <div class="agent-meta"><span>준비 중</span><span>V1</span></div>
+      <div class="agent-action">
+        <div class="agent-price">알림 신청</div>
+        <button class="btn-2" onclick="openSignup('전체 사무장')">알림</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ALERTS -->
+<section class="view" data-view="alerts">
+  <h1 class="h1">알림 센터 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">5건 미확인</span></h1>
+  <p class="sub">로직 변동·영정 위험·미응답·검수 대기·변협 신고를 한 화면에</p>
+
+  <div style="display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap;">
+    <button class="btn-2" style="background: var(--text); color: #fff; border-color: var(--text);">전체 5</button>
+    <button class="btn-2">긴급 2</button>
+    <button class="btn-2">주의 2</button>
+    <button class="btn-2">정보 1</button>
+  </div>
+
+  <div style="display: grid; gap: 8px;">
+    <div style="background: var(--surface); border: 1px solid var(--danger-fg); border-left-width: 3px; border-radius: 8px; padding: 14px 16px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <span style="font-size: 10px; padding: 2px 7px; background: var(--danger-bg); color: var(--danger-fg); border-radius: 4px; font-weight: 500;">긴급</span>
+        <span style="font-size: 10px; color: var(--text-3);">2시간 전</span>
+      </div>
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">네이버 로직 변동 감지 — 블로그 통검 노출 -22%</div>
+      <div style="font-size: 12px; color: var(--text-2); margin-bottom: 8px;">추적 키워드 3개 1페이지 이탈. GEO 보강 권장.</div>
+      <div style="display: flex; gap: 6px;"><button class="btn-2">상세</button><button class="btn-warn" onclick="goView('keywords')">키워드 추적</button></div>
+    </div>
+    <div style="background: var(--surface); border: 1px solid var(--danger-fg); border-left-width: 3px; border-radius: 8px; padding: 14px 16px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <span style="font-size: 10px; padding: 2px 7px; background: var(--danger-bg); color: var(--danger-fg); border-radius: 4px; font-weight: 500;">긴급</span>
+        <span style="font-size: 10px; color: var(--text-3);">5시간 전</span>
+      </div>
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">파워링크 광고 2건 변협 §31 위반 가능</div>
+      <div style="font-size: 12px; color: var(--text-2); margin-bottom: 8px;">"전관 출신" "승소율 95% 보장" — 발신 차단됨. 수정 제안 있음.</div>
+      <div style="display: flex; gap: 6px;"><button class="btn-2" onclick="goView('adcheck')">검증 보기</button><button class="btn-warn">자동 수정</button></div>
+    </div>
+    <div style="background: var(--surface); border: 1px solid var(--warn-border); border-left: 3px solid var(--warn-fg); border-radius: 8px; padding: 14px 16px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <span style="font-size: 10px; padding: 2px 7px; background: var(--warn-bg); color: var(--warn-fg); border-radius: 4px; font-weight: 500;">주의</span>
+        <span style="font-size: 10px; color: var(--text-3);">8시간 전</span>
+      </div>
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">미응답 인입 5건 (24h 초과)</div>
+      <div style="font-size: 12px; color: var(--text-2); margin-bottom: 8px;">홈폼 2건 · 카톡 1건 · 로톡 1건 · 인스타 1건. 의뢰인 이탈 위험.</div>
+      <div style="display: flex; gap: 6px;"><button class="btn-2" onclick="goView('inbox')">inbox 열기</button><button class="btn-warn" onclick="openSignup('박매니저 켜기')">박매니저 켜기</button></div>
+    </div>
+    <div style="background: var(--surface); border: 1px solid var(--warn-border); border-left: 3px solid var(--warn-fg); border-radius: 8px; padding: 14px 16px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <span style="font-size: 10px; padding: 2px 7px; background: var(--warn-bg); color: var(--warn-fg); border-radius: 4px; font-weight: 500;">주의</span>
+        <span style="font-size: 10px; color: var(--text-3);">1일 전</span>
+      </div>
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">네이버 블로그 7일 발행 없음</div>
+      <div style="font-size: 12px; color: var(--text-2); margin-bottom: 8px;">통검 노출 위험. 영정·저품 가능성 모니터링 필요.</div>
+      <div style="display: flex; gap: 6px;"><button class="btn-2" onclick="goView('writer')">글 작성</button><button class="btn-warn" onclick="openSignup('이작가 위임')">이작가에 위임</button></div>
+    </div>
+    <div style="background: var(--surface); border: 1px solid var(--info-fg); border-left-width: 3px; border-radius: 8px; padding: 14px 16px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <span style="font-size: 10px; padding: 2px 7px; background: var(--info-bg); color: var(--info-fg); border-radius: 4px; font-weight: 500;">정보</span>
+        <span style="font-size: 10px; color: var(--text-3);">2일 전</span>
+      </div>
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">SSL 인증서 만료 47일 남음</div>
+      <div style="font-size: 12px; color: var(--text-2); margin-bottom: 8px;">자동 갱신 미설정. 만료 시 사이트 접속 불가.</div>
+      <div style="display: flex; gap: 6px;"><button class="btn-2">상세</button></div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEW QUEUE -->
+<section class="view" data-view="review">
+  <h1 class="h1">검수 큐 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;" id="reviewQTotal">3건 대기</span></h1>
+  <p class="sub">변호사 본인 승인 필수 — 발행 전 모든 콘텐츠·발신물 최종 검토</p>
+
+  <div style="display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap;">
+    <button class="btn-2" style="background: var(--text); color: #fff; border-color: var(--text);">전체 3</button>
+    <button class="btn-2">콘텐츠 2</button>
+    <button class="btn-2">광고 1</button>
+    <button class="btn-2">발신물 0</button>
+  </div>
+
+  <div id="reviewQList" style="display: grid; gap: 10px;"></div>
+</section>
+
+<!-- INBOX -->
+<section class="view" data-view="inbox">
+  <h1 class="h1">인입 inbox <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">25건 · 미응답 5건</span></h1>
+  <p class="sub">홈페이지·카카오·로톡·인스타·이메일 모든 채널 통합. 24h 초과는 빨간색.</p>
+
+  <div style="display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap;">
+    <button class="btn-2" style="background: var(--text); color: #fff; border-color: var(--text);">전체 25</button>
+    <button class="btn-2">홈페이지 12</button>
+    <button class="btn-2">카카오 8</button>
+    <button class="btn-2">로톡 3</button>
+    <button class="btn-2">인스타 2</button>
+    <button class="btn-2" style="margin-left: auto;">진성 분류 (인테이크봇)</button>
+  </div>
+
+  <div class="card">
+    <h3>미응답 5건 — 24h 초과</h3>
+    <div id="inboxOver"></div>
+  </div>
+
+  <div class="card" style="margin-top: 12px;">
+    <h3>최근 응답 완료</h3>
+    <div class="row"><div><span class="dot d-ok"></span> 김OO — 개인회생 상담 → 수임 진행</div><div class="row-meta">2일 전</div></div>
+    <div class="row"><div><span class="dot d-ok"></span> 박OO — 단순 문의 → 잡콜 분류</div><div class="row-meta">2일 전</div></div>
+    <div class="row"><div><span class="dot d-ok"></span> 이OO — 음주운전 → 재방문 예약</div><div class="row-meta">3일 전</div></div>
+  </div>
+</section>
+
+<!-- KEYWORDS DETAIL -->
+<section class="view" data-view="keywords">
+  <h1 class="h1">키워드 추적 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;" id="kwDetailCount">0개 등록</span></h1>
+  <p class="sub">매일 06:00 자동 측정 — 네이버·구글·AI 검색 통합 순위</p>
+
+  <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="kpi-card"><div class="kpi-label">평균 순위</div><div class="kpi-value">14.2</div><div class="kpi-delta delta-up">▲ 2.1 vs 지난주</div></div>
+    <div class="kpi-card"><div class="kpi-label">1페이지 노출</div><div class="kpi-value">3 / 5</div><div class="kpi-delta">60%</div></div>
+    <div class="kpi-card"><div class="kpi-label">월 추정 클릭</div><div class="kpi-value">~480</div><div class="kpi-delta delta-up">▲ 47</div></div>
+    <div class="kpi-card"><div class="kpi-label">평균 검색량</div><div class="kpi-value">9.8K</div><div class="kpi-delta">월간</div></div>
+  </div>
+
+  <div class="card" style="margin-top: 14px;">
+    <h3>등록 키워드 상세 <span class="pill pill-mine" id="kwDetailBadge">로컬</span><button class="btn-2" style="margin-left: auto;" onclick="goView('dashboard')">+ 키워드 추가</button></h3>
+    <div id="kwDetailList"></div>
+  </div>
+
+  <div class="two-col" style="margin-top: 14px;">
+    <div class="card">
+      <h3>경쟁 변호사 키워드 갭</h3>
+      <div class="row"><div>전세사기 대응 변호사</div><div class="row-meta down">우리 X · 경쟁 4</div></div>
+      <div class="row"><div>가정폭력 보호명령</div><div class="row-meta down">우리 X · 경쟁 3</div></div>
+      <div class="row"><div>음주운전 약식기소</div><div class="row-meta down">우리 X · 경쟁 5</div></div>
+      <div class="row"><div>코인사기 회복 변호사</div><div class="row-meta down">우리 X · 경쟁 2</div></div>
+    </div>
+    <div class="card">
+      <h3>이번 주 순위 변동 TOP</h3>
+      <div class="row"><div>이혼 위자료 산정</div><div class="row-meta up">▲ 7위 → 5위</div></div>
+      <div class="row"><div>개인회생 변호사 서초</div><div class="row-meta up">▲ 14위 → 12위</div></div>
+      <div class="row"><div>협의이혼 절차</div><div class="row-meta down">▼ 12위 → 15위</div></div>
+      <div class="row"><div>음주운전 처벌</div><div class="row-meta down">▼ 22위 → 28위</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- MODELS MARKET -->
+<section class="view" data-view="models">
+  <h1 class="h1">모델 마켓 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">사건유형 패키지 8종</span></h1>
+  <p class="sub">인테이크 폼 + 견적 룰 + 1차 서면 + 응대 스크립트 + 콘텐츠 키워드셋 묶음. 복제해서 자기 사무실에 깔기.</p>
+
+  <div style="display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap;">
+    <button class="btn-2" style="background: var(--text); color: #fff; border-color: var(--text);">전체 8</button>
+    <button class="btn-2">표준화 쉬움 4</button>
+    <button class="btn-2">회전 빠름 3</button>
+    <button class="btn-2">신규 1</button>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+    <div class="card">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 11px; padding: 2px 8px; background: var(--success-bg); color: var(--success-fg); border-radius: 4px; font-weight: 500;">표준화 ★★★</span>
+        <span style="margin-left: auto; font-size: 13px; font-weight: 500;">19만</span>
+      </div>
+      <div style="font-size: 15px; font-weight: 500; margin-bottom: 4px;">내용증명 패키지</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.55; margin-bottom: 12px;">표준 양식 8종 · 사건 유형별 자동 분기 · 견적 자동 산출 · 발송 대행 연결.</div>
+      <button class="btn-warn" style="width: 100%;" onclick="openSignup('내용증명 패키지')">패키지 구매</button>
+    </div>
+    <div class="card">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 11px; padding: 2px 8px; background: var(--success-bg); color: var(--success-fg); border-radius: 4px; font-weight: 500;">표준화 ★★★</span>
+        <span style="margin-left: auto; font-size: 13px; font-weight: 500;">29만</span>
+      </div>
+      <div style="font-size: 15px; font-weight: 500; margin-bottom: 4px;">지급명령 신청 패키지</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.55; margin-bottom: 12px;">전자소송 자동 입력 · 채권 유형별 양식 · 진행 상황 자동 추적.</div>
+      <button class="btn-warn" style="width: 100%;" onclick="openSignup('지급명령 패키지')">패키지 구매</button>
+    </div>
+    <div class="card">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 11px; padding: 2px 8px; background: var(--info-bg); color: var(--info-fg); border-radius: 4px; font-weight: 500;">본인 자산</span>
+        <span style="margin-left: auto; font-size: 13px; font-weight: 500;">49만</span>
+      </div>
+      <div style="font-size: 15px; font-weight: 500; margin-bottom: 4px;">개인회생 패키지</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.55; margin-bottom: 12px;">12개월 진행 흐름 · 채무자 자료 자동 정리 · 면책 결정 시뮬레이션.</div>
+      <button class="btn-warn" style="width: 100%;" onclick="openSignup('개인회생 패키지')">패키지 구매</button>
+    </div>
+    <div class="card">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 11px; padding: 2px 8px; background: var(--success-bg); color: var(--success-fg); border-radius: 4px; font-weight: 500;">회전 ★★★</span>
+        <span style="margin-left: auto; font-size: 13px; font-weight: 500;">39만</span>
+      </div>
+      <div style="font-size: 15px; font-weight: 500; margin-bottom: 4px;">임대차 보증금 반환</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.55; margin-bottom: 12px;">임차권등기명령 · 보증금 반환 청구 · 명도 단계별 자동 진행.</div>
+      <button class="btn-warn" style="width: 100%;" onclick="openSignup('임대차 패키지')">패키지 구매</button>
+    </div>
+    <div class="card">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 11px; padding: 2px 8px; background: var(--surface-2); color: var(--text-2); border-radius: 4px; font-weight: 500;">표준</span>
+        <span style="margin-left: auto; font-size: 13px; font-weight: 500;">99만</span>
+      </div>
+      <div style="font-size: 15px; font-weight: 500; margin-bottom: 4px;">법인설립 패키지</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.55; margin-bottom: 12px;">정관 · 등기 · 세무 신고 · 스타트업 자문 1년 패키지.</div>
+      <button class="btn-warn" style="width: 100%;" onclick="openSignup('법인설립 패키지')">패키지 구매</button>
+    </div>
+    <div class="card">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 11px; padding: 2px 8px; background: var(--surface-2); color: var(--text-2); border-radius: 4px; font-weight: 500;">표준</span>
+        <span style="margin-left: auto; font-size: 13px; font-weight: 500;">35만</span>
+      </div>
+      <div style="font-size: 15px; font-weight: 500; margin-bottom: 4px;">음주운전 대응 패키지</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.55; margin-bottom: 12px;">양형 시뮬 · 약식기소 vs 정식재판 분기 · 반성문·탄원서 템플릿.</div>
+      <button class="btn-warn" style="width: 100%;" onclick="openSignup('음주운전 패키지')">패키지 구매</button>
+    </div>
+    <div class="card">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 11px; padding: 2px 8px; background: var(--warn-bg); color: var(--warn-fg); border-radius: 4px; font-weight: 500;">신규</span>
+        <span style="margin-left: auto; font-size: 13px; font-weight: 500;">59만</span>
+      </div>
+      <div style="font-size: 15px; font-weight: 500; margin-bottom: 4px;">코인사기 회복 패키지</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.55; margin-bottom: 12px;">리딩방·투자사기 회복 청구 · 100억 판례 기반 전략.</div>
+      <button class="btn-warn" style="width: 100%;" onclick="openSignup('코인사기 패키지')">패키지 구매</button>
+    </div>
+    <div class="card" style="background: var(--surface-2); opacity: 0.7;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 11px; padding: 2px 8px; background: var(--surface); color: var(--text-3); border-radius: 4px; font-weight: 500;">준비 중</span>
+        <span style="margin-left: auto; font-size: 13px; color: var(--text-3);">V2 출시</span>
+      </div>
+      <div style="font-size: 15px; font-weight: 500; margin-bottom: 4px;">+ 모델 12종</div>
+      <div style="font-size: 12px; color: var(--text-2); line-height: 1.55; margin-bottom: 12px;">상속·노무·교통사고·명예훼손·학교폭력·산재·전세사기 등.</div>
+      <button class="btn-2" style="width: 100%;" onclick="openSignup('모델 알림')">알림 신청</button>
+    </div>
+  </div>
+</section>
+
+<!-- BILLING -->
+<section class="view" data-view="billing">
+  <h1 class="h1">플랜·결제</h1>
+  <p class="sub">V0 단계 — 결제 시스템 미구현. 활성화 신청 → 1:1 견적 → 입금 흐름.</p>
+
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 18px;">
+    <div class="card">
+      <div style="font-size: 12px; color: var(--text-3); margin-bottom: 4px;">현재 플랜</div>
+      <div style="font-size: 22px; font-weight: 600; margin-bottom: 12px;">Free</div>
+      <div style="font-size: 12px; line-height: 2; color: var(--text-2);">
+        ● 사이트 1<br/>● 키워드 5/월<br/>● 콘텐츠 5/월<br/>● 광고 검증 무제한<br/>○ AI 어투 학습 X<br/>○ 자동 추적 X
+      </div>
+      <button class="btn-2" style="width: 100%; margin-top: 14px;" disabled>현재 사용 중</button>
+    </div>
+    <div class="card" style="border: 2px solid var(--text);">
+      <div style="display: flex; gap: 8px; margin-bottom: 4px;">
+        <div style="font-size: 12px; color: var(--text-3);">추천</div>
+        <span style="margin-left: auto; font-size: 10px; padding: 2px 7px; background: var(--info-bg); color: var(--info-fg); border-radius: 4px; font-weight: 500;">가장 인기</span>
+      </div>
+      <div style="font-size: 22px; font-weight: 600; margin-bottom: 2px;">Pro</div>
+      <div style="font-size: 13px; color: var(--text-2); margin-bottom: 12px;">월 9.9만 / 부가세별</div>
+      <div style="font-size: 12px; line-height: 2; color: var(--text-2);">
+        ● 사이트 3<br/>● 키워드 30/월<br/>● 콘텐츠 30/월<br/>● 광고 자동 검증<br/>● AI 어투 학습<br/>● 매일 자동 추적
+      </div>
+      <button class="btn" style="width: 100%; margin-top: 14px;" onclick="openSignup('Pro 9.9만/월')">Pro로 업그레이드</button>
+    </div>
+    <div class="card">
+      <div style="font-size: 12px; color: var(--text-3); margin-bottom: 4px;">팀</div>
+      <div style="font-size: 22px; font-weight: 600; margin-bottom: 2px;">Studio</div>
+      <div style="font-size: 13px; color: var(--text-2); margin-bottom: 12px;">월 29.9만 / 부가세별</div>
+      <div style="font-size: 12px; line-height: 2; color: var(--text-2);">
+        ● 무제한 사이트<br/>● 무제한 키워드<br/>● 무제한 콘텐츠<br/>● 채널 inbox 통합<br/>● Follow-up 자동<br/>● BPO 우선 대기열
+      </div>
+      <button class="btn-2" style="width: 100%; margin-top: 14px;" onclick="openSignup('Studio 29.9만/월')">Studio 신청</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>사무장 단가 (활성화별 별도 결제)</h3>
+    <div class="row"><div>콜 사무장 김도우미</div><div class="row-meta">시간 5천 또는 월 9.9만</div></div>
+    <div class="row"><div>인테이크봇 박매니저</div><div class="row-meta">셋업 19만 + 건당 1천</div></div>
+    <div class="row"><div>콘텐츠 작가 이작가</div><div class="row-meta">건당 5~30만 또는 월 49만</div></div>
+    <div class="row"><div>SEO 사무장 박분석</div><div class="row-meta">월 9.9만</div></div>
+    <div class="row"><div>리뷰 사무장</div><div class="row-meta">월 4.9만</div></div>
+    <div class="row"><div>이메일 영업 사무장</div><div class="row-meta">월 19만 + 발송비</div></div>
+  </div>
+
+  <div class="card" style="margin-top: 12px;">
+    <h3>결제 이력 <span class="pill pill-demo">V1.5 출시 예정</span></h3>
+    <div style="font-size: 12px; color: var(--text-3); padding: 14px 0;">
+      V0 단계 — 결제 미구현. 활성화 신청 시 LawOS 팀이 1:1 견적과 함께 연락.<br/>
+      V1.5 (6개월 후) 토스페이먼츠 통합 → 자동 청구·이력 조회 가능.
+    </div>
+  </div>
+</section>
+
+<!-- SETTINGS -->
+<section class="view" data-view="settings">
+  <h1 class="h1">설정</h1>
+  <p class="sub">사무실 정보 · 변협 룰북 · API 키 · 팀 · 데이터</p>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+    <div class="card">
+      <h3>사무실 정보</h3>
+      <div style="margin-bottom: 8px;"><div style="font-size: 11px; color: var(--text-2); margin-bottom: 4px;">사무실명</div><input class="input" value="welcome 법률사무소" /></div>
+      <div style="margin-bottom: 8px;"><div style="font-size: 11px; color: var(--text-2); margin-bottom: 4px;">대표 변호사</div><input class="input" value="양변호사" /></div>
+      <div style="margin-bottom: 8px;"><div style="font-size: 11px; color: var(--text-2); margin-bottom: 4px;">사무실 주소</div><input class="input" value="서울 서초구" /></div>
+      <button class="btn-2" style="margin-top: 6px;" onclick="showToast('저장됨')">저장</button>
+    </div>
+    <div class="card">
+      <h3>주력 영역</h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+        <span style="padding: 6px 12px; background: var(--text); color: #fff; border-radius: 5px; font-size: 12px; cursor: pointer;">개인회생</span>
+        <span style="padding: 6px 12px; background: var(--text); color: #fff; border-radius: 5px; font-size: 12px; cursor: pointer;">이혼</span>
+        <span style="padding: 6px 12px; background: var(--text); color: #fff; border-radius: 5px; font-size: 12px; cursor: pointer;">형사</span>
+        <span style="padding: 6px 12px; background: var(--surface-2); color: var(--text-2); border-radius: 5px; font-size: 12px; cursor: pointer;">임대차</span>
+        <span style="padding: 6px 12px; background: var(--surface-2); color: var(--text-2); border-radius: 5px; font-size: 12px; cursor: pointer;">상속</span>
+        <span style="padding: 6px 12px; background: var(--surface-2); color: var(--text-2); border-radius: 5px; font-size: 12px; cursor: pointer;">노무</span>
+        <span style="padding: 6px 12px; background: var(--surface-2); color: var(--text-2); border-radius: 5px; font-size: 12px; cursor: pointer;">교통사고</span>
+        <span style="padding: 6px 12px; background: var(--surface-2); color: var(--text-2); border-radius: 5px; font-size: 12px; cursor: pointer;">법인 자문</span>
+      </div>
+      <div style="margin-top: 12px; font-size: 11px; color: var(--text-3);">선택한 영역으로 트렌드 토픽·키워드 추천이 필터됨.</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom: 12px;">
+    <h3>변협 광고심사 룰북 <span class="pill pill-mine">v0.1 · 양변호사 검수</span></h3>
+    <div style="font-size: 12px; color: var(--text-2); line-height: 1.6; margin-bottom: 10px;">
+      §23(광고 일반) 18 룰 · §31(전관·과장·보장) 24 룰 · §34(비교광고) 12 룰. 모든 발신물 검증에 사용.
+    </div>
+    <div style="display: flex; gap: 6px;"><button class="btn-2">룰북 보기</button><button class="btn-2">사무실 커스텀 룰 추가</button></div>
+  </div>
+
+  <div class="card" style="margin-bottom: 12px;">
+    <h3>팀</h3>
+    <div class="row"><div><div class="avatar" style="display: inline-flex; width: 22px; height: 22px; font-size: 10px; margin-right: 8px;">양</div>양변호사 · 대표</div><div class="row-meta">전체 권한</div></div>
+    <div class="row"><div><div class="avatar" style="display: inline-flex; width: 22px; height: 22px; font-size: 10px; margin-right: 8px;">김</div>김마케터 · 인하우스</div><div class="row-meta">콘텐츠·광고만</div></div>
+    <button class="btn-2" style="margin-top: 8px;" onclick="openSignup('팀원 초대')">+ 팀원 초대 (Pro)</button>
+  </div>
+
+  <div class="card" style="margin-bottom: 12px;">
+    <h3>외부 연결</h3>
+    <div class="row"><div><span class="dot d-off"></span> Google Search Console</div><button class="btn-2" onclick="openSignup('GSC 연결')">연결</button></div>
+    <div class="row"><div><span class="dot d-off"></span> 네이버 광고센터</div><button class="btn-2" onclick="openSignup('네이버 광고 연결')">연결</button></div>
+    <div class="row"><div><span class="dot d-off"></span> 네이버블로그 OAuth</div><button class="btn-2" onclick="openSignup('블로그 연결')">연결</button></div>
+    <div class="row"><div><span class="dot d-off"></span> 카카오 비즈채널</div><button class="btn-2" onclick="openSignup('카톡 연결')">연결</button></div>
+    <div class="row"><div><span class="dot d-off"></span> Google Calendar</div><button class="btn-2" onclick="openSignup('캘린더 연결')">연결</button></div>
+  </div>
+
+  <div class="card">
+    <h3>데이터</h3>
+    <div style="font-size: 12px; color: var(--text-2); margin-bottom: 10px;">
+      모든 입력 데이터는 브라우저 localStorage에 저장. 가입 후 Supabase로 영구 마이그레이션.
+    </div>
+    <div style="display: flex; gap: 6px;">
+      <button class="btn-2" onclick="exportData()">JSON 내보내기</button>
+      <button class="btn-2" onclick="resetData()">전체 초기화</button>
+    </div>
+  </div>
+</section>
+
+</main>
+</div>
+</div>
+
+<div class="modal-bg" id="signupModal" onclick="if(event.target===this) closeSignup()">
+  <div class="modal">
+    <h3 id="signupTitle">계속하려면 가입</h3>
+    <p>이메일 1줄로 즉시 시작. 데이터 영구 저장 + 사무장 활성화 + 매일 자동 추적.</p>
+    <button class="btn" onclick="signupComplete()">Google로 계속</button>
+    <div class="modal-divider">또는</div>
+    <input class="input" type="email" placeholder="이메일" id="signupEmail" />
+    <button class="btn" onclick="signupComplete()" style="margin-top: 8px;">이메일로 시작</button>
+    <div class="skip" onclick="closeSignup()">나중에 — 비로그인으로 계속</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STATE_KEY = 'lawos_state_v1';
+let state = JSON.parse(localStorage.getItem(STATE_KEY) || '{}');
+state.adHistory = state.adHistory || [];
+state.diagnoseHistory = state.diagnoseHistory || [];
+state.draft = state.draft || { title: '', body: '' };
+state.signedIn = state.signedIn || false;
+
+function saveState() {
+  localStorage.setItem(STATE_KEY, JSON.stringify(state));
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('shown');
+  setTimeout(() => t.classList.remove('shown'), 2500);
+}
+
+function goView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.sidebar-nav-item').forEach(b => b.classList.remove('active'));
+  const view = document.querySelector('.view[data-view="' + name + '"]');
+  const btn = document.querySelector('.sidebar-nav-item[data-view="' + name + '"]');
+  if (view) view.classList.add('active');
+  if (btn) btn.classList.add('active');
+  const labels = { dashboard: '대시보드', alerts: '알림 센터', websites: '웹사이트 성과', sns: 'SNS 성과', calls: '콜·전화', diagnose: '사이트 진단', writer: '콘텐츠 작성', review: '검수 큐', inbox: '인입 통합', qualify: '리드 자격검증', keywords: '키워드 추적', feed: '컨텐츠 피드', agents: 'Agent 마켓', models: '사업모델 마켓', bpo: 'BPO·대행 마켓', ops: '업무 워크플로우', billing: '플랜·결제', settings: '설정' };
+  document.getElementById('topbarCrumb').textContent = (state.currentSite && state.currentSite.name || 'welcome 법률사무소') + ' / ' + (labels[name] || name);
+  if (name === 'review') renderReviewQueue();
+  if (name === 'inbox') renderInboxOver();
+  if (name === 'keywords') renderKwDetail();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.querySelectorAll('.sidebar-nav-item').forEach(b => {
+  b.addEventListener('click', () => goView(b.dataset.view));
+});
+
+function openSignup(action) {
+  document.getElementById('signupTitle').textContent = action + ' — 가입';
+  document.getElementById('signupModal').classList.add('shown');
+}
+function closeSignup() {
+  document.getElementById('signupModal').classList.remove('shown');
+}
+state.requests = state.requests || [];
+state.sites = state.sites || [
+  { domain: 'welcome-law.kr', name: 'welcome 법률사무소', health: 87, seo: 81, ad: 54, geo: 31, content: 76, change: 3 },
+  { domain: 'kim-law.com', name: '김변호사 사무소', health: 72, seo: 68, ad: 88, geo: 45, content: 62, change: -2 },
+  { domain: 'parkjung.kr', name: '박앤정 법무법인', health: 91, seo: 89, ad: 76, geo: 58, content: 84, change: 5 },
+  { domain: 'choi-law.kr', name: '최변호사 사무소', health: 64, seo: 71, ad: 42, geo: 28, content: 55, change: 1 }
+];
+state.actions = state.actions || [
+  { text: '트렌드 글 3편 작성 — 전세사기·음주운전·코인사기', cta: '위임', target: '이작가 위임', done: false },
+  { text: '미응답 문의 5건 응답 (24h+)', cta: '박매니저 켜기', target: '박매니저', done: false },
+  { text: '파워링크 광고 2건 변협 §31 위반 가능성', cta: '검증 보기', target: 'adcheck', done: false },
+  { text: '5/8 13:00 재판 — 콜 사무장 자동 ON 권장', cta: '김도우미 켜기', target: '김도우미', done: false },
+  { text: '네이버 블로그 7일 발행 없음 — 직접 작성 또는 위임', cta: '작성', target: 'writer', done: false }
+];
+
+function signupComplete() {
+  const action = document.getElementById('signupTitle').textContent.replace(' — 가입', '');
+  state.signedIn = true;
+  state.requests.push({ action, at: Date.now() });
+  saveState();
+  document.getElementById('userText').textContent = '양변호사';
+  document.querySelector('#userPill .dot').classList.remove('d-warn');
+  document.querySelector('#userPill .dot').classList.add('d-ok');
+  document.getElementById('guestBanner').style.display = 'none';
+  document.querySelectorAll('.pill-demo').forEach(p => {
+    p.textContent = '추적 시작';
+    p.classList.remove('pill-demo');
+    p.classList.add('pill-mine');
+  });
+  state.guestExtras = { migratedAt: Date.now() };
+  closeSignup();
+  showToast('가입 완료 — 신청: ' + action);
+  renderRequests();
+}
+
+function renderActions() {
+  const q = document.getElementById('actionQueue');
+  if (!q) return;
+  const open = state.actions.filter(a => !a.done);
+  const done = state.actions.filter(a => a.done);
+  q.innerHTML = open.map((a, i) => {
+    const idx = state.actions.indexOf(a);
+    return '<div class="act-row"><div class="act-num">' + (i+1) + '</div><div class="act-text">' + escapeHtml(a.text) + '</div><button class="btn-warn" onclick="actClick(' + idx + ')">' + escapeHtml(a.cta) + '</button><button class="btn-2" onclick="actDone(' + idx + ')" title="완료">✓</button></div>';
+  }).join('') + (done.length ? '<div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-3);">완료 ' + done.length + '건 · ' + done.map(d => '<span style="text-decoration: line-through;">' + escapeHtml(d.text.slice(0,20)) + '</span>').join(', ') + '</div>' : '');
+}
+function actClick(i) {
+  const a = state.actions[i];
+  if (a.target === 'adcheck' || a.target === 'writer') goView(a.target);
+  else openSignup(a.target);
+}
+function actDone(i) {
+  state.actions[i].done = true;
+  saveState();
+  renderActions();
+  showToast('완료 처리');
+}
+
+function renderRequests() {
+  const el = document.getElementById('requestList');
+  if (!el) return;
+  if (!state.requests.length) {
+    el.innerHTML = '<div style="font-size: 11px; color: var(--text-3); padding: 4px 0;">신청 이력 없음.</div>';
+    return;
+  }
+  el.innerHTML = state.requests.slice(-5).reverse().map(r =>
+    '<div class="row" style="padding: 5px 0;"><div style="font-size: 12px;">' + escapeHtml(r.action) + '</div><div class="row-meta">' + new Date(r.at).toLocaleString('ko-KR', { month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit' }) + '</div></div>'
+  ).join('');
+}
+
+async function callClaude(prompt) {
+  if (typeof window.cowork !== 'undefined' && window.cowork.askClaude) {
+    try {
+      return await window.cowork.askClaude(prompt, []);
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+}
+
+function renderDiagnoseSummary(scores) {
+  return '<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border);">' +
+    Object.entries(scores).map(([k, v]) => {
+      const color = v >= 75 ? '#10B981' : v >= 50 ? '#F59E0B' : '#EF4444';
+      return '<div style="text-align: center;"><div style="font-size: 10px; color: var(--text-3); margin-bottom: 4px;">' + k + '</div><div style="font-size: 22px; font-weight: 600; color: ' + color + ';">' + v + '</div><div style="height: 3px; background: var(--surface-2); margin-top: 4px; border-radius: 2px; overflow: hidden;"><div style="height: 100%; background: ' + color + '; width: ' + v + '%;"></div></div></div>';
+    }).join('') + '</div>';
+}
+async function runDiagnose() {
+  const url = document.getElementById('diagnoseUrl').value.trim();
+  if (!url) { showToast('URL을 입력하세요'); return; }
+  const loading = document.getElementById('diagnoseLoading');
+  const result = document.getElementById('diagnoseResult');
+  result.classList.remove('shown');
+  loading.classList.add('shown');
+
+  const prompt = "다음 변호사 사무실 사이트의 디지털 자산 점수를 평가해줘: " + url + ". 한국 법률 SaaS 'LawOS' 관점에서 5개 카테고리 (사이트 헬스, SEO, 변협 광고규정, GEO·AI 검색, 콘텐츠 자산)별 점수 0-100점과 발견된 핵심 문제 5가지를 한국어로 간결히. 종합 점수도. 형식: 종합 XX/100, 카테고리별 점수, 핵심 문제 5개. 추측 금지, 변호사 도메인 페인 직격, 마크다운 헤더 없이 평문.";
+
+  const claudeResult = await callClaude(prompt);
+  loading.classList.remove('shown');
+
+  let text;
+  if (claudeResult) {
+    text = claudeResult;
+  } else {
+    text = "종합 67 / 100점\n\n[카테고리]\n사이트 헬스 72 · SEO 81 · 변협 54 · GEO 31 · 콘텐츠 76\n\n[핵심 문제 5건]\n1. 변협 §31 위반 카피 2건 ('전관 출신', '승소율 보장')\n2. AI 검색 인용 0건 (경쟁사 평균 5건)\n3. 페이지 속도 모바일 4.2초 (권장 2.5초)\n4. 메타 description 누락 7페이지\n5. 네이버 블로그 7일 발행 없음 (영정·저품 위험)\n\n* 라이브 askClaude 통합 미가용 시 데모 결과 표시. cowork artifact 환경에서 실시간 분석.";
+  }
+
+  const scores = { '사이트 헬스': 72, 'SEO': 81, '변협': 54, 'GEO': 31, '콘텐츠': 76 };
+  result.innerHTML = renderDiagnoseSummary(scores) + '<div style="font-size: 13px; line-height: 1.7; white-space: pre-wrap;">' + escapeHtml(text) + '</div>';
+  result.classList.add('shown');
+  state.diagnoseHistory.push({ url, text, at: new Date().toISOString() });
+  saveState();
+}
+
+function renderAdScore(score) {
+  const color = score < 30 ? '#10B981' : score < 60 ? '#F59E0B' : '#EF4444';
+  const label = score < 30 ? '안전' : score < 60 ? '주의' : '위반 위험';
+  return '<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--border);"><div style="font-size: 28px; font-weight: 600; color: ' + color + ';">' + score + '</div><div><div style="font-size: 13px; font-weight: 500; color: ' + color + ';">' + label + '</div><div style="font-size: 11px; color: var(--text-3);">변협 광고심사규정 위반 가능성</div></div></div>';
+}
+async function runAdCheck() {
+  const text = document.getElementById('adText').value.trim();
+  if (!text) { showToast('검증할 텍스트를 입력하세요'); return; }
+  const result = document.getElementById('adResult');
+  result.classList.remove('shown');
+  result.innerHTML = '<div style="color: var(--text-3); font-size: 12px;">검증 중...</div>';
+  result.classList.add('shown');
+
+  const prompt = "한국 변호사 광고 텍스트 변협 광고심사규정 위반 검사: \"" + text + "\". §23(광고 일반), §31(전관·과장·보장 표현 금지), §34(비교광고) 기준 위반 가능성 점수 0-100, 위반 조항, 수정안 1개를 한국어로 간결히. 평문.";
+
+  const claudeResult = await callClaude(prompt);
+
+  let out;
+  if (claudeResult) {
+    out = claudeResult;
+  } else {
+    const lower = text.toLowerCase();
+    const issues = [];
+    if (/전관|보장|승소율 \d+|확률 \d+/.test(text)) issues.push("§31 전관·과장·보장 표현 가능성");
+    if (/최고|최단|최저|국내 최/.test(text)) issues.push("§34 비교광고 표현");
+    if (/유리한|쉽게|간단히/.test(text)) issues.push("§23 광고 일반 — 사실 외 표현");
+    out = issues.length
+      ? "위반 가능성: " + Math.min(85, 40 + issues.length * 20) + "/100\n\n위반 조항:\n" + issues.map((i, k) => (k+1) + '. ' + i).join('\n') + "\n\n수정안:\n사실 기반 표현으로 변경 권장. '보장·최고·확실' 단어 제거. 사례·판례 인용으로 신뢰도 확보.\n\n* 라이브 askClaude 미가용 시 룰북 휴리스틱 결과."
+      : "위반 가능성: 8/100\n\n검토 결과: 명백한 위반 표현 미발견.\n변협 §23·§31·§34 1차 검토 통과.\n\n* 라이브 askClaude 미가용 시 룰북 휴리스틱 결과.";
+  }
+
+  const lower = text.toLowerCase();
+  let score = 0;
+  if (/전관|보장|승소율 \d+|확률 \d+/.test(text)) score += 35;
+  if (/최고|최단|최저|국내 최/.test(text)) score += 25;
+  if (/유리한|쉽게|간단히|확실/.test(text)) score += 20;
+  if (text.length < 5) score = 0;
+  score = Math.min(95, score);
+  result.innerHTML = renderAdScore(score) + '<div style="font-size: 12px; line-height: 1.6; white-space: pre-wrap;">' + escapeHtml(out) + '</div>';
+  state.adHistory.unshift({ text, result: out, score, at: new Date().toISOString() });
+  if (state.adHistory.length > 5) state.adHistory.pop();
+  saveState();
+  renderAdHistory();
+}
+
+function renderAdHistory() {
+  const el = document.getElementById('adHistory');
+  if (!state.adHistory.length) {
+    el.innerHTML = '<div style="color: var(--text-3);">아직 검증 이력 없음. 위에서 시작.</div>';
+    return;
+  }
+  el.innerHTML = state.adHistory.map(h => {
+    const date = new Date(h.at).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const preview = h.text.length > 40 ? h.text.slice(0, 40) + '...' : h.text;
+    return '<div style="padding: 8px 0; border-top: 1px solid var(--border); font-size: 12px; line-height: 1.5;"><div style="color: var(--text);">' + preview + '</div><div style="color: var(--text-3); font-size: 11px; margin-top: 2px;">' + date + '</div></div>';
+  }).join('');
+}
+
+async function runSkeleton() {
+  const topic = document.getElementById('writerTopic').value.trim();
+  const fmt = document.getElementById('writerFormat').value;
+  if (!topic) { showToast('토픽을 입력하세요'); return; }
+  showToast('AI 골격 생성 중...');
+
+  const prompt = "한국 변호사 블로그 글 골격 생성. 토픽: \"" + topic + "\". 포맷: \"" + fmt + "\". 제목 1개 + H2 5개 + 각 H2 아래 1~2문장 골격 + 사례·판례 빈칸 표시. 변협 광고규정 통과 표현. 평문 마크다운, 사례·판례·1인칭은 [변호사 본인 추가] 표시.";
+
+  const claudeResult = await callClaude(prompt);
+
+  let title, body;
+  if (claudeResult) {
+    const lines = claudeResult.split('\n').filter(l => l.trim());
+    title = lines[0].replace(/^#+\s*/, '').replace(/^제목[:：]?\s*/, '');
+    body = lines.slice(1).join('\n');
+  } else {
+    title = topic + " — 변호사가 알려드립니다";
+    body = "## 1. 무엇이 바뀌었나\n2026년 4월 통과된 개정 내용 요약. 처벌·기준 변경.\n\n## 2. 사례 분석\n[변호사 본인 사례 1개 추가]\n\n## 3. 핵심 쟁점 3가지\n적용 시점, 보증 범위, 우선변제권.\n\n## 4. 적용 판례\n[판례 번호 추가 — 대법원 2024다XXXXXX]\n\n## 5. 변호사 조언\n[본인 의견·경험 추가]\n\nFAQ\nQ. 소급 적용?\nA. 시행일 이후 사건부터.\n\n* 라이브 askClaude 미가용 시 데모 골격.";
+  }
+
+  document.getElementById('writerTitle').value = title;
+  document.getElementById('writerBody').value = body;
+  state.draft = { title, body };
+  saveState();
+  showToast('골격 생성 완료. 사례·판례를 채워넣으세요.');
+}
+
+let autoSaveTimer = null;
+function scheduleAutoSave() {
+  const label = document.getElementById('autoSaveLabel');
+  label.textContent = '입력 중...';
+  label.style.color = 'var(--text-3)';
+  clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(() => {
+    state.draft = {
+      title: document.getElementById('writerTitle').value,
+      body: document.getElementById('writerBody').value
+    };
+    saveState();
+    label.textContent = '✓ 자동 저장됨';
+    label.style.color = '#10B981';
+  }, 1500);
+}
+
+function saveDraft() {
+  const title = document.getElementById('writerTitle').value.trim();
+  const body = document.getElementById('writerBody').value.trim();
+  if (!title) { showToast('제목을 입력하세요'); return; }
+  state.draft = { title, body };
+  const existing = state.contents.find(c => c.title === title);
+  if (existing) {
+    existing.body = body;
+    existing.updatedAt = Date.now();
+    showToast('수정 저장');
+  } else {
+    state.contents.push({
+      title, body, status: '작성중',
+      ai: parseInt(document.getElementById('aiRatio').value),
+      createdAt: Date.now()
+    });
+    showToast('작성중 큐에 추가');
+  }
+  saveState();
+  renderQueue();
+}
+
+function requestReview() {
+  const title = document.getElementById('writerTitle').value.trim();
+  if (!title) { showToast('제목 필요'); return; }
+  saveDraft();
+  const c = state.contents.find(x => x.title === title);
+  if (c) {
+    c.status = '검토';
+    saveState();
+    renderQueue();
+    showToast('검토 큐로 이동 — 변호사 검토 대기');
+  }
+}
+
+function updateAiRatio() {
+  const v = document.getElementById('aiRatio').value;
+  document.getElementById('aiRatioVal').textContent = v + '%';
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'lawos_data_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('데이터 JSON 다운로드 완료');
+}
+function resetData() {
+  if (!confirm('모든 로컬 데이터를 초기화합니다. 계속?')) return;
+  localStorage.removeItem(STATE_KEY);
+  location.reload();
+}
+
+function toggleSiteMenu() {
+  const m = document.getElementById('siteMenu');
+  m.style.display = m.style.display === 'none' ? 'block' : 'none';
+}
+function selectSite(domain, name) {
+  document.getElementById('siteLabel').textContent = domain;
+  document.getElementById('siteMenu').style.display = 'none';
+  state.currentSite = { domain, name };
+  saveState();
+  const active = document.querySelector('.sidebar-nav-item.active');
+  const view = active ? active.dataset.view : 'dashboard';
+  goView(view);
+  showToast('사이트 전환 — ' + name);
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('#siteLabel') && !e.target.closest('#siteMenu')) {
+    const m = document.getElementById('siteMenu');
+    if (m) m.style.display = 'none';
+  }
+});
+
+state.keywords = state.keywords || [];
+state.channels = state.channels || [];
+state.contents = state.contents || [];
+state.inbox = state.inbox || [
+  { ch: '홈페이지 폼', name: '김OO', topic: '개인회생 상담 문의', at: '2시간 전', read: false },
+  { ch: '카카오 채널', name: '이OO', topic: '음주운전 사건 문의', at: '5시간 전', read: false },
+  { ch: '로톡', name: '박OO', topic: '협의이혼 절차 질문', at: '1일 전', read: false },
+  { ch: '당근', name: 'choi***', topic: '전세사기 변호사', at: '1일 전', read: false },
+  { ch: '네이버 플레이스', name: '정OO', topic: '코인사기 회복 상담', at: '2일 전', read: false },
+  { ch: '인스타 DM', name: 'min***', topic: '명예훼손 대응', at: '2일 전', read: true },
+  { ch: '유튜브 댓글', name: 'park****', topic: '영상 관련 문의', at: '3일 전', read: true },
+  { ch: '이메일', name: '회사명', topic: '법인 자문 견적', at: '3일 전', read: true }
+];
+
+function renderQueue() {
+  const cols = ['아이디어', '작성중', '검토', '발행', '완료'];
+  const counts = [0, 0, 0, 0, 0];
+  state.contents.forEach(c => {
+    const i = cols.indexOf(c.status);
+    if (i >= 0) counts[i]++;
+  });
+  const total = state.contents.length;
+  document.getElementById('ctCount').textContent = total + '건';
+  const mini = document.getElementById('ctMini');
+  if (mini) mini.innerHTML = cols.map((n, i) =>
+    '<div style="background: var(--surface-2); border-radius: 5px; padding: 7px 4px; text-align: center;"><div style="font-size: 9px; color: var(--text-3); margin-bottom: 2px;">' + n + '</div><div style="font-size: 16px; font-weight: 600;">' + counts[i] + '</div></div>'
+  ).join('');
+}
+
+function renderInbox() {
+  const list = document.getElementById('inboxList');
+  if (!list) return;
+  list.innerHTML = state.inbox.slice(0, 5).map((m, i) =>
+    '<div class="row" style="padding: 7px 0; cursor: pointer;" onclick="readInbox(' + i + ')"><div style="flex: 1; min-width: 0;"><div style="font-size: 12px; ' + (m.read ? 'color: var(--text-3);' : 'font-weight: 500;') + '">' + escapeHtml(m.topic) + '</div><div style="font-size: 10px; color: var(--text-3);">' + escapeHtml(m.ch) + ' · ' + escapeHtml(m.name) + ' · ' + escapeHtml(m.at) + '</div></div>' + (m.read ? '' : '<span class="dot d-warn"></span>') + '</div>'
+  ).join('');
+}
+function renderReview() {
+  const list = document.getElementById('reviewList');
+  if (!list) return;
+  const reviews = state.contents.filter(c => c.status === '검토');
+  document.getElementById('reviewCount').textContent = reviews.length + '건';
+  if (!reviews.length) {
+    list.innerHTML = '<div style="font-size: 11px; color: var(--text-3); padding: 6px 0;">대기 중인 검수 없음. 콘텐츠 작성 후 "검수 큐로" 클릭.</div>';
+    return;
+  }
+  list.innerHTML = reviews.map(r => {
+    const idx = state.contents.indexOf(r);
+    return '<div style="padding: 10px 0; border-top: 1px solid var(--border);"><div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">' + escapeHtml(r.title) + '</div><div style="font-size: 11px; color: var(--text-3); margin-bottom: 8px;">AI ' + r.ai + '% · 변협 통과 · SEO 78점 · 작성 ' + new Date(r.createdAt).toLocaleDateString('ko-KR') + '</div><div style="display: flex; gap: 6px;"><button class="btn-2" onclick="rejectReview(' + idx + ')">반려</button><button class="btn-warn" onclick="approveReview(' + idx + ')">승인 → 발행 예정</button></div></div>';
+  }).join('');
+}
+function approveReview(i) {
+  state.contents[i].status = '발행';
+  saveState();
+  renderQueue();
+  renderReview();
+  showToast('승인 — 발행 예정 큐로 이동');
+}
+function rejectReview(i) {
+  state.contents[i].status = '작성중';
+  saveState();
+  renderQueue();
+  renderReview();
+  showToast('반려 — 작성중으로 되돌림');
+}
+
+function readInbox(i) {
+  state.inbox[i].read = true;
+  saveState();
+  renderInbox();
+  showToast('응답 대기 — 인테이크봇 연결 시 자동 1차 응대');
+}
+
+function estimateKeyword(text) {
+  const len = text.length;
+  const baseVol = Math.max(500, Math.floor(50000 / Math.max(2, len/2)));
+  const vol = Math.floor(baseVol * (0.6 + Math.random() * 0.8) / 100) * 100;
+  const competition = Math.min(99, Math.max(15, Math.floor(50 + (text.includes('변호사') ? 30 : 0) - len)));
+  return { vol, competition };
+}
+function addKeyword() {
+  const v = document.getElementById('kwInput').value.trim();
+  if (!v) return;
+  if (state.keywords.length >= 5 && !state.signedIn) {
+    showToast('Free 한도 5개 초과 — 가입 후 30개');
+    openSignup('키워드 30개 한도');
+    return;
+  }
+  const est = estimateKeyword(v);
+  state.keywords.push({ text: v, addedAt: Date.now(), rank: '측정 대기', vol: est.vol, comp: est.competition });
+  saveState();
+  document.getElementById('kwInput').value = '';
+  renderKeywords();
+  showToast('등록 — 월 ' + est.vol.toLocaleString() + ' 검색 · 경쟁 ' + est.competition);
+}
+function removeKeyword(i) {
+  state.keywords.splice(i, 1);
+  saveState();
+  renderKeywords();
+}
+function sortKeywords() {
+  state.keywords.sort((a, b) => (b.vol || 0) - (a.vol || 0));
+  saveState();
+  renderKeywords();
+  showToast('검색량 순으로 정렬');
+}
+function renderKeywords() {
+  const list = document.getElementById('kwList');
+  document.getElementById('kwCount').textContent = state.keywords.length + '/5';
+  if (!state.keywords.length) {
+    list.innerHTML = '<div style="font-size: 11px; color: var(--text-3); padding: 6px 0;">아직 키워드 없음. 아래에서 추가.</div>';
+    return;
+  }
+  list.innerHTML = state.keywords.map((k, i) => {
+    const meta = k.vol ? '월 ' + k.vol.toLocaleString() + ' · 경쟁 ' + k.comp : k.rank;
+    return '<div class="row" style="padding: 5px 0;"><div style="font-size: 12px; min-width: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + escapeHtml(k.text) + '</div><div style="display: flex; gap: 8px; align-items: center;"><span class="row-meta" style="font-size: 10px;">' + meta + '</span><span style="cursor: pointer; color: var(--text-3); font-size: 14px;" onclick="removeKeyword(' + i + ')">×</span></div></div>';
+  }).join('');
+}
+
+function addChannel() {
+  const t = document.getElementById('chType').value;
+  const u = document.getElementById('chUrl').value.trim();
+  if (!u) return;
+  state.channels.push({ type: t, url: u, addedAt: Date.now(), status: 'ok' });
+  saveState();
+  document.getElementById('chUrl').value = '';
+  renderChannels();
+}
+function removeChannel(i) {
+  state.channels.splice(i, 1);
+  saveState();
+  renderChannels();
+}
+function renderChannels() {
+  const list = document.getElementById('chList');
+  document.getElementById('chCount').textContent = state.channels.length + '개';
+  if (!state.channels.length) {
+    list.innerHTML = '<div style="font-size: 11px; color: var(--text-3); padding: 6px 0;">등록된 채널 없음. 아래에서 등록.</div>';
+    return;
+  }
+  list.innerHTML = state.channels.map((c, i) =>
+    '<div class="row" style="padding: 5px 0;"><div style="font-size: 12px;"><span class="dot d-ok"></span> ' + escapeHtml(c.type) + '</div><div style="display: flex; gap: 8px; align-items: center;"><span class="row-meta">' + escapeHtml(c.url.length > 22 ? c.url.slice(0,22)+'...' : c.url) + '</span><span style="cursor: pointer; color: var(--text-3); font-size: 14px;" onclick="removeChannel(' + i + ')">×</span></div></div>'
+  ).join('');
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function init() {
+  if (state.signedIn) {
+    document.getElementById('userText').textContent = '양변호사';
+    document.querySelector('#userPill .dot').classList.remove('d-warn');
+    document.querySelector('#userPill .dot').classList.add('d-ok');
+    document.getElementById('guestBanner').style.display = 'none';
+  }
+  if (state.draft) {
+    document.getElementById('writerTitle').value = state.draft.title || '';
+    document.getElementById('writerBody').value = state.draft.body || '';
+  }
+  renderAdHistory();
+  renderKeywords();
+  renderChannels();
+  renderQueue();
+  renderInbox();
+  renderReview();
+  renderRequests();
+  renderActions();
+  document.getElementById('requestCount').textContent = state.requests.length + '건';
+  renderSiteCompare();
+  renderFeed();
+  renderReviewQueue();
+  renderInboxOver();
+  renderKwDetail();
+  renderWebsites();
+  renderSNS();
+  renderBPO();
+  renderQualifyHistory();
+  updateSidebarTags();
+}
+const FEED_TOPICS = [
+  { topic: '전세사기 처벌강화법 통과', src: '네이버 뉴스', cat: '임대차', score: 95, time: '2시간 전', summary: '임대인 처벌 7년→10년 상향. 보증보험 가입 의무화 확대.', written: false },
+  { topic: '음주운전 양형기준 개정', src: '법률신문', cat: '형사', score: 87, time: '4시간 전', summary: '대법원 양형위원회 새 기준 발표. 재범 가중처벌 확대.', written: false },
+  { topic: '코인사기 회복 100억 판례', src: '대법원', cat: '형사', score: 82, time: '6시간 전', summary: '리딩방 사기 피해자 회복금 청구 인용 — 첫 사례.', written: false },
+  { topic: '협의이혼 양육비 산정 새 기준', src: '구글 트렌드', cat: '이혼', score: 78, time: '8시간 전', summary: '서울가정법원 양육비 산정표 개정. 소득 기준 상향.', written: false },
+  { topic: '임대차 보증금 반환 우선변제권', src: '네이버 카페', cat: '임대차', score: 71, time: '12시간 전', summary: '소액 임차인 우선변제 한도 인상 검토 중.', written: false },
+  { topic: '학교폭력 처벌 강화 법안', src: '법률신문', cat: '기타', score: 68, time: '1일 전', summary: '가해자 처벌 + 피해자 보호 의무 확대 법안 발의.', written: false },
+  { topic: '의료사고 손해배상 입증책임', src: '대법원', cat: '기타', score: 65, time: '1일 전', summary: '입증책임 환자→병원 전환 판례. 의료분쟁 변호사 수요 증가 예상.', written: false },
+  { topic: '명예훼손 SNS 처벌', src: '네이버 뉴스', cat: '기타', score: 62, time: '1일 전', summary: '온라인 모욕·명예훼손 처벌 강화. 악플 대응 수임 증가.', written: false },
+  { topic: '산재 인정 기준 확대', src: '법률신문', cat: '기타', score: 59, time: '2일 전', summary: '뇌심혈관 질환 산재 인정 폭 확대. 근로복지공단 새 지침.', written: false },
+  { topic: '상속포기 기한 분쟁', src: '네이버 카페', cat: '기타', score: 56, time: '2일 전', summary: '안 날 기준 해석 판례 변경. 상속 분쟁 변호사 수임 증가.', written: false },
+  { topic: '보이스피싱 피해 회복', src: '블라인드', cat: '형사', score: 52, time: '2일 전', summary: '은행 책임 인정 판례 증가. 피해자 손배 청구 수임 활발.', written: false },
+  { topic: '음주측정 거부 처벌', src: '보배드림', cat: '형사', score: 49, time: '3일 전', summary: '거부 시 음주운전 동급 처벌. 운전자 문의 증가.', written: false },
+  { topic: '가정폭력 보호명령 신청', src: '법률신문', cat: '이혼', score: 47, time: '3일 전', summary: '신청 절차 간소화. 변호사 동행 신청 권장.', written: false },
+  { topic: '부당해고 구제 신청', src: '네이버 뉴스', cat: '기타', score: 44, time: '3일 전', summary: '노동위원회 구제 인용율 상승. 근로자 측 변호사 수임 증가.', written: false },
+  { topic: '개인회생 면책 기준', src: '대법원', cat: '회생', score: 41, time: '4일 전', summary: '면책 결정 기준 완화 판례. 신청 증가 예상.', written: false }
+];
+
+let feedFilter = 'all';
+function filterFeed(cat) {
+  feedFilter = cat;
+  document.querySelectorAll('[data-feed]').forEach(b => {
+    if (b.dataset.feed === cat) {
+      b.style.background = 'var(--text)';
+      b.style.color = '#fff';
+      b.style.borderColor = 'var(--text)';
+    } else {
+      b.style.background = 'var(--surface-2)';
+      b.style.color = 'var(--text)';
+      b.style.borderColor = 'var(--border)';
+    }
+  });
+  renderFeed();
+}
+function srcColor(src) {
+  if (src === '대법원') return '#1E40AF';
+  if (src === '법률신문') return '#065F46';
+  if (src === '네이버 뉴스') return '#10B981';
+  if (src === '네이버 카페') return '#92400E';
+  if (src === '구글 트렌드') return '#52525B';
+  return '#A1A1AA';
+}
+function renderFeed() {
+  const mini = document.getElementById('trendMini');
+  const list = document.getElementById('feedList');
+  const top5 = FEED_TOPICS.slice(0, 5);
+  if (mini) {
+    mini.innerHTML = top5.map(t =>
+      '<div class="row" style="padding: 7px 0; cursor: pointer;" onclick="writeTopic(\'' + escapeHtml(t.topic).replace(/'/g, '\\\'') + '\')"><div style="flex: 1; min-width: 0;"><div style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + escapeHtml(t.topic) + '</div><div style="font-size: 10px; color: var(--text-3);">' + t.src + ' · ' + t.time + '</div></div><div style="display: flex; align-items: center; gap: 8px;"><span class="row-meta up" style="font-size: 11px;">+' + t.score + '%</span><button class="btn-2" onclick="event.stopPropagation(); writeTopic(\'' + escapeHtml(t.topic).replace(/'/g, '\\\'') + '\')" style="font-size: 10px; padding: 3px 8px;">글쓰기</button></div></div>'
+    ).join('');
+  }
+  if (list) {
+    const filtered = feedFilter === 'all' ? FEED_TOPICS : FEED_TOPICS.filter(t => t.cat === feedFilter);
+    list.innerHTML = filtered.map(t => {
+      const written = (state.contents || []).some(c => c.title.includes(t.topic.split(' ')[0]));
+      return '<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px;">' +
+        '<div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">' +
+          '<span style="font-size: 10px; padding: 2px 7px; border-radius: 4px; background: ' + srcColor(t.src) + '20; color: ' + srcColor(t.src) + '; font-weight: 500;">' + t.src + '</span>' +
+          '<span style="font-size: 10px; color: var(--text-3);">' + t.cat + '</span>' +
+          '<span style="margin-left: auto; font-size: 11px; color: var(--text-3);">' + t.time + '</span>' +
+        '</div>' +
+        '<div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">' + escapeHtml(t.topic) + '</div>' +
+        '<div style="font-size: 12px; color: var(--text-2); line-height: 1.55; margin-bottom: 10px;">' + escapeHtml(t.summary) + '</div>' +
+        '<div style="display: flex; align-items: center; gap: 10px;">' +
+          '<div style="font-size: 11px; color: var(--text-3); flex: 1;">매칭 <strong style="color: ' + (t.score >= 70 ? '#10B981' : t.score >= 50 ? '#F59E0B' : 'var(--text-3)') + ';">+' + t.score + '%</strong></div>' +
+          (written ? '<span style="font-size: 11px; color: var(--success-fg); padding: 4px 10px; background: var(--success-bg); border-radius: 5px;">✓ 작성됨</span>' : '<button class="btn-warn" onclick="writeTopic(\'' + escapeHtml(t.topic).replace(/'/g, '\\\'') + '\')">글 쓰기</button>') +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+}
+function writeTopic(topic) {
+  document.getElementById('writerTopic').value = topic;
+  goView('writer');
+  setTimeout(() => {
+    if (confirm('AI 골격을 즉시 생성하시겠습니까?')) runSkeleton();
+  }, 400);
+}
+
+function renderSiteCompare() {
+  const el = document.getElementById('siteCompare');
+  if (!el) return;
+  document.getElementById('siteCount').textContent = state.sites.length + '개';
+  const cur = state.currentSite ? state.currentSite.domain : 'welcome-law.kr';
+  el.innerHTML = state.sites.map(s => {
+    const isActive = s.domain === cur;
+    const hColor = s.health >= 80 ? '#10B981' : s.health >= 60 ? '#F59E0B' : '#EF4444';
+    const chSign = s.change > 0 ? '▲' : s.change < 0 ? '▼' : '·';
+    const chCol = s.change > 0 ? 'var(--success-fg)' : s.change < 0 ? 'var(--danger-fg)' : 'var(--text-3)';
+    return '<div style="display: grid; grid-template-columns: 1.4fr 60px repeat(4, 50px) 50px 80px; gap: 8px; align-items: center; padding: 10px 12px; background: ' + (isActive ? 'var(--surface-2)' : 'var(--surface)') + '; border: 1px solid var(--border); border-radius: 6px; cursor: pointer;" onclick="selectSite(\'' + s.domain + '\', \'' + s.name + '\')">' +
+      '<div><div style="font-size: 13px; font-weight: 500;">' + escapeHtml(s.name) + (isActive ? ' <span style="font-size: 10px; color: var(--text-3); font-weight: 400;">선택됨</span>' : '') + '</div><div style="font-size: 10px; color: var(--text-3);">' + s.domain + '</div></div>' +
+      '<div style="text-align: center;"><div style="font-size: 18px; font-weight: 600; color: ' + hColor + ';">' + s.health + '</div><div style="font-size: 9px; color: var(--text-3);">헬스</div></div>' +
+      '<div style="text-align: center;"><div style="font-size: 14px; font-weight: 500;">' + s.seo + '</div><div style="font-size: 9px; color: var(--text-3);">SEO</div></div>' +
+      '<div style="text-align: center;"><div style="font-size: 14px; font-weight: 500;">' + s.ad + '</div><div style="font-size: 9px; color: var(--text-3);">변협</div></div>' +
+      '<div style="text-align: center;"><div style="font-size: 14px; font-weight: 500;">' + s.geo + '</div><div style="font-size: 9px; color: var(--text-3);">GEO</div></div>' +
+      '<div style="text-align: center;"><div style="font-size: 14px; font-weight: 500;">' + s.content + '</div><div style="font-size: 9px; color: var(--text-3);">콘텐츠</div></div>' +
+      '<div style="text-align: center; color: ' + chCol + '; font-size: 12px; font-weight: 500;">' + chSign + ' ' + Math.abs(s.change) + '</div>' +
+      '<button class="btn-2" onclick="event.stopPropagation(); openDetailFor(\'' + s.domain + '\')" style="font-size: 10px;">상세</button>' +
+    '</div>';
+  }).join('') + '<div onclick="openSignup(\'새 사이트 추가\')" style="padding: 10px 12px; border: 1px dashed var(--border-2); border-radius: 6px; text-align: center; font-size: 12px; color: var(--text-3); cursor: pointer;">+ 새 사이트 추가 — 가입 후 무제한</div>';
+}
+function openDetailFor(domain) {
+  const s = state.sites.find(x => x.domain === domain);
+  if (!s) return;
+  selectSite(s.domain, s.name);
+  goView('diagnose');
+  showToast(s.name + ' 상세 진단으로 이동');
+}
+
+function updateSidebarTags() {
+  const sk = document.getElementById('sbKw'); if (sk) sk.textContent = state.keywords.length + '/5';
+  const sc = document.getElementById('sbCh'); if (sc) sc.textContent = state.channels.length + '개';
+  const sct = document.getElementById('sbCt'); if (sct) sct.textContent = state.contents.length + '건';
+  const sr = document.getElementById('sbReq'); if (sr) sr.textContent = state.requests.length + '건';
+}
+
+function renderReviewQueue() {
+  const list = document.getElementById('reviewQList');
+  if (!list) return;
+  const items = state.contents.filter(c => c.status === '검토');
+  document.getElementById('reviewQTotal').textContent = items.length + '건 대기';
+  if (!items.length) {
+    list.innerHTML = '<div class="card" style="text-align: center; color: var(--text-3); padding: 32px;">검토 대기 없음. 콘텐츠 작성 후 "검수 큐로" 클릭.</div>';
+    return;
+  }
+  list.innerHTML = items.map(r => {
+    const idx = state.contents.indexOf(r);
+    return '<div class="card"><div style="display: flex; gap: 8px; margin-bottom: 6px;"><span style="font-size: 10px; padding: 2px 7px; background: var(--info-bg); color: var(--info-fg); border-radius: 4px; font-weight: 500;">콘텐츠</span><span style="font-size: 10px; color: var(--text-3);">' + new Date(r.createdAt).toLocaleDateString('ko-KR') + '</span></div><div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">' + escapeHtml(r.title) + '</div><div style="font-size: 11px; color: var(--text-3); margin-bottom: 10px;">김마케터 작성 → 양변호사 검토 대기 · AI ' + r.ai + '% · SEO 78점 · 변협 통과</div><div style="display: flex; gap: 6px;"><button class="btn-2">미리보기</button><button class="btn-2" onclick="rejectReview(' + idx + ')">반려</button><button class="btn-warn" onclick="approveReview(' + idx + ')">승인 → 발행</button></div></div>';
+  }).join('');
+}
+
+function renderInboxOver() {
+  const el = document.getElementById('inboxOver');
+  if (!el) return;
+  el.innerHTML = state.inbox.filter(m => !m.read).slice(0, 5).map((m, i) =>
+    '<div style="padding: 10px 0; border-top: ' + (i ? '1px solid var(--border)' : 'none') + ';"><div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;"><span style="font-size: 10px; padding: 2px 7px; background: var(--danger-bg); color: var(--danger-fg); border-radius: 4px; font-weight: 500;">미응답</span><span style="font-size: 11px; color: var(--text-3);">' + escapeHtml(m.ch) + ' · ' + escapeHtml(m.at) + '</span></div><div style="font-size: 13px; font-weight: 500; margin-bottom: 2px;">' + escapeHtml(m.topic) + '</div><div style="font-size: 12px; color: var(--text-2); margin-bottom: 8px;">' + escapeHtml(m.name) + '님 · 사건 분류 미정</div><div style="display: flex; gap: 6px;"><button class="btn-2" onclick="readInbox(' + i + ')">응답</button><button class="btn-2">분류 (인테이크봇)</button><button class="btn-warn" onclick="openSignup(\'박매니저 활성화\')">박매니저로 자동화</button></div></div>'
+  ).join('');
+}
+
+state.qualifyHistory = state.qualifyHistory || [];
+
+function runQualify() {
+  const text = document.getElementById('qualifyInput').value.trim();
+  if (!text) { showToast('텍스트를 입력하세요'); return; }
+
+  let ruleScore = 0;
+  const flags = [];
+  if (/광고|마케팅|홍보|SEO|DB|영업|제휴/i.test(text)) { ruleScore -= 60; flags.push('잡콜 키워드 감지'); }
+  if (/보이스피싱|투자|급전|환급|당첨|검찰\s*수사/i.test(text)) { ruleScore -= 40; flags.push('피싱 패턴'); }
+  if (text.length < 15) { ruleScore -= 30; flags.push('너무 짧음'); }
+
+  let caseType = '미분류';
+  let estFee = 0;
+  let urgency = '보통';
+  if (/이혼|위자료|양육권|재산분할/i.test(text)) { caseType = '이혼'; estFee = 350; ruleScore += 40; }
+  else if (/회생|파산|면책|채무/i.test(text)) { caseType = '개인회생'; estFee = 280; ruleScore += 35; }
+  else if (/음주운전|구속|기소|형사|사기/i.test(text)) { caseType = '형사'; estFee = 500; ruleScore += 50; }
+  else if (/임대차|보증금|전세|명도/i.test(text)) { caseType = '임대차'; estFee = 220; ruleScore += 30; }
+  else if (/상속|유증|상속포기/i.test(text)) { caseType = '상속'; estFee = 320; ruleScore += 35; }
+  else if (/해고|임금|산재|노동/i.test(text)) { caseType = '노무'; estFee = 200; ruleScore += 25; }
+  if (/긴급|즉시|오늘|내일|지금/i.test(text)) { urgency = '긴급'; ruleScore += 20; }
+  if (caseType === '미분류') ruleScore -= 20;
+
+  const llmScore = Math.min(60, Math.max(-30, ruleScore + (Math.random() * 20 - 10)));
+  const finalScore = Math.round(0.4 * ruleScore + 0.6 * llmScore);
+
+  let classification, color;
+  if (finalScore >= 30) { classification = '진성콜'; color = 'var(--success-fg)'; }
+  else if (finalScore >= -10) { classification = '보류'; color = 'var(--warn-fg)'; }
+  else { classification = '잡콜'; color = 'var(--danger-fg)'; }
+
+  const priority = classification === '진성콜' ? Math.min(5, Math.max(1, Math.floor((estFee / 100) + (urgency === '긴급' ? 1 : 0)))) : 0;
+  const confidence = Math.min(95, Math.max(55, 70 + Math.abs(finalScore)));
+
+  const html =
+    '<div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px;">' +
+      '<div style="background: var(--surface-2); padding: 12px 14px; border-radius: 8px;"><div style="font-size: 10px; color: var(--text-3); margin-bottom: 4px;">분류</div><div style="font-size: 18px; font-weight: 600; color: ' + color + ';">' + classification + '</div><div style="font-size: 10px; color: var(--text-3); margin-top: 2px;">신뢰도 ' + confidence + '%</div></div>' +
+      '<div style="background: var(--surface-2); padding: 12px 14px; border-radius: 8px;"><div style="font-size: 10px; color: var(--text-3); margin-bottom: 4px;">사건 유형</div><div style="font-size: 18px; font-weight: 600;">' + caseType + '</div><div style="font-size: 10px; color: var(--text-3); margin-top: 2px;">긴급도 ' + urgency + '</div></div>' +
+      '<div style="background: var(--surface-2); padding: 12px 14px; border-radius: 8px;"><div style="font-size: 10px; color: var(--text-3); margin-bottom: 4px;">예상 수임금액</div><div style="font-size: 18px; font-weight: 600;">' + (estFee ? estFee + '만원' : '미산정') + '</div><div style="font-size: 10px; color: var(--text-3); margin-top: 2px;">우선순위 ' + (priority || '-') + '/5</div></div>' +
+    '</div>' +
+    (flags.length ? '<div style="font-size: 11px; color: var(--text-3); padding: 8px 0; border-top: 1px solid var(--border);"><strong>감지 신호:</strong> ' + flags.join(' · ') + '</div>' : '') +
+    '<div style="display: flex; gap: 6px; margin-top: 10px;">' +
+      '<button class="btn-2" onclick="qualifyFeedback(\'correct\')">분류 정확</button>' +
+      '<button class="btn-2" onclick="qualifyFeedback(\'wrong\')">잘못 분류 (피드백)</button>' +
+      (classification === '진성콜' ? '<button class="btn-warn" onclick="goView(\'review\'); showToast(\'검수 큐 추가\')">변호사 검수 큐로</button>' : '') +
+    '</div>';
+
+  document.getElementById('qualifyResult').innerHTML = html;
+  document.getElementById('qualifyResult').style.display = 'block';
+
+  state.qualifyHistory.unshift({ text: text.slice(0, 80), classification, caseType, estFee, score: finalScore, at: Date.now() });
+  if (state.qualifyHistory.length > 8) state.qualifyHistory.pop();
+  saveState();
+  renderQualifyHistory();
+}
+
+function qualifyFeedback(type) {
+  showToast(type === 'correct' ? '피드백 반영 — 분류 강화' : '피드백 반영 — 룰셋 재학습 트리거');
+}
+
+function renderQualifyHistory() {
+  const el = document.getElementById('qualifyHistory');
+  if (!el) return;
+  if (!state.qualifyHistory.length) {
+    el.innerHTML = '<div style="font-size: 11px; color: var(--text-3); padding: 6px 0;">분류 이력 없음. 위에서 시작.</div>';
+    return;
+  }
+  el.innerHTML = state.qualifyHistory.map(h => {
+    const col = h.classification === '진성콜' ? 'var(--success-fg)' : h.classification === '잡콜' ? 'var(--danger-fg)' : 'var(--warn-fg)';
+    return '<div class="row" style="padding: 7px 0;"><div style="flex: 1; min-width: 0;"><div style="font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">' + escapeHtml(h.text) + '</div><div style="font-size: 10px; color: var(--text-3);">' + h.caseType + ' · ' + (h.estFee ? h.estFee + '만' : '-') + '</div></div><span style="font-size: 11px; font-weight: 500; color: ' + col + ';">' + h.classification + '</span></div>';
+  }).join('');
+}
+
+function renderWebsites() {
+  const el = document.getElementById('webList');
+  const cnt = document.getElementById('webCount');
+  if (!el) return;
+  cnt.textContent = state.sites.length + '개 사이트';
+  el.innerHTML = state.sites.map(s => {
+    const hCol = s.health >= 80 ? '#10B981' : s.health >= 60 ? '#F59E0B' : '#EF4444';
+    return '<div style="display: grid; grid-template-columns: 1.5fr 80px repeat(4, 60px) 100px 80px; gap: 10px; align-items: center; padding: 12px 14px; background: var(--surface-2); border-radius: 6px;">' +
+      '<div><div style="font-size: 13px; font-weight: 500;">' + escapeHtml(s.name) + '</div><div style="font-size: 10px; color: var(--text-3);">' + s.domain + '</div></div>' +
+      '<div style="text-align: center;"><div style="font-size: 18px; font-weight: 600; color: ' + hCol + ';">' + s.health + '</div><div style="font-size: 9px; color: var(--text-3);">헬스</div></div>' +
+      '<div style="text-align: center;"><div style="font-size: 13px; font-weight: 500;">' + s.seo + '</div><div style="font-size: 9px; color: var(--text-3);">SEO</div></div>' +
+      '<div style="text-align: center;"><div style="font-size: 13px; font-weight: 500;">' + s.geo + '</div><div style="font-size: 9px; color: var(--text-3);">GEO</div></div>' +
+      '<div style="text-align: center;"><div style="font-size: 13px; font-weight: 500;">' + s.content + '</div><div style="font-size: 9px; color: var(--text-3);">콘텐츠</div></div>' +
+      '<div style="text-align: center;"><div style="font-size: 13px; font-weight: 500;">' + (s.change > 0 ? '+' : '') + s.change + '</div><div style="font-size: 9px; color: var(--text-3);">변동</div></div>' +
+      '<button class="btn-2" onclick="event.stopPropagation(); selectSite(\'' + s.domain + '\', \'' + s.name + '\'); goView(\'diagnose\')" style="font-size: 11px;">진단 →</button>' +
+      '<button class="btn-warn" onclick="openSignup(\'' + escapeHtml(s.name) + ' SEO 위임\')" style="font-size: 10px;">★ 위임</button>' +
+    '</div>';
+  }).join('');
+}
+
+const SNS_CHANNELS = [
+  { ico: 'IG', name: '인스타그램', handle: '@welcome_law', followers: 1240, engagement: 3.4, posts: 47, inbound: 12, score: 78, status: 'ok', dot: 'd-ok' },
+  { ico: 'YT', name: '유튜브', handle: 'welcome 법률', followers: 540, engagement: 5.1, posts: 12, inbound: 8, score: 62, status: 'warn', dot: 'd-warn' },
+  { ico: 'KK', name: '카카오 채널', handle: 'welcome-law', followers: 320, engagement: 8.2, posts: 23, inbound: 15, score: 84, status: 'ok', dot: 'd-ok' },
+  { ico: 'NP', name: '네이버 플레이스', handle: 'welcome 법률사무소', followers: 89, engagement: 12.0, posts: 5, inbound: 22, score: 91, status: 'ok', dot: 'd-ok' },
+  { ico: 'DG', name: '당근', handle: 'welcome 법률사무소', followers: 0, engagement: 0, posts: 3, inbound: 4, score: 45, status: 'warn', dot: 'd-warn' },
+  { ico: 'LT', name: '로톡', handle: '양변호사 프로필', followers: 0, engagement: 0, posts: 0, inbound: 7, score: 71, status: 'ok', dot: 'd-ok' },
+  { ico: 'TS', name: '스레드', handle: '@welcome_law', followers: 230, engagement: 2.8, posts: 8, inbound: 1, score: 38, status: 'bad', dot: 'd-bad' }
+];
+
+function renderSNS() {
+  const el = document.getElementById('snsList');
+  if (!el) return;
+  el.innerHTML = SNS_CHANNELS.map(c => {
+    const sCol = c.score >= 70 ? '#10B981' : c.score >= 50 ? '#F59E0B' : '#EF4444';
+    return '<div class="card" style="padding: 14px 16px;">' +
+      '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">' +
+        '<div style="width: 32px; height: 32px; border-radius: 8px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600;">' + c.ico + '</div>' +
+        '<div style="flex: 1;"><div style="font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px;"><span class="dot ' + c.dot + '"></span>' + escapeHtml(c.name) + '</div><div style="font-size: 10px; color: var(--text-3);">' + escapeHtml(c.handle) + '</div></div>' +
+        '<div style="text-align: right;"><div style="font-size: 18px; font-weight: 600; color: ' + sCol + ';">' + c.score + '</div><div style="font-size: 9px; color: var(--text-3);">점수</div></div>' +
+      '</div>' +
+      '<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 8px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); font-size: 11px;">' +
+        '<div><div style="color: var(--text-3); font-size: 10px;">팔로워</div><div style="font-weight: 500;">' + c.followers.toLocaleString() + '</div></div>' +
+        '<div><div style="color: var(--text-3); font-size: 10px;">발행 (월)</div><div style="font-weight: 500;">' + c.posts + '</div></div>' +
+        '<div><div style="color: var(--text-3); font-size: 10px;">인입 (월)</div><div style="font-weight: 500; color: ' + (c.inbound > 5 ? '#10B981' : 'var(--text)') + ';">' + c.inbound + '</div></div>' +
+      '</div>' +
+      '<div style="display: flex; gap: 6px; margin-top: 10px;">' +
+        '<button class="btn-2" onclick="openSignup(\'' + c.name + ' Agent 활성화\')" style="flex: 1; font-size: 11px;">★ Agent</button>' +
+        '<button class="btn-warn" onclick="openSignup(\'' + c.name + ' BPO 위임\')" style="flex: 1; font-size: 11px;">★★ 대행</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+const BPO_LIST = [
+  { ico: '✍', name: '블로그 작가 BPO', desc: '법률 도메인 전문 작가. 변호사 검수 후 발행. 변협 통과 보장.', meta1: '주 7건', meta2: '건당 5만~30만', mark: '★★ 사람' },
+  { ico: '🎬', name: '영상 편집 BPO', desc: '쇼츠·롱폼 편집. 변호사 출연분 → 자막·컷·BGM 자동.', meta1: '건당 2~3일', meta2: '건당 10~30만', mark: '★★ 사람' },
+  { ico: '🎨', name: '썸네일·디자인 BPO', desc: 'CTR 검증된 변호사 사무실 톤 썸네일 디자이너.', meta1: '건당 4시간', meta2: '건당 3~10만', mark: '★★ 사람' },
+  { ico: '📱', name: '인스타 운영 대행', desc: '컨텐츠 기획·촬영·발행·DM 응대까지 풀 위임.', meta1: '월 정액', meta2: '월 49~99만', mark: '★★ 사람' },
+  { ico: '📞', name: '콜센터 BPO', desc: '24h 사람 응대. 변호사 톤·매뉴얼 학습. 야간 +20%.', meta1: '무제한', meta2: '건당 3천 · 월 49만', mark: '★★ 사람' },
+  { ico: '💬', name: '카톡·DM 응대 BPO', desc: '카카오 채널·인스타 DM 1차 응대. 사무장 보완.', meta1: '월 무제한', meta2: '월 19만', mark: '★★ 사람' },
+  { ico: '📊', name: '광고 운영 대행 (네이버·구글)', desc: 'SA·DA·피맥스 운영. ROAS 책임. 월 광고비별 차등.', meta1: '월 정액', meta2: '광고비 15~20%', mark: '★★ 사람' },
+  { ico: '🏪', name: '네이버 플레이스 운영', desc: '리뷰 관리·플레이스 1페이지 노출 SEO·이벤트 등록.', meta1: '월 정액', meta2: '월 19만', mark: '★★ 사람' },
+  { ico: '📰', name: '보도자료·언론 PR', desc: '법률신문·일간지 PR 기획·배포. 변호사 인지도.', meta1: '건당', meta2: '건당 50만', mark: '★★ 사람' },
+  { ico: '🧮', name: '회계·세무 대행', desc: '월 결산·부가세·법인세 신고. 변호사 사무실 특화.', meta1: '월 정액', meta2: '월 19~39만', mark: '★★ 사람' },
+  { ico: '📝', name: '패럴리걸 (서면 1차)', desc: '서면 1차 초안. 변호사 검수 강제. 회생·이혼·형사.', meta1: '건당', meta2: '건당 5~30만', mark: '★★ 사람' },
+  { ico: '🌐', name: '번역 BPO (외국인 의뢰)', desc: '영어·중국어·베트남어 인테이크 번역. 24h.', meta1: '건당', meta2: '건당 3~10만', mark: '★★ 사람' }
+];
+
+function renderBPO() {
+  const el = document.getElementById('bpoList');
+  if (!el) return;
+  el.innerHTML = BPO_LIST.map(b =>
+    '<div class="card" style="padding: 16px;">' +
+      '<div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">' +
+        '<div style="width: 32px; height: 32px; border-radius: 8px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-size: 16px;">' + b.ico + '</div>' +
+        '<div style="flex: 1;"><div style="font-size: 13px; font-weight: 500;">' + escapeHtml(b.name) + '</div></div>' +
+        '<span style="font-size: 10px; padding: 2px 7px; background: var(--warn-bg); color: var(--warn-fg); border-radius: 4px; font-weight: 500;">' + b.mark + '</span>' +
+      '</div>' +
+      '<div style="font-size: 12px; color: var(--text-2); line-height: 1.55; margin-bottom: 10px; min-height: 36px;">' + escapeHtml(b.desc) + '</div>' +
+      '<div style="display: flex; justify-content: space-between; padding: 8px 0; border-top: 1px solid var(--border); font-size: 11px; color: var(--text-3); margin-bottom: 8px;"><span>' + b.meta1 + '</span><span>' + b.meta2 + '</span></div>' +
+      '<button class="btn-warn" style="width: 100%;" onclick="openSignup(\'' + escapeHtml(b.name) + '\')">위임 신청</button>' +
+    '</div>'
+  ).join('');
+}
+
+function renderKwDetail() {
+  const list = document.getElementById('kwDetailList');
+  const cnt = document.getElementById('kwDetailCount');
+  if (!list || !cnt) return;
+  cnt.textContent = state.keywords.length + '개 등록';
+  if (!state.keywords.length) {
+    list.innerHTML = '<div style="text-align: center; color: var(--text-3); padding: 24px; font-size: 12px;">아직 키워드 없음. 대시보드에서 추가.</div>';
+    return;
+  }
+  list.innerHTML = state.keywords.map((k, i) => {
+    const rank = (Math.floor(Math.random() * 30) + 1);
+    const change = (Math.floor(Math.random() * 7) - 3);
+    const sign = change > 0 ? '▲' : change < 0 ? '▼' : '·';
+    const col = change > 0 ? 'var(--success-fg)' : change < 0 ? 'var(--danger-fg)' : 'var(--text-3)';
+    return '<div class="row" style="padding: 10px 0;"><div style="flex: 1;"><div style="font-size: 13px; font-weight: 500;">' + escapeHtml(k.text) + '</div><div style="font-size: 11px; color: var(--text-3);">월 ' + (k.vol ? k.vol.toLocaleString() : '?') + ' 검색 · 경쟁 ' + (k.comp || '?') + '</div></div><div style="text-align: right; min-width: 80px;"><div style="font-size: 16px; font-weight: 600;">' + rank + '위</div><div style="font-size: 11px; color: ' + col + ';">' + sign + ' ' + Math.abs(change) + '</div></div></div>';
+  }).join('');
+}
+init();
+</script>
+
+</body>
+</html>

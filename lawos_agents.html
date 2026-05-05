@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI 사무장 카탈로그 — LawOS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="lawos_styles.css" />
+<style>
+  .filter-row {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .filter-pill {
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    background: var(--surface);
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text-2);
+  }
+  .filter-pill.active {
+    background: var(--text);
+    color: #fff;
+    border-color: var(--text);
+  }
+  .filter-pill:hover:not(.active) { background: var(--surface-2); }
+
+  .agent-grid-full {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+  }
+
+  .agent-card.coming-soon {
+    background: var(--surface-2);
+    opacity: 0.7;
+  }
+  .agent-card.gray-area {
+    border-color: var(--warn-border);
+  }
+  .gray-badge {
+    position: absolute;
+    top: 14px; right: 14px;
+    font-size: 10px;
+    padding: 2px 8px;
+    background: var(--warn-bg);
+    color: var(--warn-fg);
+    border-radius: 4px;
+  }
+  .agent-card { position: relative; }
+
+  .modal-bg {
+    display: none;
+    background: rgba(0,0,0,0.45);
+    padding: 40px 16px;
+    min-height: 400px;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-bg.shown { display: flex; }
+  .modal-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    max-width: 440px;
+    width: 100%;
+  }
+  .modal-h { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 8px; }
+  .modal-sub { font-size: 13px; color: var(--text-2); margin-bottom: 24px; line-height: 1.6; }
+  .modal-summary {
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+  .modal-summary-row {
+    display: flex; justify-content: space-between;
+    padding: 4px 0;
+  }
+  .modal-summary-row strong { font-weight: 500; }
+  .modal-actions { display: flex; gap: 8px; }
+  .modal-actions .btn { flex: 1; }
+
+  @media (max-width: 1100px) {
+    .agent-grid-full { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .agent-grid-full { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-logo">L</div>
+    <div class="brand-name">LawOS</div>
+  </div>
+  <a href="lawos_v0_dashboard.html"><div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+    대시보드
+  </div></a>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+    신뢰자산
+  </div>
+  <div class="nav-item active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+    사무장
+    <span class="badge">16</span>
+  </div>
+  <a href="lawos_writer.html"><div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+    콘텐츠
+  </div></a>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/></svg>
+    모델 마켓
+  </div>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/></svg>
+    행정
+  </div>
+
+  <div class="nav-section">팀</div>
+  <div class="channel-list">
+    <div class="channel-row"><div class="avatar" style="width:18px;height:18px;font-size:10px;">양</div>양변호사 (대표)</div>
+    <div class="channel-row"><div class="avatar" style="width:18px;height:18px;font-size:10px;">김</div>김마케터</div>
+  </div>
+</aside>
+
+<main class="main">
+
+  <div class="topbar">
+    <div>
+      <div class="crumb">welcome 법률사무소 / 사무장</div>
+      <h1>AI 사무장 카탈로그</h1>
+      <div class="sub">시간제 또는 건당 위임. 활성화 = 유료 · V0는 결제 X · 신청 → 1:1 견적</div>
+    </div>
+  </div>
+
+  <div class="filter-row">
+    <div class="filter-pill active">전체 16</div>
+    <div class="filter-pill">응대 4</div>
+    <div class="filter-pill">콘텐츠 3</div>
+    <div class="filter-pill">광고·SEO 3</div>
+    <div class="filter-pill">측정·알림 3</div>
+    <div class="filter-pill">회색지대 3</div>
+  </div>
+
+  <div class="legend">
+    <span class="legend-pill"><span class="pill-free">무료</span>광고규제·GEO·Follow-up</span>
+    <span class="legend-pill"><span class="pill-lock"><svg class="lock-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>활성화</span>유료 · 콜·인테이크·작가</span>
+  </div>
+
+  <div class="agent-grid-full">
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">콜</div>
+        <div>
+          <div class="agent-name">콜 사무장 김도우미</div>
+          <div class="agent-role">재판·외근 시 1차 응대</div>
+        </div>
+      </div>
+      <div class="agent-desc">캘린더 부재 시간만 자동 ON. 변호사 폰 동시 울림 후 미수신 시 사무장이 응대·메모 전달.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">on-demand</span>
+        <span class="agent-tag">한국어 ★★★</span>
+        <span class="agent-tag">elevenlabs</span>
+      </div>
+      <div class="agent-meta"><span>처리량 월 200건</span><span>응답 3초</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">시간 5천 · 월 9.9만</div>
+          <div style="font-size: 10px; color: var(--text-3);">상담실장 인건비 1/8</div>
+        </div>
+        <button class="btn-activate" onclick="openModal('콜 사무장 김도우미', '시간 5천원 · 월 9.9만')">활성화 신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">챗</div>
+        <div>
+          <div class="agent-name">인테이크봇 박매니저</div>
+          <div class="agent-role">24시간 챗 1차 응대</div>
+        </div>
+      </div>
+      <div class="agent-desc">홈페이지·카카오·로톡 문의를 자동 분류. 사건 유형별 핸드오프와 1차 견적 제시.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">always-on</span>
+        <span class="agent-tag">claude</span>
+        <span class="agent-tag">멀티채널</span>
+      </div>
+      <div class="agent-meta"><span>무제한</span><span>응답 2초</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">셋업 19만 · 건당 1천</div>
+          <div style="font-size: 10px; color: var(--text-3);">잡콜 처리 비용 1/3</div>
+        </div>
+        <button class="btn-activate" onclick="openModal('인테이크봇 박매니저', '셋업 19만 + 건당 1천')">활성화 신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">작</div>
+        <div>
+          <div class="agent-name">콘텐츠 작가 이작가</div>
+          <div class="agent-role">블로그·쇼츠 작성·검수</div>
+        </div>
+      </div>
+      <div class="agent-desc">AI 60% + 변호사 40% 검수. 변협 광고규정 자동 통과한 글만 발행. 사례·판례 빈칸 가이드.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">on-demand</span>
+        <span class="agent-tag">ai hedge</span>
+        <span class="agent-tag">EEAT</span>
+      </div>
+      <div class="agent-meta"><span>주 7건</span><span>건당 30분</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">건당 5~30만 · 월 49만</div>
+          <div style="font-size: 10px; color: var(--text-3);">블로그 대행 시세 1/3</div>
+        </div>
+        <button class="btn-activate" onclick="openModal('콘텐츠 작가 이작가', '건당 5~30만 또는 월 49만')">활성화 신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">검</div>
+        <div>
+          <div class="agent-name">광고규제 검증 최감독</div>
+          <div class="agent-role">발신 전 자동 차단·교정</div>
+        </div>
+      </div>
+      <div class="agent-desc">변협 §23·§31·§34 자동 검증. 발신물 위반 가능성 차단·수정안 제시. 위반 이력 자동 기록.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">always-on</span>
+        <span class="agent-tag">변협 룰북</span>
+      </div>
+      <div class="agent-meta"><span>무제한</span><span>실시간</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">무료 (Pro 포함)</div>
+          <div style="font-size: 10px; color: var(--success-fg);">신고 시 증빙으로 사용</div>
+        </div>
+        <button class="btn-secondary">활성화</button>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">탐</div>
+        <div>
+          <div class="agent-name">GEO 인용 추적 정탐색</div>
+          <div class="agent-role">AI 검색 인용 모니터링</div>
+        </div>
+      </div>
+      <div class="agent-desc">ChatGPT·Gemini·네이버 Cue에 우리 사무실이 인용되는지 주 1회 자동 체크. 경쟁사 갭 분석.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">always-on</span>
+        <span class="agent-tag">주간</span>
+      </div>
+      <div class="agent-meta"><span>키워드 30개</span><span>주 1회</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">무료 (Pro 포함)</div>
+        </div>
+        <button class="btn-secondary">활성화</button>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">팔</div>
+        <div>
+          <div class="agent-name">Follow-up 한매니저</div>
+          <div class="agent-role">사후관리·리뷰 요청</div>
+        </div>
+      </div>
+      <div class="agent-desc">사건 종결 후 자동 시퀀스. 만족도 SMS·리뷰 요청·미수금 알림·재방문 권유.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">always-on</span>
+        <span class="agent-tag">자동 시퀀스</span>
+      </div>
+      <div class="agent-meta"><span>의뢰인당</span><span>월 평균 3접점</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">무료 (Studio 포함)</div>
+        </div>
+        <button class="btn-secondary">활성화</button>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">메</div>
+        <div>
+          <div class="agent-name">이메일 영업 사무장</div>
+          <div class="agent-role">B2B 자문 cold email</div>
+        </div>
+      </div>
+      <div class="agent-desc">법인·스타트업 대상 자문 영업. 시퀀스·delivery·답장 분류 자동. IP 워밍 포함.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">on-demand</span>
+        <span class="agent-tag">B2B</span>
+      </div>
+      <div class="agent-meta"><span>월 1000건</span><span>open 23%</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">월 19만 + 발송비</div>
+        </div>
+        <button class="btn-activate" onclick="openModal('이메일 영업 사무장', '월 19만 + 발송비')">활성화 신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">SEO</div>
+        <div>
+          <div class="agent-name">SEO 사무장 박분석</div>
+          <div class="agent-role">키워드 발굴·내부링크</div>
+        </div>
+      </div>
+      <div class="agent-desc">키워드 갭 분석·내부 링크 자동 제안·메타 최적화. 네이버·구글·AI 검색 통합.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">always-on</span>
+        <span class="agent-tag">한국어</span>
+      </div>
+      <div class="agent-meta"><span>주 1리포트</span><span>키워드 100개</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">월 9.9만 (Pro 포함)</div>
+        </div>
+        <button class="btn-activate" onclick="openModal('SEO 사무장 박분석', '월 9.9만')">활성화 신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">리</div>
+        <div>
+          <div class="agent-name">리뷰 사무장</div>
+          <div class="agent-role">평판 모니터링</div>
+        </div>
+      </div>
+      <div class="agent-desc">네이버 플레이스·구글·로톡 별점·리뷰 모니터링. 부정 리뷰 즉시 알림. 답글 초안 제공.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">always-on</span>
+        <span class="agent-tag">실시간</span>
+      </div>
+      <div class="agent-meta"><span>전 채널</span><span>알림 1분 내</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">월 4.9만 (Pro 포함)</div>
+        </div>
+        <button class="btn-activate" onclick="openModal('리뷰 사무장', '월 4.9만')">활성화 신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card gray-area">
+      <span class="gray-badge">회색지대</span>
+      <div class="agent-head">
+        <div class="agent-avatar">카</div>
+        <div>
+          <div class="agent-name">카페 댓글 사무장</div>
+          <div class="agent-role">네이버 카페·커뮤니티</div>
+        </div>
+      </div>
+      <div class="agent-desc">법률 상담 게시글에 1차 답글 초안 작성. 변호사 본인 검수·승인 필수. 변협 광고심사 통과 강제.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">on-demand</span>
+        <span class="agent-tag">검수 필수</span>
+      </div>
+      <div class="agent-meta"><span>월 100건</span><span>승인 후 발신</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">건당 5천</div>
+          <div style="font-size: 10px; color: var(--warn-fg);">변호사 본인 승인 필수</div>
+        </div>
+        <button class="btn-activate" onclick="openModal('카페 댓글 사무장', '건당 5천원')">활성화 신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card gray-area">
+      <span class="gray-badge">회색지대</span>
+      <div class="agent-head">
+        <div class="agent-avatar">지</div>
+        <div>
+          <div class="agent-name">지식인 답변 사무장</div>
+          <div class="agent-role">네이버 지식인 답변</div>
+        </div>
+      </div>
+      <div class="agent-desc">법률 질문 자동 분류 + 답변 초안. 변호사 본인 ID로 발신. 변협 광고규정 자동 검증.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">on-demand</span>
+        <span class="agent-tag">검수 필수</span>
+      </div>
+      <div class="agent-meta"><span>월 100건</span><span>승인 후 발신</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">건당 7천</div>
+        </div>
+        <button class="btn-activate" onclick="openModal('지식인 답변 사무장', '건당 7천원')">활성화 신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card gray-area">
+      <span class="gray-badge">회색지대</span>
+      <div class="agent-head">
+        <div class="agent-avatar">DM</div>
+        <div>
+          <div class="agent-name">인스타 DM 사무장</div>
+          <div class="agent-role">인스타 DM 1차 응대</div>
+        </div>
+      </div>
+      <div class="agent-desc">인스타 DM으로 들어온 문의 자동 분류·1차 응답. 변호사 핸드오프. API 정책 준수.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">always-on</span>
+        <span class="agent-tag">검수 필수</span>
+      </div>
+      <div class="agent-meta"><span>무제한</span><span>응답 5분 내</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">월 9.9만</div>
+        </div>
+        <button class="btn-activate" onclick="openModal('인스타 DM 사무장', '월 9.9만')">활성화 신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card coming-soon">
+      <div class="agent-head">
+        <div class="agent-avatar">미</div>
+        <div>
+          <div class="agent-name">미수금 사무장</div>
+          <div class="agent-role">청구·독촉·연체 추적</div>
+        </div>
+      </div>
+      <div class="agent-desc">청구서 자동 발송·연체 알림·미수금 추적. 결제·법적 절차 단계별 시퀀스.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">준비 중</span>
+      </div>
+      <div class="agent-meta"><span>—</span><span>V1 출시</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">출시 알림</div>
+        </div>
+        <button class="btn-secondary">알림 신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card coming-soon">
+      <div class="agent-head">
+        <div class="agent-avatar">견</div>
+        <div>
+          <div class="agent-name">견적 사무장</div>
+          <div class="agent-role">사건별 견적 자동 산출</div>
+        </div>
+      </div>
+      <div class="agent-desc">사건 유형·복잡도·일정 기반 견적 룰북. 1차 견적 제시 후 변호사 확정.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">준비 중</span>
+      </div>
+      <div class="agent-meta"><span>—</span><span>V1 출시</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">출시 알림</div>
+        </div>
+        <button class="btn-secondary">알림 신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card coming-soon">
+      <div class="agent-head">
+        <div class="agent-avatar">일</div>
+        <div>
+          <div class="agent-name">일정 사무장</div>
+          <div class="agent-role">상담 예약·캘린더 sync</div>
+        </div>
+      </div>
+      <div class="agent-desc">Google·Naver 캘린더 sync. 빈 시간 자동 추출·상담 예약 자동 배정.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">준비 중</span>
+      </div>
+      <div class="agent-meta"><span>—</span><span>V1 출시</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">출시 알림</div>
+        </div>
+        <button class="btn-secondary">알림 신청</button>
+      </div>
+    </div>
+
+    <div class="agent-card coming-soon">
+      <div class="agent-head">
+        <div class="agent-avatar">번</div>
+        <div>
+          <div class="agent-name">번역 사무장</div>
+          <div class="agent-role">외국인 의뢰 응대</div>
+        </div>
+      </div>
+      <div class="agent-desc">영어·중국어·베트남어 인테이크 자동 번역. 변호사에게 한국어로 정리·전달.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">준비 중</span>
+      </div>
+      <div class="agent-meta"><span>—</span><span>V2 출시</span></div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">출시 알림</div>
+        </div>
+        <button class="btn-secondary">알림 신청</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="margin-top: 32px; padding: 20px; background: var(--surface-2); border-radius: var(--radius-lg); font-size: 13px; color: var(--text-2); line-height: 1.7;">
+    <strong style="color: var(--text);">행정 백엔드는 LawOS가 처리합니다.</strong><br/>
+    사무장 활성화 시 통화 회선·녹취·STT·결제·캘린더 sync·문자 발송·계약서 보관·변협 광고심사 자동 검증·KYC·보안 로그 — 모든 백엔드 작업은 LawOS 책임. 변호사는 사무장의 결과물만 검토.
+  </div>
+
+</main>
+</div>
+
+<div class="modal-bg" id="modal" onclick="if(event.target===this) closeModal()">
+  <div class="modal-card">
+    <div class="modal-h" id="modalTitle">콜 사무장 김도우미</div>
+    <div class="modal-sub">활성화 신청을 받으면 LawOS 팀이 24시간 내 1:1 견적과 함께 연락드립니다. V0 단계는 결제 X — 양 변호사가 직접 확인 후 진행.</div>
+
+    <div class="modal-summary">
+      <div class="modal-summary-row"><span>사무장</span><strong id="modalAgent">콜 사무장 김도우미</strong></div>
+      <div class="modal-summary-row"><span>가격</span><strong id="modalPrice">시간 5천원 · 월 9.9만</strong></div>
+      <div class="modal-summary-row"><span>사무실</span><strong>welcome 법률사무소</strong></div>
+      <div class="modal-summary-row"><span>담당</span><strong>양변호사</strong></div>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+      <span class="label-text">메모 (선택)</span>
+      <textarea class="input" rows="3" placeholder="시작 시점·필요 시간·특이사항"></textarea>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal()" style="flex: 0;">취소</button>
+      <button class="btn" onclick="submitActivate()">신청 보내기</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function openModal(name, price) {
+  document.getElementById('modalTitle').textContent = name;
+  document.getElementById('modalAgent').textContent = name;
+  document.getElementById('modalPrice').textContent = price;
+  document.getElementById('modal').classList.add('shown');
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('shown');
+}
+function submitActivate() {
+  alert('활성화 신청 접수. 양변호사·support@dreamframe.org로 알림이 갑니다.');
+  closeModal();
+}
+document.querySelectorAll('.filter-pill').forEach(function(p) {
+  p.addEventListener('click', function() {
+    document.querySelectorAll('.filter-pill').forEach(function(x) { x.classList.remove('active'); });
+    this.classList.add('active');
+  });
+});
+</script>
+
+</body>
+</html>

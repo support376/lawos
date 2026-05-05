@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LawOS 개발 로드맵</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #FAFAFA;
+  --surface: #FFFFFF;
+  --surface-2: #F4F4F5;
+  --border: #E4E4E7;
+  --text: #18181B;
+  --text-2: #52525B;
+  --text-3: #A1A1AA;
+  --warn-bg: #FEF3C7;
+  --warn-fg: #92400E;
+  --success-bg: #D1FAE5;
+  --success-fg: #065F46;
+  --info-bg: #DBEAFE;
+  --info-fg: #1E40AF;
+  --danger-bg: #FEE2E2;
+  --danger-fg: #991B1B;
+  --r: 8px;
+  --rl: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard Variable", Pretendard, system-ui, "Segoe UI", "Malgun Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.6;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  padding: 28px 24px 80px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.header { margin-bottom: 28px; }
+.header h1 { font-size: 26px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.2; margin-bottom: 4px; }
+.header .sub { font-size: 13px; color: var(--text-2); }
+
+.progress-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 28px; }
+.prog-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--rl); padding: 14px 16px;
+}
+.prog-label { font-size: 11px; color: var(--text-2); margin-bottom: 4px; }
+.prog-value { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; }
+.prog-meta { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+
+.section-title {
+  font-size: 14px; font-weight: 500;
+  margin: 32px 0 14px;
+  color: var(--text-2);
+}
+
+.milestones { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 24px; position: relative; }
+.milestones::before {
+  content: ''; position: absolute;
+  top: 28px; left: 8%; right: 8%; height: 2px;
+  background: var(--border); z-index: 0;
+}
+.ms {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--rl); padding: 14px 14px;
+  position: relative; z-index: 1;
+}
+.ms-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 3px solid var(--surface);
+  margin: 0 auto 6px;
+  background: var(--border);
+}
+.ms.done .ms-dot { background: #10B981; }
+.ms.active .ms-dot { background: var(--text); }
+.ms-name { font-size: 12px; font-weight: 500; text-align: center; margin-bottom: 4px; }
+.ms-when { font-size: 10px; color: var(--text-3); text-align: center; margin-bottom: 8px; }
+.ms-goal { font-size: 11px; color: var(--text-2); text-align: center; line-height: 1.4; }
+.ms.active { border-color: var(--text); }
+
+.area-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.area {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--rl); padding: 16px 18px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+.area:hover { border-color: var(--text-3); }
+.area-head {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 10px;
+}
+.area-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.area-name { font-size: 14px; font-weight: 500; }
+.area-meta { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+.area-bar { height: 5px; background: var(--surface-2); border-radius: 3px; overflow: hidden; margin: 10px 0; }
+.area-bar-fill { height: 100%; }
+
+.area-tasks { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.area.open .area-tasks { display: block; }
+.task {
+  display: flex; align-items: center; gap: 10px;
+  padding: 6px 0; font-size: 12px;
+  line-height: 1.5;
+}
+.task + .task { border-top: 1px solid var(--border); }
+.task-status {
+  width: 14px; height: 14px; border-radius: 50%;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 700;
+}
+.task-done { background: var(--success-bg); color: var(--success-fg); }
+.task-progress { background: var(--info-bg); color: var(--info-fg); }
+.task-todo { background: var(--surface-2); color: var(--text-3); }
+.task-text { flex: 1; }
+.task-when {
+  font-size: 10px; color: var(--text-3);
+  padding: 2px 7px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.task-when-v0 { background: var(--success-bg); color: var(--success-fg); }
+.task-when-v1 { background: var(--info-bg); color: var(--info-fg); }
+.task-when-v1-5 { background: var(--warn-bg); color: var(--warn-fg); }
+.task-when-v2 { background: var(--surface-2); color: var(--text-2); }
+
+.matrix {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--rl); overflow-x: auto;
+  margin-bottom: 24px;
+}
+.matrix table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.matrix th, .matrix td {
+  padding: 10px 12px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.matrix th {
+  background: var(--surface-2);
+  font-weight: 500;
+  color: var(--text-2);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.matrix tr:last-child td { border-bottom: none; }
+.cell-done { background: var(--success-bg); color: var(--success-fg); font-weight: 500; }
+.cell-active { background: var(--info-bg); color: var(--info-fg); font-weight: 500; }
+.cell-plan { background: var(--surface-2); color: var(--text-3); }
+.cell-blocked { background: var(--danger-bg); color: var(--danger-fg); font-weight: 500; }
+
+.kpi-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--rl);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.kpi-block h3 { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.kpi-block .when { font-size: 11px; color: var(--text-3); margin-bottom: 14px; }
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+.kpi-cell {
+  background: var(--surface-2);
+  padding: 10px 12px;
+  border-radius: var(--r);
+}
+.kpi-cell-l { font-size: 11px; color: var(--text-2); margin-bottom: 4px; }
+.kpi-cell-v { font-size: 18px; font-weight: 600; }
+.kpi-cell-d { font-size: 10px; color: var(--text-3); margin-top: 2px; }
+
+@media (max-width: 800px) {
+  .progress-row, .milestones, .area-grid, .kpi-grid { grid-template-columns: 1fr 1fr; }
+  .milestones::before { display: none; }
+}
+@media (max-width: 500px) {
+  .progress-row, .area-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>LawOS 개발 로드맵</h1>
+  <div class="sub">변호사 사무실 디지털 운영 OS — V0 → V3 12개월 계획 · 2026.05.05 작성</div>
+</div>
+
+<div class="progress-row">
+  <div class="prog-card">
+    <div class="prog-label">현재 단계</div>
+    <div class="prog-value">V0</div>
+    <div class="prog-meta">와이어프레임 + placeholder 완성</div>
+  </div>
+  <div class="prog-card">
+    <div class="prog-label">전체 진척</div>
+    <div class="prog-value">25%</div>
+    <div class="prog-meta">UI 95% · 백엔드 5%</div>
+  </div>
+  <div class="prog-card">
+    <div class="prog-label">평가 점수</div>
+    <div class="prog-value">97.5</div>
+    <div class="prog-meta">6명 agent 평균 (35라운드)</div>
+  </div>
+  <div class="prog-card">
+    <div class="prog-label">다음 마일스톤</div>
+    <div class="prog-value">V0 dogfood</div>
+    <div class="prog-meta">Welcome 법률사무소 + 4주</div>
+  </div>
+</div>
+
+<div class="section-title">5단계 마일스톤 — 12개월 계획</div>
+
+<div class="milestones">
+  <div class="ms done">
+    <div class="ms-dot"></div>
+    <div class="ms-name">V0 와이어프레임</div>
+    <div class="ms-when">완료</div>
+    <div class="ms-goal">5개 화면 + 단일 아티팩트 + 평가 95+</div>
+  </div>
+  <div class="ms active">
+    <div class="ms-dot"></div>
+    <div class="ms-name">V0 dogfood</div>
+    <div class="ms-when">~4주</div>
+    <div class="ms-goal">Welcome 법률사무소 1명 매주 사용</div>
+  </div>
+  <div class="ms">
+    <div class="ms-dot"></div>
+    <div class="ms-name">V1 외부 영업</div>
+    <div class="ms-when">~3개월</div>
+    <div class="ms-goal">별산제 5~10명 + 사무장 1호 활성화</div>
+  </div>
+  <div class="ms">
+    <div class="ms-dot"></div>
+    <div class="ms-name">V1.5 결제·콜</div>
+    <div class="ms-when">~6개월</div>
+    <div class="ms-goal">Pro 9.9만 결제 + 콜 사무장 + 30명</div>
+  </div>
+  <div class="ms">
+    <div class="ms-dot"></div>
+    <div class="ms-name">V2 BPO 마켓</div>
+    <div class="ms-when">~12개월</div>
+    <div class="ms-goal">변호사 100명 + 월 2,100만 매출</div>
+  </div>
+</div>
+
+<div class="section-title">개발 영역 10개 — 클릭하면 작업 리스트</div>
+
+<div class="area-grid">
+
+  <div class="area" onclick="this.classList.toggle('open')">
+    <div class="area-head">
+      <div class="area-icon">🎨</div>
+      <div style="flex:1;">
+        <div class="area-name">Frontend (Next.js)</div>
+        <div class="area-meta">5 화면 React 컴포넌트</div>
+      </div>
+      <span style="font-size: 13px; font-weight: 600; color: var(--success-fg);">85%</span>
+    </div>
+    <div class="area-bar"><div class="area-bar-fill" style="width: 85%; background: #10B981;"></div></div>
+    <div class="area-tasks">
+      <div class="task"><div class="task-status task-done">✓</div><div class="task-text">와이어프레임 5장 (랜딩·온보딩·대시보드·작가·사무장)</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-done">✓</div><div class="task-text">Next.js v0 라우트 + AppShell + Sidebar</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-done">✓</div><div class="task-text">5개 페이지 React 변환 + localStorage 상태</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-progress">!</div><div class="task-text">실제 typecheck·dev 서버 검증</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">shadcn/ui 컴포넌트 도입 (Button·Dialog·Toast)</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">차트 (Recharts) — 키워드 순위 그래프</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">접근성·키보드 단축키·다크 모드</div><span class="task-when task-when-v2">V2</span></div>
+    </div>
+  </div>
+
+  <div class="area" onclick="this.classList.toggle('open')">
+    <div class="area-head">
+      <div class="area-icon">🔌</div>
+      <div style="flex:1;">
+        <div class="area-name">Backend API</div>
+        <div class="area-meta">Next.js API Routes</div>
+      </div>
+      <span style="font-size: 13px; font-weight: 600; color: var(--text-3);">10%</span>
+    </div>
+    <div class="area-bar"><div class="area-bar-fill" style="width: 10%; background: #3B82F6;"></div></div>
+    <div class="area-tasks">
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">/api/diagnose — PageSpeed + Claude 분석</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">/api/ad-check — 변협 룰북 + Claude</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">/api/generate-skeleton — Claude 골격</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">/api/keywords/track — SERP 크롤링</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">/api/feed/refresh — RSS 크롤러</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">/api/agents/activate — 사무장 신청·이메일</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">Rate limit + API 키 관리 (Pro/Studio 게이트)</div><span class="task-when task-when-v1-5">V1.5</span></div>
+    </div>
+  </div>
+
+  <div class="area" onclick="this.classList.toggle('open')">
+    <div class="area-head">
+      <div class="area-icon">🗄️</div>
+      <div style="flex:1;">
+        <div class="area-name">Database (Supabase)</div>
+        <div class="area-meta">Postgres + RLS</div>
+      </div>
+      <span style="font-size: 13px; font-weight: 600; color: var(--success-fg);">60%</span>
+    </div>
+    <div class="area-bar"><div class="area-bar-fill" style="width: 60%; background: #10B981;"></div></div>
+    <div class="area-tasks">
+      <div class="task"><div class="task-status task-done">✓</div><div class="task-text">기존 인프라 (workspaces·users·tickets·events·attachments)</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-done">✓</div><div class="task-text">RLS workspace_id 기반 격리</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-done">✓</div><div class="task-text">가입 자동 provisioning 트리거</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">신규 6개 테이블 (channels·keywords·content_pieces·ad_check_logs·agent_assignments·feed_topics)</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">keyword_rankings 시계열 (cron 갱신)</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">사이트별 점수 히스토리 (site_scores)</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">멀티 사이트 (workspace_sites — V0 핵심)</div><span class="task-when task-when-v0">V0</span></div>
+    </div>
+  </div>
+
+  <div class="area" onclick="this.classList.toggle('open')">
+    <div class="area-head">
+      <div class="area-icon">🤖</div>
+      <div style="flex:1;">
+        <div class="area-name">AI 통합</div>
+        <div class="area-meta">Claude API + 프롬프트</div>
+      </div>
+      <span style="font-size: 13px; font-weight: 600; color: var(--info-fg);">20%</span>
+    </div>
+    <div class="area-bar"><div class="area-bar-fill" style="width: 20%; background: #3B82F6;"></div></div>
+    <div class="area-tasks">
+      <div class="task"><div class="task-status task-done">✓</div><div class="task-text">@ai-sdk/anthropic 설치 (기존 코드)</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">사이트 진단 프롬프트 (5 카테고리 점수 + 문제 5건)</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">변협 검증 프롬프트 + 룰북 RAG</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">글 골격 5개 포맷별 프롬프트 템플릿</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">AI hedge 인간화 패스 (문장 길이 분산·1인칭 삽입)</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">변호사 본인 어투 학습 (3~5개 글 RAG)</div><span class="task-when task-when-v1-5">V1.5</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">사용량 한도·토큰 추적 (Pro/Studio 차등)</div><span class="task-when task-when-v1">V1</span></div>
+    </div>
+  </div>
+
+  <div class="area" onclick="this.classList.toggle('open')">
+    <div class="area-head">
+      <div class="area-icon">🌐</div>
+      <div style="flex:1;">
+        <div class="area-name">외부 API·크롤러</div>
+        <div class="area-meta">PageSpeed·RSS·SERP</div>
+      </div>
+      <span style="font-size: 13px; font-weight: 600; color: var(--text-3);">5%</span>
+    </div>
+    <div class="area-bar"><div class="area-bar-fill" style="width: 5%; background: #F59E0B;"></div></div>
+    <div class="area-tasks">
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">Google PageSpeed Insights API (사이트 헬스)</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">RSS 크롤러 — 법률신문·네이버 뉴스·대법원</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">구글 트렌드 비공식 API</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">네이버 SERP 크롤링 (블덱스 제휴 우선)</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">GSC OAuth + 사이트 데이터 import</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">ChatGPT·Cue·Gemini 인용 추적 (자체 쿼리)</div><span class="task-when task-when-v1-5">V1.5</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">Vercel Cron (매일 06:00 자동 갱신)</div><span class="task-when task-when-v1">V1</span></div>
+    </div>
+  </div>
+
+  <div class="area" onclick="this.classList.toggle('open')">
+    <div class="area-head">
+      <div class="area-icon">📞</div>
+      <div style="flex:1;">
+        <div class="area-name">음성 인프라</div>
+        <div class="area-meta">콜 사무장 백엔드</div>
+      </div>
+      <span style="font-size: 13px; font-weight: 600; color: var(--text-3);">0%</span>
+    </div>
+    <div class="area-bar"><div class="area-bar-fill" style="width: 0%; background: #F59E0B;"></div></div>
+    <div class="area-tasks">
+      <div class="task"><div class="task-status task-progress">!</div><div class="task-text">ElevenLabs Conversational AI 한국어 검증 — V0 시작 시 1주 병렬</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">Twilio 070 회선 발급</div><span class="task-when task-when-v1-5">V1.5</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">통화 녹취·STT (Clova Speech 또는 Whisper)</div><span class="task-when task-when-v1-5">V1.5</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">Google Calendar OAuth + 부재 시간 자동 감지</div><span class="task-when task-when-v1-5">V1.5</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">동시 울림 + 미수신 핸드오프 흐름</div><span class="task-when task-when-v1-5">V1.5</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">한국 대안 — 마음AI·Persona AI 제휴 검토</div><span class="task-when task-when-v1-5">V1.5</span></div>
+    </div>
+  </div>
+
+  <div class="area" onclick="this.classList.toggle('open')">
+    <div class="area-head">
+      <div class="area-icon">💳</div>
+      <div style="flex:1;">
+        <div class="area-name">결제·구독</div>
+        <div class="area-meta">토스페이먼츠</div>
+      </div>
+      <span style="font-size: 13px; font-weight: 600; color: var(--text-3);">0%</span>
+    </div>
+    <div class="area-bar"><div class="area-bar-fill" style="width: 0%; background: #F59E0B;"></div></div>
+    <div class="area-tasks">
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">V0 placeholder — 활성화 신청 → 이메일 1:1 견적</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">토스페이먼츠 통합 (Free/Pro/Studio)</div><span class="task-when task-when-v1-5">V1.5</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">Pro 9.9만/Studio 29.9만 자동 청구</div><span class="task-when task-when-v1-5">V1.5</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">사무장 단가 결제 (콜 시간 5천·작가 5~30만)</div><span class="task-when task-when-v1-5">V1.5</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">사용량 메터링·초과 과금</div><span class="task-when task-when-v2">V2</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">BPO 마켓 거래 수수료 (15~20%)</div><span class="task-when task-when-v2">V2</span></div>
+    </div>
+  </div>
+
+  <div class="area" onclick="this.classList.toggle('open')">
+    <div class="area-head">
+      <div class="area-icon">📨</div>
+      <div style="flex:1;">
+        <div class="area-name">알림·이메일</div>
+        <div class="area-meta">Resend·알리고</div>
+      </div>
+      <span style="font-size: 13px; font-weight: 600; color: var(--info-fg);">30%</span>
+    </div>
+    <div class="area-bar"><div class="area-bar-fill" style="width: 30%; background: #3B82F6;"></div></div>
+    <div class="area-tasks">
+      <div class="task"><div class="task-status task-done">✓</div><div class="task-text">Resend 패키지 설치 (기존)</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">사무장 활성화 신청 → support@dreamframe.org 이메일</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">매일 KPI 알림 (변동 큰 항목만)</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">알림톡 (알리고) — 미응답 인입·검수 대기</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">Follow-up 사무장 자동 시퀀스</div><span class="task-when task-when-v1-5">V1.5</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">변협 광고 위반 즉시 알림</div><span class="task-when task-when-v1">V1</span></div>
+    </div>
+  </div>
+
+  <div class="area" onclick="this.classList.toggle('open')">
+    <div class="area-head">
+      <div class="area-icon">🔐</div>
+      <div style="flex:1;">
+        <div class="area-name">인증·OAuth</div>
+        <div class="area-meta">Supabase Auth</div>
+      </div>
+      <span style="font-size: 13px; font-weight: 600; color: var(--success-fg);">70%</span>
+    </div>
+    <div class="area-bar"><div class="area-bar-fill" style="width: 70%; background: #10B981;"></div></div>
+    <div class="area-tasks">
+      <div class="task"><div class="task-status task-done">✓</div><div class="task-text">Supabase Auth 기본 설치 (이메일·Google OAuth)</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-done">✓</div><div class="task-text">로그인·회원가입·콜백 라우트 (기존)</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">비로그인 → 가입 매끄러운 마이그레이션 (localStorage → DB)</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">변호사 자격증명 KYC (선택, 광고 검증 강화용)</div><span class="task-when task-when-v1-5">V1.5</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">팀 초대 (마케터·실장 역할 분리)</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">GSC·네이버광고·유튜브 OAuth 연결</div><span class="task-when task-when-v1">V1</span></div>
+    </div>
+  </div>
+
+  <div class="area" onclick="this.classList.toggle('open')">
+    <div class="area-head">
+      <div class="area-icon">⚖️</div>
+      <div style="flex:1;">
+        <div class="area-name">도메인 룰북</div>
+        <div class="area-meta">변협·SEO·GEO</div>
+      </div>
+      <span style="font-size: 13px; font-weight: 600; color: var(--text-3);">15%</span>
+    </div>
+    <div class="area-bar"><div class="area-bar-fill" style="width: 15%; background: #F59E0B;"></div></div>
+    <div class="area-tasks">
+      <div class="task"><div class="task-status task-progress">!</div><div class="task-text">변협 광고심사규정 룰북 v0.1 (50~100 룰) — 양변호사 검수</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">5개 콘텐츠 포맷 템플릿 (사례·Q&A·체크리스트·비교·타임라인)</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">한국 법률 SEO 가이드 (롱테일·H2·EEAT)</div><span class="task-when task-when-v0">V0</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">GEO 최적화 룰 (ChatGPT·Cue 인용 패턴)</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">잡콜·진성콜 분류 룰 (사건유형 매핑)</div><span class="task-when task-when-v1">V1</span></div>
+      <div class="task"><div class="task-status task-todo">·</div><div class="task-text">사건유형 모델 패키지 (개인회생·내용증명·임대차)</div><span class="task-when task-when-v1-5">V1.5</span></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="section-title">영역 × 마일스톤 매트릭스</div>
+
+<div class="matrix">
+<table>
+  <thead>
+    <tr>
+      <th style="min-width: 140px;">영역</th>
+      <th>V0 wireframe</th>
+      <th>V0 dogfood</th>
+      <th>V1 외부영업</th>
+      <th>V1.5 결제·콜</th>
+      <th>V2 BPO 마켓</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Frontend</td>
+      <td class="cell-done">완료</td>
+      <td class="cell-active">검증·shadcn</td>
+      <td class="cell-plan">차트·폼 강화</td>
+      <td class="cell-plan">결제 UI</td>
+      <td class="cell-plan">마켓 UI</td>
+    </tr>
+    <tr>
+      <td>Backend API</td>
+      <td class="cell-done">없음</td>
+      <td class="cell-active">L1 4종</td>
+      <td class="cell-plan">L2 추적·OAuth</td>
+      <td class="cell-plan">결제·웹훅</td>
+      <td class="cell-plan">마켓 API</td>
+    </tr>
+    <tr>
+      <td>Database</td>
+      <td class="cell-done">기존</td>
+      <td class="cell-active">신규 6개</td>
+      <td class="cell-plan">시계열·히스토리</td>
+      <td class="cell-plan">결제 로그</td>
+      <td class="cell-plan">마켓 거래</td>
+    </tr>
+    <tr>
+      <td>AI</td>
+      <td class="cell-done">설치만</td>
+      <td class="cell-active">진단·검증·골격</td>
+      <td class="cell-plan">hedge·어투 학습</td>
+      <td class="cell-plan">사용량 메터링</td>
+      <td class="cell-plan">사무장 자율 동작</td>
+    </tr>
+    <tr>
+      <td>외부 API</td>
+      <td class="cell-done">없음</td>
+      <td class="cell-active">PageSpeed·RSS</td>
+      <td class="cell-plan">SERP·GSC·트렌드</td>
+      <td class="cell-plan">GEO 추적</td>
+      <td class="cell-plan">광고 API</td>
+    </tr>
+    <tr>
+      <td>음성</td>
+      <td class="cell-done">없음</td>
+      <td class="cell-blocked">검증만</td>
+      <td class="cell-plan">대기</td>
+      <td class="cell-active">통합·콜 사무장</td>
+      <td class="cell-plan">스케일</td>
+    </tr>
+    <tr>
+      <td>결제</td>
+      <td class="cell-done">없음</td>
+      <td class="cell-active">placeholder</td>
+      <td class="cell-plan">placeholder</td>
+      <td class="cell-active">토스 통합</td>
+      <td class="cell-plan">메터링·수수료</td>
+    </tr>
+    <tr>
+      <td>알림</td>
+      <td class="cell-done">없음</td>
+      <td class="cell-active">신청 이메일</td>
+      <td class="cell-plan">알림톡·KPI</td>
+      <td class="cell-plan">시퀀스</td>
+      <td class="cell-plan">자동화</td>
+    </tr>
+    <tr>
+      <td>Auth·OAuth</td>
+      <td class="cell-done">기존</td>
+      <td class="cell-active">마이그레이션</td>
+      <td class="cell-plan">팀·외부 OAuth</td>
+      <td class="cell-plan">KYC</td>
+      <td class="cell-plan">SSO</td>
+    </tr>
+    <tr>
+      <td>도메인 룰북</td>
+      <td class="cell-done">없음</td>
+      <td class="cell-active">변협 룰북 v0.1</td>
+      <td class="cell-plan">SEO·GEO</td>
+      <td class="cell-plan">사건 모델</td>
+      <td class="cell-plan">시장별 확장</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+
+<div class="section-title">마일스톤별 수락 기준 + KPI</div>
+
+<div class="kpi-block">
+  <h3>V0 dogfood (4주)</h3>
+  <div class="when">→ Welcome 법률사무소 1명 매주 사용</div>
+  <div class="kpi-grid">
+    <div class="kpi-cell"><div class="kpi-cell-l">사용 빈도</div><div class="kpi-cell-v">주 1회</div><div class="kpi-cell-d">월요일 09시</div></div>
+    <div class="kpi-cell"><div class="kpi-cell-l">L1 4개 작동</div><div class="kpi-cell-v">100%</div><div class="kpi-cell-d">진단·변협·트렌드·골격</div></div>
+    <div class="kpi-cell"><div class="kpi-cell-l">콘텐츠 작성</div><div class="kpi-cell-v">≥4편</div><div class="kpi-cell-d">월간 발행</div></div>
+    <div class="kpi-cell"><div class="kpi-cell-l">사무장 신청</div><div class="kpi-cell-v">≥1건</div><div class="kpi-cell-d">진짜 의지 신호</div></div>
+  </div>
+</div>
+
+<div class="kpi-block">
+  <h3>V1 외부 영업 (3개월)</h3>
+  <div class="when">→ 별산제 5~10명 + 사무장 1호 활성화 + 월 매출 50~100만</div>
+  <div class="kpi-grid">
+    <div class="kpi-cell"><div class="kpi-cell-l">유료 변호사</div><div class="kpi-cell-v">5~10명</div><div class="kpi-cell-d">Pro 또는 BPO</div></div>
+    <div class="kpi-cell"><div class="kpi-cell-l">D30 리텐션</div><div class="kpi-cell-v">≥30%</div><div class="kpi-cell-d">가입 후 30일</div></div>
+    <div class="kpi-cell"><div class="kpi-cell-l">변협 위반 차단</div><div class="kpi-cell-v">≥90%</div><div class="kpi-cell-d">발신 전 검증 통과율</div></div>
+    <div class="kpi-cell"><div class="kpi-cell-l">월 매출</div><div class="kpi-cell-v">50~100만</div><div class="kpi-cell-d">BPO + Pro 혼합</div></div>
+  </div>
+</div>
+
+<div class="kpi-block">
+  <h3>V1.5 결제·콜 사무장 (6개월)</h3>
+  <div class="when">→ 30명 + 콜 사무장 활성 + Pro 결제 자동 + 월 매출 600~900만</div>
+  <div class="kpi-grid">
+    <div class="kpi-cell"><div class="kpi-cell-l">유료 변호사</div><div class="kpi-cell-v">~30명</div><div class="kpi-cell-d">Pro 9.9만</div></div>
+    <div class="kpi-cell"><div class="kpi-cell-l">콜 사무장</div><div class="kpi-cell-v">≥10명</div><div class="kpi-cell-d">시간제 활성화</div></div>
+    <div class="kpi-cell"><div class="kpi-cell-l">Pro 전환</div><div class="kpi-cell-v">≥10%</div><div class="kpi-cell-d">Free → Pro</div></div>
+    <div class="kpi-cell"><div class="kpi-cell-l">월 매출</div><div class="kpi-cell-v">600~900만</div><div class="kpi-cell-d">구독+사무장+모델</div></div>
+  </div>
+</div>
+
+<div class="kpi-block">
+  <h3>V2 BPO 마켓 (12개월)</h3>
+  <div class="when">→ 100명 + BPO 마켓 베타 + 월 매출 2,100만</div>
+  <div class="kpi-grid">
+    <div class="kpi-cell"><div class="kpi-cell-l">유료 변호사</div><div class="kpi-cell-v">~100명</div><div class="kpi-cell-d">Pro·Studio·BPO</div></div>
+    <div class="kpi-cell"><div class="kpi-cell-l">BPO 거래</div><div class="kpi-cell-v">월 50건+</div><div class="kpi-cell-d">15~20% 수수료</div></div>
+    <div class="kpi-cell"><div class="kpi-cell-l">D90 리텐션</div><div class="kpi-cell-v">≥40%</div><div class="kpi-cell-d">3개월 락인 검증</div></div>
+    <div class="kpi-cell"><div class="kpi-cell-l">월 매출</div><div class="kpi-cell-v">2,100만+</div><div class="kpi-cell-d">구독 990 + 사무장 900 + 모델 245</div></div>
+  </div>
+</div>
+
+<div class="section-title">가져와야 할 기능 — 기술 스펙 15개</div>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--rl); padding: 16px; margin-bottom: 24px; overflow-x: auto;">
+<table style="width: 100%; border-collapse: collapse; font-size: 12px; min-width: 900px;">
+<thead>
+<tr>
+  <th style="text-align: left; padding: 8px 10px; background: var(--surface-2); font-weight: 500; color: var(--text-2); font-size: 11px;">시점</th>
+  <th style="text-align: left; padding: 8px 10px; background: var(--surface-2); font-weight: 500; color: var(--text-2); font-size: 11px;">항목</th>
+  <th style="text-align: left; padding: 8px 10px; background: var(--surface-2); font-weight: 500; color: var(--text-2); font-size: 11px;">시간</th>
+  <th style="text-align: left; padding: 8px 10px; background: var(--surface-2); font-weight: 500; color: var(--text-2); font-size: 11px;">월 운영비 (100명)</th>
+  <th style="text-align: left; padding: 8px 10px; background: var(--surface-2); font-weight: 500; color: var(--text-2); font-size: 11px;">핵심 의존</th>
+</tr>
+</thead>
+<tbody>
+<tr style="background: var(--success-bg);"><td style="padding: 8px 10px; font-weight: 500; color: var(--success-fg);">V0</td><td style="padding: 8px 10px;">A. 멀티 워크스페이스 RLS</td><td style="padding: 8px 10px;">5일</td><td style="padding: 8px 10px;">$0</td><td style="padding: 8px 10px;">Supabase Auth</td></tr>
+<tr style="background: var(--success-bg);"><td style="padding: 8px 10px; font-weight: 500; color: var(--success-fg);">V0</td><td style="padding: 8px 10px;">B. 비로그인 → 가입 마이그레이션</td><td style="padding: 8px 10px;">3일</td><td style="padding: 8px 10px;">$0</td><td style="padding: 8px 10px;">localStorage → Supabase</td></tr>
+<tr style="background: var(--success-bg);"><td style="padding: 8px 10px; font-weight: 500; color: var(--success-fg);">V0</td><td style="padding: 8px 10px;"><strong>7. 리드 자격검증</strong> ← 잡콜 90% 페인 직격</td><td style="padding: 8px 10px;">12~14일</td><td style="padding: 8px 10px;">$130</td><td style="padding: 8px 10px;">Claude Haiku · CLOVA STT</td></tr>
+<tr style="background: var(--success-bg);"><td style="padding: 8px 10px; font-weight: 500; color: var(--success-fg);">V0</td><td style="padding: 8px 10px;">6. 연관 키워드·인구통계</td><td style="padding: 8px 10px;">12~18일</td><td style="padding: 8px 10px;">$50</td><td style="padding: 8px 10px;">네이버 검색광고+데이터랩 API (무료)</td></tr>
+<tr style="background: var(--info-bg);"><td style="padding: 8px 10px; font-weight: 500; color: var(--info-fg);">V1</td><td style="padding: 8px 10px;">1. 워크플로우 빌더</td><td style="padding: 8px 10px;">18~22일</td><td style="padding: 8px 10px;">$250</td><td style="padding: 8px 10px;">BullMQ·Redis·React Flow</td></tr>
+<tr style="background: var(--info-bg);"><td style="padding: 8px 10px; font-weight: 500; color: var(--info-fg);">V1</td><td style="padding: 8px 10px;">4. Internal Linking 추천</td><td style="padding: 8px 10px;">8~10일</td><td style="padding: 8px 10px;">$70</td><td style="padding: 8px 10px;">OpenAI 임베딩·pgvector</td></tr>
+<tr style="background: var(--info-bg);"><td style="padding: 8px 10px; font-weight: 500; color: var(--info-fg);">V1</td><td style="padding: 8px 10px;">8. 거절·미수임 사유</td><td style="padding: 8px 10px;">3일</td><td style="padding: 8px 10px;">$0</td><td style="padding: 8px 10px;">Recharts</td></tr>
+<tr style="background: var(--info-bg);"><td style="padding: 8px 10px; font-weight: 500; color: var(--info-fg);">V1</td><td style="padding: 8px 10px;">3. 콘텐츠 인벤토리 (풀)</td><td style="padding: 8px 10px;">22~30일</td><td style="padding: 8px 10px;">$70</td><td style="padding: 8px 10px;">GSC + 네이버 서치어드바이저</td></tr>
+<tr style="background: var(--info-bg);"><td style="padding: 8px 10px; font-weight: 500; color: var(--info-fg);">V1</td><td style="padding: 8px 10px;">C. cron 인프라</td><td style="padding: 8px 10px;">8일</td><td style="padding: 8px 10px;">$120</td><td style="padding: 8px 10px;">Vercel Cron Pro 또는 pg_cron</td></tr>
+<tr style="background: var(--info-bg);"><td style="padding: 8px 10px; font-weight: 500; color: var(--info-fg);">V1</td><td style="padding: 8px 10px;">D. 알림 발송 (Resend·알리고)</td><td style="padding: 8px 10px;">5일</td><td style="padding: 8px 10px;">$50</td><td style="padding: 8px 10px;">Resend·알리고 알림톡</td></tr>
+<tr style="background: var(--info-bg);"><td style="padding: 8px 10px; font-weight: 500; color: var(--info-fg);">V1</td><td style="padding: 8px 10px;">2. 백링크·DA 분석</td><td style="padding: 8px 10px;">18~25일</td><td style="padding: 8px 10px;">$680</td><td style="padding: 8px 10px;">Ahrefs $500 + Moz $179 API</td></tr>
+<tr style="background: var(--warn-bg);"><td style="padding: 8px 10px; font-weight: 500; color: var(--warn-fg);">V1.5</td><td style="padding: 8px 10px;">E. 결제 (토스페이먼츠)</td><td style="padding: 8px 10px;">14일</td><td style="padding: 8px 10px;">$320 (수수료 2.9%)</td><td style="padding: 8px 10px;">토스 빌링키·팝빌</td></tr>
+<tr><td style="padding: 8px 10px; font-weight: 500; color: var(--text-3);">V2</td><td style="padding: 8px 10px;">10. 지식베이스 자동 학습</td><td style="padding: 8px 10px;">20~25일</td><td style="padding: 8px 10px;">$560</td><td style="padding: 8px 10px;">Claude Sonnet·CLOVA·Tika</td></tr>
+<tr><td style="padding: 8px 10px; font-weight: 500; color: var(--text-3);">V2</td><td style="padding: 8px 10px;">5. 블로그 지수 측정 ⚠ ToS 위험</td><td style="padding: 8px 10px;">30~45일</td><td style="padding: 8px 10px;">$350</td><td style="padding: 8px 10px;">Playwright·프록시·2Captcha</td></tr>
+<tr><td style="padding: 8px 10px; font-weight: 500; color: var(--text-3);">V2</td><td style="padding: 8px 10px;">9. 성과 기반 과금 ⚠ 변호사법 §34</td><td style="padding: 8px 10px;">7일</td><td style="padding: 8px 10px;">거래액 1.5~2.9%</td><td style="padding: 8px 10px;">Calendly Webhook·토스</td></tr>
+</tbody>
+</table>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 24px;">
+<div class="kpi-block">
+<h3>총 구현 시간</h3>
+<div class="when">단일 개발자 풀타임 기준</div>
+<div class="kpi-grid">
+<div class="kpi-cell"><div class="kpi-cell-l">V0 (4종)</div><div class="kpi-cell-v">~32일</div><div class="kpi-cell-d">5+3+13+17</div></div>
+<div class="kpi-cell"><div class="kpi-cell-l">V1 (7종)</div><div class="kpi-cell-v">~95일</div><div class="kpi-cell-d">3개월 풀타임</div></div>
+<div class="kpi-cell"><div class="kpi-cell-l">V1.5 (1종)</div><div class="kpi-cell-v">14일</div><div class="kpi-cell-d">결제</div></div>
+<div class="kpi-cell"><div class="kpi-cell-l">V2 (3종)</div><div class="kpi-cell-v">~70일</div><div class="kpi-cell-d">3.5개월</div></div>
+</div>
+</div>
+
+<div class="kpi-block">
+<h3>월 운영비 (V1.5 · 100명 기준)</h3>
+<div class="when">매출 990만 가정 시 영업이익률 ~64%</div>
+<div class="kpi-grid">
+<div class="kpi-cell"><div class="kpi-cell-l">LLM·임베딩</div><div class="kpi-cell-v">$700</div><div class="kpi-cell-d">Claude·OpenAI</div></div>
+<div class="kpi-cell"><div class="kpi-cell-l">SEO API</div><div class="kpi-cell-v">$680</div><div class="kpi-cell-d">Ahrefs·Moz</div></div>
+<div class="kpi-cell"><div class="kpi-cell-l">SERP·인프라</div><div class="kpi-cell-v">$350</div><div class="kpi-cell-d">프록시·캡차</div></div>
+<div class="kpi-cell"><div class="kpi-cell-l">합계</div><div class="kpi-cell-v">~$2,700</div><div class="kpi-cell-d">월 ~360만원</div></div>
+</div>
+</div>
+</div>
+
+<div class="kpi-block" style="margin-bottom: 24px; border-color: var(--warn-border); background: var(--warn-bg);">
+<h3 style="color: var(--warn-fg);">⚠ 법적 리스크 — 빌드 전 클리어 필수</h3>
+<div class="when" style="color: var(--warn-fg);">7개 항목 변호사·노무사 자문 권장</div>
+<div style="font-size: 12px; line-height: 1.8; color: var(--warn-fg);">
+<strong>변호사법 §34 (성과 기반 과금)</strong> — "수임 건"이 아니라 "유효 진성콜·미팅 예약" 단위로 설계 / 성공 보너스는 SaaS 사용료 명목<br/>
+<strong>변호사법 §31 (거절 사유 추적)</strong> — "lost_to(경쟁사)" 자유서술 금지, 코드값만<br/>
+<strong>네이버 ToS (블로그 지수)</strong> — 사용자 본인 블로그만, robots.txt 준수, "추정" 면책 고지<br/>
+<strong>저작권법 §35-3 (크롤러)</strong> — 메타데이터·순위만 저장, 본문 캐시 금지<br/>
+<strong>개인정보보호법 §29 (RLS)</strong> — 정책 단위 테스트 필수<br/>
+<strong>정통망법 §50 (알림톡)</strong> — 광고는 [광고] 접두사 + 수신거부<br/>
+<strong>전상법 §13·§17 (결제)</strong> — SaaS 즉시 제공 예외 명시 + 사업자·통신판매업 등록 (2~4주)
+</div>
+</div>
+
+<div class="section-title">즉시 할 일 (이번 주)</div>
+
+<div class="kpi-block">
+  <h3>5개 액션 — 양변호사·외주 결정 포함</h3>
+  <div class="when">→ V0 dogfood 진입 전제조건</div>
+  <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
+    <div class="task"><div class="task-status task-progress">1</div><div class="task-text">ElevenLabs 한국어 콜 1주 검증 — V0 시작과 병렬 (안 되면 V1.5 음성 통째로 흔들림)</div></div>
+    <div class="task"><div class="task-status task-progress">2</div><div class="task-text">변협 광고심사규정 룰북 v0.1 작성 — 양변호사 검수 4시간 (V0 차별점)</div></div>
+    <div class="task"><div class="task-status task-progress">3</div><div class="task-text">양변호사·마케터에 와이어프레임 30분 시연 — 보수성·UX 피드백</div></div>
+    <div class="task"><div class="task-status task-progress">4</div><div class="task-text">Cursor·Claude Code 셋업 + 첫 컴포넌트 변환 시도 (2시간)</div></div>
+    <div class="task"><div class="task-status task-progress">5</div><div class="task-text">외주 풀스택 견적 2~3개 확보 (옵션 C 백업 — 50~150만 부분 작업용)</div></div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LawOS — Welcome 법률사무소</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<style>
+  :root {
+    --bg: #FAFAFA;
+    --surface: #FFFFFF;
+    --surface-2: #F4F4F5;
+    --border: #E4E4E7;
+    --border-2: #D4D4D8;
+    --text: #18181B;
+    --text-2: #52525B;
+    --text-3: #A1A1AA;
+    --accent: #18181B;
+    --warn-bg: #FEF3C7;
+    --warn-fg: #92400E;
+    --warn-border: #FDE68A;
+    --danger-bg: #FEE2E2;
+    --danger-fg: #991B1B;
+    --success-bg: #D1FAE5;
+    --success-fg: #065F46;
+    --info-bg: #DBEAFE;
+    --info-fg: #1E40AF;
+    --radius: 8px;
+    --radius-lg: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    letter-spacing: -0.005em;
+    -webkit-font-smoothing: antialiased;
+  }
+  .app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 16px 12px;
+    display: flex; flex-direction: column; gap: 4px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px 16px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .brand-logo {
+    width: 26px; height: 26px; border-radius: 6px;
+    background: var(--text);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 600; font-size: 12px;
+  }
+  .brand-name { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+
+  .nav-section { font-size: 11px; color: var(--text-3); padding: 12px 12px 6px; font-weight: 500; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    color: var(--text-2);
+    font-size: 13px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .nav-item:hover { background: var(--surface-2); color: var(--text); }
+  .nav-item.active { background: var(--surface-2); color: var(--text); font-weight: 500; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .nav-item .badge {
+    margin-left: auto; font-size: 10px; padding: 2px 6px;
+    border-radius: 4px; background: var(--warn-bg); color: var(--warn-fg);
+    font-weight: 500;
+  }
+  .nav-item .badge.dot {
+    width: 6px; height: 6px; border-radius: 50%; padding: 0; background: var(--danger-fg);
+  }
+
+  .site-switcher {
+    margin: 0 4px 12px;
+    padding: 10px 12px;
+    background: var(--surface-2);
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px;
+  }
+  .site-switcher:hover { background: var(--border); }
+  .site-favicon {
+    width: 18px; height: 18px;
+    border-radius: 4px;
+    background: var(--text);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .site-info { flex: 1; min-width: 0; }
+  .site-name { font-weight: 500; color: var(--text); }
+  .site-domain { font-size: 11px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .site-chevron { width: 14px; height: 14px; color: var(--text-3); flex-shrink: 0; }
+
+  .site-dropdown {
+    margin: 0 4px 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px;
+    display: none;
+  }
+  .site-dropdown.shown { display: block; }
+  .site-option {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .site-option:hover { background: var(--surface-2); }
+  .site-option.active { background: var(--surface-2); }
+  .site-option-add {
+    border-top: 1px solid var(--border);
+    margin-top: 4px; padding-top: 10px;
+    color: var(--text-2); font-size: 12px;
+  }
+
+  .guest-banner {
+    background: var(--info-bg);
+    color: var(--info-fg);
+    padding: 12px 18px;
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    font-size: 13px;
+    display: flex; align-items: center; gap: 12px;
+    line-height: 1.55;
+  }
+  .guest-banner-text { flex: 1; }
+  .guest-banner-text strong { font-weight: 600; }
+  .guest-banner-action {
+    padding: 6px 12px;
+    background: var(--info-fg);
+    color: #fff;
+    border-radius: 5px;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; border: none;
+    font-family: inherit;
+  }
+
+  .signup-modal-bg {
+    display: none;
+    background: rgba(0,0,0,0.45);
+    padding: 40px 16px;
+    min-height: 400px;
+    align-items: center;
+    justify-content: center;
+  }
+  .signup-modal-bg.shown { display: flex; }
+  .signup-modal {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    max-width: 420px;
+    width: 100%;
+  }
+  .signup-modal h3 {
+    font-size: 20px; font-weight: 600;
+    letter-spacing: -0.02em; margin-bottom: 8px;
+  }
+  .signup-modal p {
+    font-size: 13px; color: var(--text-2);
+    line-height: 1.55; margin-bottom: 20px;
+  }
+  .signup-modal .input { margin-bottom: 8px; }
+  .signup-modal .btn { width: 100%; padding: 11px; margin-bottom: 8px; }
+  .signup-modal .oauth-btn {
+    width: 100%; padding: 11px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: inherit; font-size: 13px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .signup-modal .oauth-btn:hover { background: var(--surface-2); }
+  .signup-modal .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 12px 0;
+    font-size: 11px; color: var(--text-3);
+  }
+  .signup-modal .divider::before, .signup-modal .divider::after {
+    content: ""; flex: 1; height: 1px;
+    background: var(--border);
+  }
+  .signup-modal .skip {
+    text-align: center;
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--text-3);
+    cursor: pointer;
+  }
+
+  .channel-list { padding: 0 4px; }
+  .channel-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; font-size: 12px;
+    color: var(--text-2);
+  }
+  .channel-row .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .dot-ok { background: #10B981; }
+  .dot-stale { background: #EF4444; }
+  .dot-warn { background: #F59E0B; }
+  .dot-off { background: var(--border-2); }
+
+  .main { padding: 24px 32px 80px; max-width: 1200px; }
+
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .topbar h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.2; }
+  .topbar .crumb { font-size: 12px; color: var(--text-3); margin-bottom: 6px; }
+  .topbar .sub { font-size: 13px; color: var(--text-2); margin-top: 4px; }
+  .user-pill {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 12px;
+  }
+  .avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-weight: 500; font-size: 11px; }
+
+  .alert {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 18px;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: var(--warn-fg);
+    line-height: 1.55;
+  }
+  .alert-icon { width: 16px; height: 16px; flex-shrink: 0; margin-top: 2px; }
+  .alert-body { flex: 1; line-height: 1.55; }
+  .alert-body strong { font-weight: 600; }
+  .alert-actions { display: flex; gap: 8px; }
+  .alert-link {
+    font-size: 12px; padding: 4px 10px;
+    background: rgba(146, 64, 14, 0.08);
+    border-radius: 5px;
+    color: var(--warn-fg);
+    cursor: pointer;
+  }
+
+  .legend { display: flex; gap: 14px; margin-bottom: 16px; font-size: 12px; color: var(--text-2); }
+  .legend-pill { display: inline-flex; align-items: center; gap: 6px; }
+  .pill-free { padding: 2px 8px; border-radius: 5px; background: var(--info-bg); color: var(--info-fg); font-size: 11px; font-weight: 500; }
+  .pill-lock { padding: 2px 8px; border-radius: 5px; background: var(--warn-bg); color: var(--warn-fg); font-size: 11px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+  .pill-demo { padding: 2px 8px; border-radius: 5px; background: var(--surface-2); color: var(--text-2); font-size: 11px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px; }
+  .pill-mine { padding: 2px 8px; border-radius: 5px; background: var(--success-bg); color: var(--success-fg); font-size: 11px; font-weight: 500; }
+  .update-cta {
+    margin-left: auto;
+    font-size: 11px; padding: 4px 10px;
+    background: var(--surface-2); color: var(--text-2);
+    border-radius: 5px; cursor: pointer; border: 1px solid var(--border);
+    font-family: inherit; font-weight: 500;
+  }
+  .update-cta:hover { background: var(--text); color: #fff; border-color: var(--text); }
+  .lock-svg { width: 10px; height: 10px; }
+
+  .section { margin-bottom: 32px; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .section-head h2 { font-size: 13px; font-weight: 500; color: var(--text-2); }
+  .section-head .pill-free, .section-head .pill-lock { margin-left: 8px; }
+
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+  }
+  .kpi-label { font-size: 12px; color: var(--text-2); margin-bottom: 6px; }
+  .kpi-value { font-size: 28px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; }
+  .kpi-delta { font-size: 11px; color: var(--text-3); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .delta-up { color: #10B981; }
+  .delta-down { color: #EF4444; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+  }
+  .card h3 {
+    font-size: 13px; font-weight: 500;
+    margin-bottom: 12px;
+    display: flex; align-items: center;
+  }
+  .row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 0;
+    font-size: 13px;
+  }
+  .row + .row { border-top: 1px solid var(--border); }
+  .row-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+  .row-label { color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .row-meta { color: var(--text-3); font-size: 12px; flex-shrink: 0; }
+  .row-meta.up { color: #10B981; }
+  .row-meta.down { color: #EF4444; }
+
+  .ticket-mini { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 10px; }
+  .ticket-col {
+    background: var(--surface-2);
+    border-radius: 6px;
+    padding: 10px 8px;
+    text-align: center;
+  }
+  .ticket-col-name { font-size: 10px; color: var(--text-3); margin-bottom: 4px; }
+  .ticket-col-count { font-size: 18px; font-weight: 600; }
+
+  .agent-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .agent-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    display: flex; flex-direction: column; gap: 10px;
+    position: relative;
+    transition: border-color 0.15s;
+  }
+  .agent-card:hover { border-color: var(--border-2); }
+  .agent-head { display: flex; align-items: center; gap: 10px; }
+  .agent-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 500; color: var(--text-2);
+  }
+  .agent-name { font-size: 14px; font-weight: 500; line-height: 1.2; }
+  .agent-role { font-size: 11px; color: var(--text-3); margin-top: 2px; }
+  .agent-desc { font-size: 12px; color: var(--text-2); line-height: 1.55; min-height: 32px; }
+  .agent-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+  .agent-tag {
+    font-size: 10px; padding: 2px 7px; border-radius: 4px;
+    background: var(--surface-2); color: var(--text-2);
+  }
+  .agent-meta {
+    display: flex; justify-content: space-between;
+    font-size: 11px; color: var(--text-3);
+    padding: 8px 0;
+    border-top: 1px solid var(--border);
+  }
+  .agent-action { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .agent-price { font-size: 12px; color: var(--text); font-weight: 500; }
+  .btn-activate {
+    font-size: 12px; padding: 6px 12px;
+    background: var(--warn-bg); color: var(--warn-fg);
+    border-radius: 6px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--warn-border);
+  }
+  .btn-activate:hover { background: #FDE68A; }
+
+  .action-queue {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+  }
+  .action-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 4px; gap: 12px;
+    border-radius: 6px;
+    transition: background 0.1s;
+  }
+  .action-row:hover { background: var(--surface-2); }
+  .action-row + .action-row { border-top: 1px solid var(--border); }
+  .action-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500; color: var(--text-2);
+    flex-shrink: 0;
+  }
+  .action-text { font-size: 13px; flex: 1; line-height: 1.4; }
+  .btn-secondary {
+    font-size: 12px; padding: 5px 10px;
+    background: var(--surface-2); color: var(--text);
+    border-radius: 5px; cursor: pointer; border: 1px solid var(--border);
+  }
+  .btn-secondary:hover { background: var(--border); }
+
+  .ad-warn-card {
+    background: var(--surface);
+    border: 1px solid var(--warn-border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+  }
+  .ad-warn-head {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 500;
+    margin-bottom: 10px;
+    color: var(--warn-fg);
+  }
+  .ad-warn-icon { width: 16px; height: 16px; flex-shrink: 0; }
+  .ad-warn-row {
+    padding: 8px 0;
+    font-size: 13px;
+  }
+  .ad-warn-row + .ad-warn-row { border-top: 1px solid var(--border); }
+  .ad-warn-row-text { color: var(--text); margin-bottom: 4px; }
+  .ad-warn-row-meta { font-size: 11px; color: var(--text-3); }
+
+  @media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .agent-grid { grid-template-columns: 1fr; }
+    .ticket-mini { grid-template-columns: repeat(5, 1fr); }
+  }
+  @media (max-width: 800px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { display: none; }
+    .two-col { grid-template-columns: 1fr; }
+    .main { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+
+<aside class="sidebar">
+  <div class="brand">
+    <div class="brand-logo">L</div>
+    <div class="brand-name">LawOS</div>
+  </div>
+
+  <div class="site-switcher" onclick="toggleSites()">
+    <div class="site-favicon">W</div>
+    <div class="site-info">
+      <div class="site-name" id="currentSite">welcome 법률사무소</div>
+      <div class="site-domain" id="currentDomain">welcome-law.kr</div>
+    </div>
+    <svg class="site-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+  </div>
+  <div class="site-dropdown" id="siteDropdown">
+    <div class="site-option active" onclick="selectSite('welcome 법률사무소', 'welcome-law.kr')">
+      <div class="site-favicon">W</div>
+      <div class="site-info">
+        <div class="site-name">welcome 법률사무소</div>
+        <div class="site-domain">welcome-law.kr</div>
+      </div>
+    </div>
+    <div class="site-option" onclick="selectSite('김변호사 사무소', 'kim-law.com')">
+      <div class="site-favicon" style="background: #4F46E5;">K</div>
+      <div class="site-info">
+        <div class="site-name">김변호사 사무소</div>
+        <div class="site-domain">kim-law.com</div>
+      </div>
+    </div>
+    <div class="site-option" onclick="selectSite('박앤정 법무법인', 'parkjung.kr')">
+      <div class="site-favicon" style="background: #DC2626;">P</div>
+      <div class="site-info">
+        <div class="site-name">박앤정 법무법인</div>
+        <div class="site-domain">parkjung.kr</div>
+      </div>
+    </div>
+    <div class="site-option site-option-add" onclick="addSite()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+      새 사이트 추가
+    </div>
+  </div>
+
+  <a href="lawos_v0_dashboard.html" style="color: inherit; text-decoration: none;"><div class="nav-item active">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+    대시보드
+  </div></a>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+    신뢰자산
+  </div>
+  <a href="lawos_agents.html" style="color: inherit; text-decoration: none;"><div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+    사무장
+    <span class="badge">16</span>
+  </div></a>
+  <a href="lawos_writer.html" style="color: inherit; text-decoration: none;"><div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+    콘텐츠
+  </div></a>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>
+    모델 마켓
+  </div>
+  <div class="nav-item">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    행정
+  </div>
+
+  <div class="nav-section">채널</div>
+  <div class="channel-list">
+    <div class="channel-row"><span class="dot dot-ok"></span>홈페이지</div>
+    <div class="channel-row"><span class="dot dot-stale"></span>네이버 블로그</div>
+    <div class="channel-row"><span class="dot dot-ok"></span>인스타</div>
+    <div class="channel-row"><span class="dot dot-warn"></span>유튜브</div>
+    <div class="channel-row"><span class="dot dot-off"></span>카카오 채널</div>
+  </div>
+
+  <div class="nav-section">팀</div>
+  <div class="channel-list">
+    <div class="channel-row"><div class="avatar" style="width:18px;height:18px;font-size:10px;">양</div>양변호사 (대표)</div>
+    <div class="channel-row"><div class="avatar" style="width:18px;height:18px;font-size:10px;">김</div>김마케터</div>
+  </div>
+
+  <div class="nav-section">누적 자산</div>
+  <div class="channel-list" style="font-size: 11px;">
+    <div class="channel-row" style="padding: 4px 8px;">추적 데이터 28일</div>
+    <div class="channel-row" style="padding: 4px 8px;">발행 글 47편</div>
+    <div class="channel-row" style="padding: 4px 8px;">OAuth 연결 1/4</div>
+    <div class="channel-row" style="padding: 4px 8px;">광고 검증 이력 23건</div>
+    <div class="channel-row" style="padding: 4px 8px; color: var(--text-3);">→ 떠나면 분석 사라짐</div>
+  </div>
+</aside>
+
+<main class="main">
+
+<div class="topbar">
+  <div>
+    <div class="crumb" id="topbarCrumb">welcome 법률사무소 / 대시보드</div>
+    <h1>이번 주 점검</h1>
+    <div class="sub">2026.05.04 — 5.10 · 점검할 것 7개</div>
+  </div>
+  <div style="display: flex; gap: 8px; align-items: center;">
+    <button class="btn-secondary" onclick="openSignup('새 콘텐츠 작성')">+ 새 콘텐츠</button>
+    <button class="btn-secondary" onclick="openSignup('인입 응답')">인입 응답</button>
+    <button class="btn" onclick="openSignup('로그인')">로그인 / 가입</button>
+  </div>
+</div>
+
+<div class="guest-banner">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+  <div class="guest-banner-text">
+    <strong>비로그인 모드 · welcome-law.kr 진단 진행 중</strong> · 데모 데이터로 화면 채워두었습니다. 가입하면 1시간 후 사라지는 결과가 영구 저장 + 채널 연결 + 사무장 활성화.
+  </div>
+  <button class="guest-banner-action" onclick="openSignup('결과 저장')">결과 저장 · 가입</button>
+</div>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; margin-bottom: 24px;">
+  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+    <div>
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 2px;">사무실 OS 셋업 — 5단계</div>
+      <div style="font-size: 12px; color: var(--text-3);">1 / 5 완료 · 평균 4분 소요</div>
+    </div>
+    <div style="width: 120px; height: 6px; background: var(--surface-2); border-radius: 3px; overflow: hidden;">
+      <div style="width: 20%; height: 100%; background: var(--success-fg);"></div>
+    </div>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
+    <div style="padding: 12px; background: var(--success-bg); border-radius: 8px;">
+      <div style="font-size: 11px; color: var(--success-fg); margin-bottom: 4px; font-weight: 500;">✓ 완료</div>
+      <div style="font-size: 13px; font-weight: 500; color: var(--success-fg);">1. 사이트 진단</div>
+    </div>
+    <div style="padding: 12px; background: var(--surface-2); border-radius: 8px; cursor: pointer;" onclick="openSignup('가입')">
+      <div style="font-size: 11px; color: var(--info-fg); margin-bottom: 4px; font-weight: 500;">→ 다음</div>
+      <div style="font-size: 13px; font-weight: 500;">2. 가입 30초</div>
+    </div>
+    <div style="padding: 12px; background: var(--surface-2); border-radius: 8px; cursor: pointer;" onclick="openSignup('채널 연결')">
+      <div style="font-size: 11px; color: var(--text-3); margin-bottom: 4px;">대기</div>
+      <div style="font-size: 13px; font-weight: 500;">3. 채널 연결</div>
+    </div>
+    <div style="padding: 12px; background: var(--surface-2); border-radius: 8px; cursor: pointer;" onclick="openSignup('키워드 등록')">
+      <div style="font-size: 11px; color: var(--text-3); margin-bottom: 4px;">대기</div>
+      <div style="font-size: 13px; font-weight: 500;">4. 키워드 등록</div>
+    </div>
+    <div style="padding: 12px; background: var(--surface-2); border-radius: 8px; cursor: pointer;" onclick="window.location.href='lawos_writer.html'">
+      <div style="font-size: 11px; color: var(--text-3); margin-bottom: 4px;">대기</div>
+      <div style="font-size: 13px; font-weight: 500;">5. 첫 콘텐츠</div>
+    </div>
+  </div>
+</div>
+
+<div class="alert">
+  <svg class="alert-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  <div class="alert-body">
+    <strong>네이버 로직 변동 감지</strong> — 블로그 통검 노출 -22% (지난 3일 평균). 추적 키워드 중 3개가 1페이지에서 이탈.
+  </div>
+  <div class="alert-actions">
+    <span class="alert-link">상세 보기</span>
+    <span class="alert-link">GEO 보강 제안</span>
+  </div>
+</div>
+
+<div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 24px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); font-size: 12px; align-items: center;">
+  <span style="color: var(--text-2); margin-right: 8px; font-weight: 500;">LawOS만 하는 것</span>
+  <span style="padding: 3px 10px; background: var(--surface-2); border-radius: 4px; color: var(--text-2);">변협 광고 자동 검증</span>
+  <span style="padding: 3px 10px; background: var(--surface-2); border-radius: 4px; color: var(--text-2);">잡콜·진성콜 분리</span>
+  <span style="padding: 3px 10px; background: var(--surface-2); border-radius: 4px; color: var(--text-2);">GEO·AI 검색 인용 추적</span>
+  <span style="padding: 3px 10px; background: var(--surface-2); border-radius: 4px; color: var(--text-2);">네이버 로직 변동 알림</span>
+  <span style="padding: 3px 10px; background: var(--surface-2); border-radius: 4px; color: var(--text-2);">AI hedge 60%</span>
+</div>
+
+<div class="legend">
+  <span class="legend-pill"><span class="pill-free">무료</span>셀프 — 보고·진단·작성·검수</span>
+  <span class="legend-pill"><span class="pill-lock"><svg class="lock-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>위임</span>발행·자동화·사무장이 실행</span>
+  <span style="margin-left: auto; font-size: 11px; color: var(--text-3);">셀프 또는 위임. V0는 결제 X · 활성화 신청 → 1:1 견적</span>
+</div>
+
+<div class="section">
+  <div class="section-head">
+    <h2>이번 주 KPI <span class="pill-demo">데모</span></h2>
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span style="font-size: 11px; color: var(--text-3);">2026.05.04 — 2026.05.10</span>
+      <button class="update-cta" onclick="openSignup('내 사이트 추적')">내 데이터로 바꾸기</button>
+    </div>
+  </div>
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">사이트 헬스</div>
+      <div class="kpi-value">87</div>
+      <div class="kpi-delta delta-up">▲ 3 vs 지난주</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">광고 ROAS</div>
+      <div class="kpi-value">2.4x</div>
+      <div class="kpi-delta delta-up">▲ 0.2 · 잡콜 64%</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">이번주 인입</div>
+      <div class="kpi-value">47</div>
+      <div class="kpi-delta">진성 17 · 잡콜 30 · 미응답 5</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">수임 전환</div>
+      <div class="kpi-value">11%</div>
+      <div class="kpi-delta delta-down">▼ 2%p · 47건 중 5건</div>
+    </div>
+  </div>
+  <div class="kpi-grid" style="margin-top: 12px;">
+    <div class="kpi-card">
+      <div class="kpi-label">추적 키워드</div>
+      <div class="kpi-value">5 / 5</div>
+      <div class="kpi-delta">free 한도 도달</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">작성 콘텐츠</div>
+      <div class="kpi-value">14</div>
+      <div class="kpi-delta">발행 0 · 검토 2 · 작성중 4</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">GEO 인용 (AI 검색)</div>
+      <div class="kpi-value">8</div>
+      <div class="kpi-delta delta-up">▲ ChatGPT 5 · Cue 3</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">영정·저품 위험</div>
+      <div class="kpi-value">안전</div>
+      <div class="kpi-delta">5채널 모두 정상</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="two-col">
+
+    <div class="card">
+      <h3>트렌드 토픽 TOP 5 <span class="pill-mine">내 영역</span><button class="update-cta" onclick="openSignup('영역 설정')">영역 변경</button></h3>
+      <div class="row">
+        <div class="row-left"><span class="row-label">전세사기 처벌강화법 통과</span></div>
+        <span class="row-meta up">+95% · 미작성</span>
+      </div>
+      <div class="row">
+        <div class="row-left"><span class="row-label">음주운전 양형기준 개정</span></div>
+        <span class="row-meta up">+67% · 미작성</span>
+      </div>
+      <div class="row">
+        <div class="row-left"><span class="row-label">코인사기 회복 판례</span></div>
+        <span class="row-meta up">+52% · 작성중</span>
+      </div>
+      <div class="row">
+        <div class="row-left"><span class="row-label">협의이혼 양육비 산정</span></div>
+        <span class="row-meta up">+48% · 발행 (인입 7건)</span>
+      </div>
+      <div class="row">
+        <div class="row-left"><span class="row-label">임대차 보증금 반환</span></div>
+        <span class="row-meta up">+41% · 발행 (인입 3건 → 수임 1)</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>채널 점검 <span class="pill-demo">데모</span><button class="update-cta" onclick="openSignup('채널 연결')">+ 내 채널 연결</button></h3>
+      <div class="row">
+        <div class="row-left"><span class="dot dot-ok"></span><span class="row-label">홈페이지</span></div>
+        <span class="row-meta">welcome-law.kr · 정상</span>
+      </div>
+      <div class="row">
+        <div class="row-left"><span class="dot dot-stale"></span><span class="row-label">네이버 블로그</span></div>
+        <span class="row-meta down">7일 발행 없음</span>
+      </div>
+      <div class="row">
+        <div class="row-left"><span class="dot dot-ok"></span><span class="row-label">인스타</span></div>
+        <span class="row-meta">@welcome_law</span>
+      </div>
+      <div class="row">
+        <div class="row-left"><span class="dot dot-warn"></span><span class="row-label">유튜브</span></div>
+        <span class="row-meta down">3주 발행 없음</span>
+      </div>
+      <div class="row">
+        <div class="row-left"><span class="dot dot-off"></span><span class="row-label">카카오 채널</span></div>
+        <span class="row-meta">미연결</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <div class="two-col">
+
+    <div class="card">
+      <h3>이번 주 콘텐츠 큐 <span class="pill-demo">데모</span><button class="update-cta" onclick="openSignup('콘텐츠 작성')">+ 글 작성</button></h3>
+      <div class="ticket-mini">
+        <div class="ticket-col">
+          <div class="ticket-col-name">아이디어</div>
+          <div class="ticket-col-count">4</div>
+        </div>
+        <div class="ticket-col">
+          <div class="ticket-col-name">작성중</div>
+          <div class="ticket-col-count">2</div>
+        </div>
+        <div class="ticket-col">
+          <div class="ticket-col-name">검토</div>
+          <div class="ticket-col-count">1</div>
+        </div>
+        <div class="ticket-col">
+          <div class="ticket-col-name">발행 예정</div>
+          <div class="ticket-col-count">3</div>
+        </div>
+        <div class="ticket-col">
+          <div class="ticket-col-name">완료</div>
+          <div class="ticket-col-count">8</div>
+        </div>
+      </div>
+      <div style="font-size: 12px; color: var(--text-3); padding-top: 8px; border-top: 1px solid var(--border); margin-top: 4px;">
+        검토 1건 — 변협 §31 위반 의심 (수정 필요)
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>인입 inbox <span class="pill-demo">데모</span><button class="update-cta" onclick="openSignup('inbox 연결')">+ 채널 연결</button></h3>
+      <div class="row">
+        <div class="row-left"><span class="row-label">홈페이지 폼</span></div>
+        <span class="row-meta">12건 · 미응답 2</span>
+      </div>
+      <div class="row">
+        <div class="row-left"><span class="row-label">카카오 채널</span></div>
+        <span class="row-meta">8건 · 미응답 1</span>
+      </div>
+      <div class="row">
+        <div class="row-left"><span class="row-label">로톡</span></div>
+        <span class="row-meta">3건 · 미응답 1</span>
+      </div>
+      <div class="row">
+        <div class="row-left"><span class="row-label">인스타 DM</span></div>
+        <span class="row-meta">2건 · 미응답 1</span>
+      </div>
+      <div style="font-size: 12px; color: var(--danger-fg); padding-top: 8px; border-top: 1px solid var(--border); margin-top: 4px;">
+        24h 초과 5건 — 인테이크봇 켜면 자동 1차 응대
+      </div>
+    </div>
+
+    <div class="ad-warn-card">
+      <div class="ad-warn-head">
+        <svg class="ad-warn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/></svg>
+        광고규제 검증
+        <span class="pill-mine" style="margin-left: 8px;">실시간</span>
+        <button class="update-cta" onclick="openSignup('자동 검증 활성화')">자동 차단 켜기</button>
+      </div>
+      <div class="ad-warn-row">
+        <div class="ad-warn-row-text">"전관 출신 변호사가 직접 상담"</div>
+        <div class="ad-warn-row-meta">파워링크 · §31 위반 가능 — 자동 수정 제안 있음</div>
+      </div>
+      <div class="ad-warn-row">
+        <div class="ad-warn-row-text">"승소율 95% 보장"</div>
+        <div class="ad-warn-row-meta">파워컨텐츠 · §23 광고 일반 위반</div>
+      </div>
+      <div style="font-size: 11px; color: var(--text-3); padding-top: 10px; border-top: 1px solid var(--border); margin-top: 4px; line-height: 1.5;">
+        모든 발신물은 발신 전 자동 검증 · 위반 이력은 ticket_activities에 기록 · 변협 신고 시 증빙으로 사용 가능
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head">
+    <h2>AI 사무장 카탈로그 <span class="pill-lock"><svg class="lock-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>활성화 = 유료</span></h2>
+    <a href="lawos_agents.html" style="font-size: 12px; color: var(--text-3); cursor: pointer;">전체 16개 보기 →</a>
+  </div>
+
+  <div class="agent-grid">
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">콜</div>
+        <div>
+          <div class="agent-name">콜 사무장 김도우미</div>
+          <div class="agent-role">재판·외근 시 1차 응대</div>
+        </div>
+      </div>
+      <div class="agent-desc">캘린더 부재 시간만 자동 ON. 일정 조율과 메모 전달. 변호사 폰 동시 울림 후 미수신 시 핸드오프.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">on-demand</span>
+        <span class="agent-tag">한국어 ★★★</span>
+        <span class="agent-tag">elevenlabs</span>
+      </div>
+      <div class="agent-meta">
+        <span>처리량 월 200건</span>
+        <span>응답 3초</span>
+      </div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">시간 5천 · 월 9.9만</div>
+          <div style="font-size: 10px; color: var(--text-3); margin-top: 2px;">상담실장 인건비 1/8</div>
+        </div>
+        <a href="lawos_agents.html"><button class="btn-activate">활성화 신청</button></a>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">챗</div>
+        <div>
+          <div class="agent-name">인테이크봇 박매니저</div>
+          <div class="agent-role">24시간 챗 1차 응대</div>
+        </div>
+      </div>
+      <div class="agent-desc">홈페이지 폼·카카오·로톡에서 들어온 문의 자동 분류. 사건 유형별 핸드오프와 1차 견적 제시.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">always-on</span>
+        <span class="agent-tag">claude</span>
+        <span class="agent-tag">멀티채널</span>
+      </div>
+      <div class="agent-meta">
+        <span>처리량 무제한</span>
+        <span>응답 2초</span>
+      </div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">셋업 19만 · 건당 1천</div>
+          <div style="font-size: 10px; color: var(--text-3); margin-top: 2px;">잡콜 1건 처리 비용 1/3</div>
+        </div>
+        <a href="lawos_agents.html"><button class="btn-activate">활성화 신청</button></a>
+      </div>
+    </div>
+
+    <div class="agent-card">
+      <div class="agent-head">
+        <div class="agent-avatar">작</div>
+        <div>
+          <div class="agent-name">콘텐츠 작가 이작가</div>
+          <div class="agent-role">블로그·쇼츠 작성·검수</div>
+        </div>
+      </div>
+      <div class="agent-desc">AI 60% + 변호사 40% 검수. 변협 광고규정 자동 통과한 글만 발행. 사례·판례 빈칸 가이드.</div>
+      <div class="agent-tags">
+        <span class="agent-tag">on-demand</span>
+        <span class="agent-tag">ai hedge</span>
+        <span class="agent-tag">EEAT</span>
+      </div>
+      <div class="agent-meta">
+        <span>주 7건</span>
+        <span>건당 30분</span>
+      </div>
+      <div class="agent-action">
+        <div>
+          <div class="agent-price">건당 5~30만 · 월 49만</div>
+          <div style="font-size: 10px; color: var(--text-3); margin-top: 2px;">블로그 대행 시세 1/3</div>
+        </div>
+        <a href="lawos_agents.html"><button class="btn-activate">활성화 신청</button></a>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head">
+    <h2>이번 주 할 일 — 5건</h2>
+    <span style="font-size: 11px; color: var(--text-3);">우선순위 순 · 위임 또는 직접</span>
+  </div>
+  <div class="action-queue">
+    <div class="action-row">
+      <div class="action-num">1</div>
+      <div class="action-text">트렌드 글 3편 작성 — 전세사기 · 음주운전 양형 · 코인사기 회복</div>
+      <a href="lawos_writer.html"><button class="btn-activate">이작가에게 위임</button></a>
+    </div>
+    <div class="action-row">
+      <div class="action-num">2</div>
+      <div class="action-text">미응답 문의 5건 응답 (24h 초과)</div>
+      <span class="btn-activate">박매니저 켜기</span>
+    </div>
+    <div class="action-row">
+      <div class="action-num">3</div>
+      <div class="action-text">파워링크 광고 2건 변협 §31 위반 가능성 — 자동 수정 제안 있음</div>
+      <span class="btn-secondary">검증 보기</span>
+    </div>
+    <div class="action-row">
+      <div class="action-num">4</div>
+      <div class="action-text">네이버 블로그 7일 발행 없음 — 직접 작성 또는 위임</div>
+      <span class="btn-secondary">콘텐츠 큐 열기</span>
+    </div>
+    <div class="action-row">
+      <div class="action-num">5</div>
+      <div class="action-text">이번 주 일정 비움 (5/8 13:00 재판) — 콜 사무장 자동 ON 권장</div>
+      <span class="btn-activate">김도우미 켜기</span>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-head">
+    <h2>변호사 검수 대기 <span class="pill-demo">데모</span></h2>
+    <span style="font-size: 11px; color: var(--text-3);">2건 · 가입 후 내 사무실 데이터로 표시</span>
+  </div>
+  <div class="card" style="padding: 0;">
+    <div class="action-row" style="padding: 14px 18px;">
+      <div class="action-num">검</div>
+      <div class="action-text">
+        <div>"전세사기 처벌강화법 통과 — 세입자가 알아야 할 5가지" 발행 검토</div>
+        <div style="font-size: 11px; color: var(--text-3); margin-top: 2px;">김마케터 작성 → 양변호사 검토 대기 · AI 58% · SEO 78점 · 변협 통과</div>
+      </div>
+      <span class="btn-secondary">미리보기</span>
+      <span class="btn-activate">승인</span>
+    </div>
+    <div class="action-row" style="padding: 14px 18px; border-top: 1px solid var(--border);">
+      <div class="action-num">검</div>
+      <div class="action-text">
+        <div>인테이크봇 응답 시안 — "음주운전 적발 후 어떻게?"</div>
+        <div style="font-size: 11px; color: var(--text-3); margin-top: 2px;">박매니저(봇) 1차 분류 → 양변호사 견적 확정 · 형사 · 견적 200만 · 신뢰도 92%</div>
+      </div>
+      <span class="btn-secondary">수정</span>
+      <span class="btn-activate">승인</span>
+    </div>
+  </div>
+  <div style="font-size: 11px; color: var(--text-3); margin-top: 8px; padding: 0 4px; display: flex; justify-content: space-between; align-items: center;">
+    <span>실수 시 모든 액션은 24시간 내 되돌리기 가능 · 변협 신고 시 증빙으로 사용</span>
+    <button class="update-cta" onclick="openSignup('내 검수 큐')">내 사무실 검수 시작</button>
+  </div>
+</div>
+
+</main>
+</div>
+
+<div class="signup-modal-bg" id="signupModal" onclick="if(event.target===this) closeSignup()">
+  <div class="signup-modal">
+    <h3 id="signupTitle">계속하려면 가입</h3>
+    <p id="signupSub">이메일 1줄로 즉시 시작. 진단 결과·키워드 추적·사무장 카탈로그가 다 열립니다.</p>
+
+    <button class="oauth-btn" onclick="completeSignup()">
+      <span style="width: 16px; height: 16px; border-radius: 50%; background: var(--surface-2); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 10px;">G</span>
+      Google로 계속
+    </button>
+
+    <div class="divider">또는</div>
+
+    <input class="input" type="email" placeholder="이메일" id="signupEmail" />
+    <button class="btn" onclick="completeSignup()">이메일로 시작</button>
+
+    <div class="skip" onclick="closeSignup()">나중에 — 비로그인으로 계속</div>
+  </div>
+</div>
+
+<script>
+function toggleSites() {
+  document.getElementById('siteDropdown').classList.toggle('shown');
+}
+function selectSite(name, domain) {
+  document.getElementById('currentSite').textContent = name;
+  document.getElementById('currentDomain').textContent = domain;
+  document.getElementById('topbarCrumb').textContent = name + ' / 대시보드';
+  document.querySelectorAll('.site-option').forEach(function(o) { o.classList.remove('active'); });
+  event.currentTarget.classList.add('active');
+  document.getElementById('siteDropdown').classList.remove('shown');
+}
+function addSite() {
+  document.getElementById('siteDropdown').classList.remove('shown');
+  openSignup('새 사이트 추가');
+}
+function openSignup(action) {
+  document.getElementById('signupTitle').textContent = action + ' — 가입';
+  document.getElementById('signupModal').classList.add('shown');
+}
+function closeSignup() {
+  document.getElementById('signupModal').classList.remove('shown');
+}
+function completeSignup() {
+  alert('가입 완료. (V0 placeholder — 실제 플로우는 W1 빌드)');
+  closeSignup();
+}
+
+(function() {
+  var qs = window.location.search;
+  var match = qs.match(/site=([^&]+)/);
+  if (match) {
+    var url = decodeURIComponent(match[1]);
+    var domain = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    document.getElementById('currentDomain').textContent = domain;
+  }
+})();
+</script>
+
+</body>
+</html>

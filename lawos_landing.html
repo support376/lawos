@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LawOS — 변호사 사무실 디지털 운영 OS</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="lawos_styles.css" />
+<style>
+  body {
+    background: var(--bg);
+    min-height: 100vh;
+  }
+  .top-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .top-nav-brand { display: flex; align-items: center; gap: 8px; }
+  .top-nav-links { display: flex; gap: 16px; align-items: center; font-size: 13px; }
+  .top-nav-links a { color: var(--text-2); }
+  .top-nav-links a:hover { color: var(--text); }
+
+  .hero-shell {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 100px 24px 60px;
+    text-align: center;
+  }
+  .hero-tag {
+    display: inline-block;
+    padding: 5px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 12px;
+    color: var(--text-2);
+    margin-bottom: 24px;
+  }
+  .hero-h1 {
+    font-size: 48px; font-weight: 600;
+    letter-spacing: -0.035em; line-height: 1.1;
+    margin-bottom: 18px;
+  }
+  .hero-sub {
+    font-size: 17px; color: var(--text-2);
+    line-height: 1.6;
+    margin-bottom: 36px;
+    max-width: 560px;
+    margin-left: auto; margin-right: auto;
+  }
+
+  .input-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    max-width: 600px;
+    margin: 0 auto 16px;
+  }
+  .input-row { display: flex; gap: 8px; }
+  .input-row .input { flex: 1; font-size: 15px; padding: 14px 16px; }
+  .input-row .btn { padding: 14px 28px; font-size: 15px; }
+
+  .meta-line {
+    font-size: 12px; color: var(--text-3);
+    margin-top: 12px;
+    line-height: 1.6;
+  }
+
+  .features-strip {
+    display: flex; gap: 24px; flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 48px;
+    font-size: 13px;
+    color: var(--text-2);
+  }
+  .feature-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .feature-pill::before {
+    content: ""; width: 4px; height: 4px;
+    border-radius: 50%; background: #10B981;
+  }
+
+  .preview-section {
+    max-width: 1100px; margin: 80px auto 0;
+    padding: 0 24px 100px;
+  }
+  .preview-label {
+    text-align: center;
+    font-size: 12px;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+  .preview-h2 {
+    text-align: center;
+    font-size: 28px; font-weight: 600;
+    letter-spacing: -0.025em;
+    margin-bottom: 8px;
+  }
+  .preview-sub {
+    text-align: center;
+    color: var(--text-2);
+    font-size: 14px;
+    margin-bottom: 40px;
+  }
+
+  .preview-mockup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .preview-bar {
+    background: var(--surface-2);
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 6px; align-items: center;
+  }
+  .preview-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--border-2); }
+  .preview-content {
+    padding: 24px 28px;
+  }
+  .preview-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+    margin-bottom: 16px;
+  }
+  .preview-card {
+    background: var(--surface-2);
+    padding: 14px 16px;
+    border-radius: var(--radius);
+  }
+  .preview-card-label { font-size: 11px; color: var(--text-3); margin-bottom: 4px; }
+  .preview-card-value { font-size: 22px; font-weight: 600; letter-spacing: -0.02em; }
+  .preview-card-meta { font-size: 11px; color: var(--text-3); margin-top: 4px; }
+
+  .footer {
+    text-align: center;
+    padding: 24px 32px 32px;
+    font-size: 12px;
+    color: var(--text-3);
+    border-top: 1px solid var(--border);
+  }
+
+  @media (max-width: 700px) {
+    .hero-shell { padding: 60px 16px 40px; }
+    .hero-h1 { font-size: 32px; }
+    .preview-grid { grid-template-columns: repeat(2, 1fr); }
+    .top-nav { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="top-nav">
+  <div class="top-nav-brand">
+    <div class="brand-logo">L</div>
+    <div class="brand-name">LawOS</div>
+  </div>
+  <div class="top-nav-links">
+    <a href="lawos_agents.html">AI 사무장</a>
+    <a href="lawos_onboarding.html"><button class="btn-secondary">로그인</button></a>
+  </div>
+</nav>
+
+<div class="hero-shell">
+
+  <div class="hero-tag">변호사 사무실 디지털 운영 OS</div>
+
+  <h1 class="hero-h1">사이트는 누구나 만든다.<br/>그 위에서 돌리는 OS가 다르다.</h1>
+
+  <p class="hero-sub">URL 한 줄 넣으면 사이트 헬스·SEO·변협 광고규제·AI 검색 인용까지 즉시 점검.<br/>여러 사무실·사이트를 한 화면에서 운영하고, 시간 부족하면 AI 사무장에게 위임.</p>
+
+  <div class="input-card">
+    <div class="input-row">
+      <input class="input" id="urlInput" placeholder="https://welcome-law.kr" value="https://welcome-law.kr" />
+      <button class="btn" onclick="goDashboard()">대시보드 시작</button>
+    </div>
+    <div class="meta-line">회원가입 없이 무료 시작 · 30초 진단 → 즉시 대시보드 사용 · 결과는 1시간 유지</div>
+  </div>
+
+  <div class="features-strip">
+    <span class="feature-pill">변협 광고 자동 검증</span>
+    <span class="feature-pill">잡콜·진성콜 분리</span>
+    <span class="feature-pill">GEO·AI 검색 추적</span>
+    <span class="feature-pill">멀티 사이트 관리</span>
+    <span class="feature-pill">AI 사무장 16종</span>
+  </div>
+
+</div>
+
+<div class="preview-section">
+  <div class="preview-label">대시보드 미리보기</div>
+  <h2 class="preview-h2">진단 결과가 곧 대시보드입니다</h2>
+  <p class="preview-sub">URL 입력 → 30초 후 이 화면에 우리 사무실 데이터가 채워집니다. 가입은 결과 저장할 때만.</p>
+
+  <div class="preview-mockup">
+    <div class="preview-bar">
+      <div class="preview-dot"></div>
+      <div class="preview-dot"></div>
+      <div class="preview-dot"></div>
+      <span style="margin-left: 12px; font-size: 12px; color: var(--text-3);">welcome-law.kr · 비로그인 · 1시간 유지</span>
+    </div>
+    <div class="preview-content">
+      <div class="preview-grid">
+        <div class="preview-card">
+          <div class="preview-card-label">사이트 헬스</div>
+          <div class="preview-card-value">87</div>
+          <div class="preview-card-meta">상위 32%</div>
+        </div>
+        <div class="preview-card">
+          <div class="preview-card-label">광고 ROAS</div>
+          <div class="preview-card-value">2.4x</div>
+          <div class="preview-card-meta">잡콜 64%</div>
+        </div>
+        <div class="preview-card">
+          <div class="preview-card-label">GEO 인용</div>
+          <div class="preview-card-value">8</div>
+          <div class="preview-card-meta">ChatGPT 5</div>
+        </div>
+        <div class="preview-card">
+          <div class="preview-card-label">변협 위험</div>
+          <div class="preview-card-value" style="color: #EF4444;">2</div>
+          <div class="preview-card-meta">자동 수정 가능</div>
+        </div>
+      </div>
+      <div style="text-align: center; padding: 16px 0; font-size: 13px; color: var(--text-3);">
+        + 트렌드 토픽 · 채널 점검 · 콘텐츠 큐 · 사무장 카탈로그 · 인입 inbox
+      </div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  LawOS · 변호사 사무실의 디지털 운영 OS · 2026
+</div>
+
+<script>
+function goDashboard() {
+  var url = document.getElementById('urlInput').value.trim();
+  var qs = url ? '?site=' + encodeURIComponent(url) : '';
+  window.location.href = 'lawos_v0_dashboard.html' + qs;
+}
+document.getElementById('urlInput').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') goDashboard();
+});
+</script>
+
+</body>
+</html>

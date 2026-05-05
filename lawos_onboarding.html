@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>LawOS — 로그인</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+<link rel="stylesheet" href="lawos_styles.css" />
+<style>
+  body {
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .auth-shell {
+    max-width: 400px; width: 100%;
+  }
+  .auth-brand {
+    display: flex; align-items: center; gap: 8px;
+    justify-content: center;
+    margin-bottom: 32px;
+  }
+  .auth-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px 28px;
+  }
+  .auth-h1 {
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.02em;
+    margin-bottom: 6px;
+  }
+  .auth-sub {
+    font-size: 13px; color: var(--text-2);
+    margin-bottom: 24px; line-height: 1.5;
+  }
+
+  .auth-form { display: flex; flex-direction: column; gap: 12px; }
+  .auth-form .input { font-size: 14px; }
+  .auth-form .btn { padding: 12px; font-size: 14px; }
+
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    margin: 20px 0;
+    font-size: 11px; color: var(--text-3);
+  }
+  .divider::before, .divider::after {
+    content: ""; flex: 1; height: 1px;
+    background: var(--border);
+  }
+
+  .oauth-btn {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    padding: 11px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    width: 100%;
+  }
+  .oauth-btn:hover { background: var(--surface-2); }
+  .oauth-icon-circle {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--surface-2);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 11px;
+  }
+
+  .auth-footer {
+    margin-top: 20px;
+    font-size: 12px; color: var(--text-3);
+    text-align: center;
+    line-height: 1.6;
+  }
+  .auth-footer a { color: var(--text-2); text-decoration: underline; }
+
+  .back-link {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 13px;
+  }
+  .back-link a { color: var(--text-3); }
+</style>
+</head>
+<body>
+
+<div class="auth-shell">
+
+  <div class="auth-brand">
+    <div class="brand-logo">L</div>
+    <div class="brand-name">LawOS</div>
+  </div>
+
+  <div class="auth-card">
+    <div class="auth-h1">시작하기</div>
+    <div class="auth-sub">이메일 1줄로 즉시 시작. 사무실 정보·채널은 대시보드에서 천천히.</div>
+
+    <button class="oauth-btn" onclick="goDashboard()">
+      <span class="oauth-icon-circle">G</span>
+      Google로 계속
+    </button>
+
+    <div class="divider">또는</div>
+
+    <form class="auth-form" onsubmit="goDashboard(); return false;">
+      <input class="input" type="email" placeholder="이메일" required />
+      <button type="submit" class="btn">이메일로 시작</button>
+    </form>
+
+    <div class="auth-footer">
+      가입과 로그인이 같습니다. 이메일 인증 1회 후 즉시 대시보드.<br/>
+      이용 시 <a href="#">이용약관</a>·<a href="#">개인정보처리방침</a>에 동의합니다.
+    </div>
+  </div>
+
+  <div class="back-link">
+    <a href="lawos_landing.html">← 진단 화면으로</a>
+  </div>
+
+</div>
+
+<script>
+function goDashboard() {
+  window.location.href = 'lawos_v0_dashboard.html';
+}
+</script>
+
+</body>
+</html>
