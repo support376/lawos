@@ -554,6 +554,23 @@ textarea.input { resize: vertical; min-height: 80px; line-height: 1.5; }
     <div class="brand-name">LawOS</div>
   </div>
 
+  <div style="display: flex; flex-direction: column; gap: 4px; margin: 0 4px 12px; padding: 6px; background: var(--surface-2); border-radius: 8px;">
+    <button class="mode-tab active" data-mode="ops" onclick="switchMode('ops')" style="text-align: left; padding: 8px 10px; border: none; border-radius: 5px; background: var(--surface); color: var(--text); font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.04);">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        로펌 운영 관리
+      </div>
+      <div style="font-size: 10px; color: var(--text-3); margin-top: 2px;">영업·마케팅·세일즈 성과</div>
+    </button>
+    <button class="mode-tab" data-mode="case" onclick="switchMode('case')" style="text-align: left; padding: 8px 10px; border: none; border-radius: 5px; background: transparent; color: var(--text-2); font-family: inherit; font-size: 12px; font-weight: 500; cursor: pointer;">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+        상담 및 사건 관리
+      </div>
+      <div style="font-size: 10px; color: var(--text-3); margin-top: 2px;">Lead·Case·Stage·재무</div>
+    </button>
+  </div>
+
   <div class="sidebar-site" onclick="toggleSiteMenu()">
     <div class="site-name" id="siteLabel">welcome-law.kr</div>
     <svg class="site-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
@@ -564,6 +581,7 @@ textarea.input { resize: vertical; min-height: 80px; line-height: 1.5; }
     </div>
   </div>
 
+  <div data-group="ops">
   <button class="sidebar-nav-item active" data-view="dashboard">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
     대시보드
@@ -646,6 +664,54 @@ textarea.input { resize: vertical; min-height: 80px; line-height: 1.5; }
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     설정
   </button>
+  </div>
+
+  <div data-group="case" style="display: none;">
+    <button class="sidebar-nav-item" data-view="partner-board">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      대표 대시보드
+    </button>
+    <button class="sidebar-nav-item" data-view="confirms">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      수임 컨펌 대기
+      <span style="margin-left: auto; font-size: 10px; padding: 1px 6px; background: var(--warn-bg); color: var(--warn-fg); border-radius: 4px; font-weight: 500;">3</span>
+    </button>
+
+    <div class="sidebar-section">파이프라인</div>
+    <button class="sidebar-nav-item" data-view="consultant">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      상담 (Lead)
+    </button>
+    <button class="sidebar-nav-item" data-view="writer-pipe">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+      작성 (Stage)
+    </button>
+    <button class="sidebar-nav-item" data-view="billing-pipe">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      재무 (Payment)
+    </button>
+
+    <div class="sidebar-section">사건</div>
+    <button class="sidebar-nav-item" data-view="case-detail">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      사건 상세
+    </button>
+    <button class="sidebar-nav-item" data-view="cases-list">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+      사건 목록
+    </button>
+    <button class="sidebar-nav-item" data-view="my-tasks">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/></svg>
+      내 업무 (workbench)
+      <span style="margin-left: auto; font-size: 10px; padding: 1px 6px; background: var(--danger-bg); color: var(--danger-fg); border-radius: 4px; font-weight: 500;">7</span>
+    </button>
+
+    <div class="sidebar-section">참고</div>
+    <button class="sidebar-nav-item" data-view="case-archive">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+      사건 아카이브
+    </button>
+  </div>
 
   <div class="sidebar-section">누적 자산</div>
   <div class="sidebar-tag">키워드 <span id="sbKw">0/5</span></div>
@@ -1573,6 +1639,338 @@ textarea.input { resize: vertical; min-height: 80px; line-height: 1.5; }
   </div>
 </section>
 
+<!-- ===== CASE MANAGEMENT MOCKUPS ===== -->
+
+<section class="view" data-view="partner-board">
+  <h1 class="h1">대표 대시보드 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">3 파이프라인 통합 + 직접 개입</span></h1>
+  <p class="sub">Lead·Case·Payment 모든 카드까지 즉시 보임. KPI는 운영 지표 (전환율·미수금·체류일).</p>
+
+  <div style="background: linear-gradient(135deg, var(--warn-bg), #FDE68A); border: 1px solid var(--warn-border); border-radius: var(--rl); padding: 14px 18px; margin-bottom: 18px;">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <div>
+        <div style="font-size: 13px; font-weight: 600; color: var(--warn-fg); margin-bottom: 2px;">🔔 수임 컨펌 대기 3건</div>
+        <div style="font-size: 11px; color: var(--warn-fg);">상담팀이 수임 확정 — 담당자·stage 지정 필요</div>
+      </div>
+      <button class="btn-warn" onclick="goView('confirms')">확인하러 가기</button>
+    </div>
+  </div>
+
+  <div class="kpi-grid" style="grid-template-columns: repeat(5, 1fr);">
+    <div class="kpi-card"><div class="kpi-label">이번달 수임</div><div class="kpi-value">8</div><div class="kpi-delta delta-up">▲ 2 vs 지난달</div></div>
+    <div class="kpi-card"><div class="kpi-label">활성 사건</div><div class="kpi-value">47</div><div class="kpi-delta">총 수임 누적</div></div>
+    <div class="kpi-card"><div class="kpi-label">미수금</div><div class="kpi-value">2.8억</div><div class="kpi-delta delta-down">연체 7건</div></div>
+    <div class="kpi-card"><div class="kpi-label">진행 Action</div><div class="kpi-value">62</div><div class="kpi-delta">오늘 마감 8</div></div>
+    <div class="kpi-card"><div class="kpi-label">평균 체류일</div><div class="kpi-value">14.2일</div><div class="kpi-delta">stage별 평균</div></div>
+  </div>
+
+  <div class="card" style="margin-top: 18px;">
+    <h3>📞 상담 파이프라인 (전체) <button class="btn-2" style="margin-left: auto;" onclick="goView('consultant')">전체 보기 →</button></h3>
+    <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; margin-top: 8px;">
+      <div style="background: var(--surface-2); padding: 8px; border-radius: 6px; text-align: center;"><div style="font-size: 10px; color: var(--text-3);">신규</div><div style="font-size: 18px; font-weight: 600;">12</div></div>
+      <div style="background: var(--surface-2); padding: 8px; border-radius: 6px; text-align: center;"><div style="font-size: 10px; color: var(--text-3);">접촉중</div><div style="font-size: 18px; font-weight: 600;">8</div></div>
+      <div style="background: var(--surface-2); padding: 8px; border-radius: 6px; text-align: center;"><div style="font-size: 10px; color: var(--text-3);">적격</div><div style="font-size: 18px; font-weight: 600;">5</div></div>
+      <div style="background: var(--success-bg); padding: 8px; border-radius: 6px; text-align: center;"><div style="font-size: 10px; color: var(--success-fg);">전환</div><div style="font-size: 18px; font-weight: 600; color: var(--success-fg);">8</div></div>
+      <div style="background: var(--danger-bg); padding: 8px; border-radius: 6px; text-align: center;"><div style="font-size: 10px; color: var(--danger-fg);">실패</div><div style="font-size: 18px; font-weight: 600; color: var(--danger-fg);">14</div></div>
+      <div style="background: var(--surface-2); padding: 8px; border-radius: 6px; text-align: center;"><div style="font-size: 10px; color: var(--text-3);">보류</div><div style="font-size: 18px; font-weight: 600;">3</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 12px;">
+    <h3>✍️ 작성 파이프라인 (개인회생) <button class="btn-2" style="margin-left: auto;" onclick="goView('writer-pipe')">전체 보기 →</button></h3>
+    <div style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin-top: 8px; font-size: 10px;">
+      <div style="background: var(--surface-2); padding: 6px 4px; border-radius: 5px; text-align: center;"><div style="color: var(--text-3);">서류준비</div><div style="font-size: 14px; font-weight: 600;">9</div></div>
+      <div style="background: var(--surface-2); padding: 6px 4px; border-radius: 5px; text-align: center;"><div style="color: var(--text-3);">신청접수</div><div style="font-size: 14px; font-weight: 600;">6</div></div>
+      <div style="background: var(--warn-bg); padding: 6px 4px; border-radius: 5px; text-align: center;"><div style="color: var(--warn-fg);">보정루프</div><div style="font-size: 14px; font-weight: 600; color: var(--warn-fg);">4</div></div>
+      <div style="background: var(--surface-2); padding: 6px 4px; border-radius: 5px; text-align: center;"><div style="color: var(--text-3);">개시결정</div><div style="font-size: 14px; font-weight: 600;">8</div></div>
+      <div style="background: var(--surface-2); padding: 6px 4px; border-radius: 5px; text-align: center;"><div style="color: var(--text-3);">채권신고</div><div style="font-size: 14px; font-weight: 600;">5</div></div>
+      <div style="background: var(--surface-2); padding: 6px 4px; border-radius: 5px; text-align: center;"><div style="color: var(--text-3);">채권집회</div><div style="font-size: 14px; font-weight: 600;">3</div></div>
+      <div style="background: var(--success-bg); padding: 6px 4px; border-radius: 5px; text-align: center;"><div style="color: var(--success-fg);">인가결정</div><div style="font-size: 14px; font-weight: 600; color: var(--success-fg);">7</div></div>
+      <div style="background: var(--surface-2); padding: 6px 4px; border-radius: 5px; text-align: center;"><div style="color: var(--text-3);">변제수행</div><div style="font-size: 14px; font-weight: 600;">5</div></div>
+    </div>
+    <div style="font-size: 11px; color: var(--text-3); margin-top: 8px;">🛑 Finance Hold 2건 · ⚠ 병목: 보정루프 4건 (평균 21일 체류)</div>
+  </div>
+
+  <div class="card" style="margin-top: 12px;">
+    <h3>💰 재무 파이프라인 <button class="btn-2" style="margin-left: auto;" onclick="goView('billing-pipe')">전체 보기 →</button></h3>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px;">
+      <div style="background: var(--surface-2); padding: 8px; border-radius: 6px; text-align: center;"><div style="font-size: 10px; color: var(--text-3);">예정</div><div style="font-size: 18px; font-weight: 600;">12</div><div style="font-size: 10px; color: var(--text-3);">3,200만</div></div>
+      <div style="background: var(--surface-2); padding: 8px; border-radius: 6px; text-align: center;"><div style="font-size: 10px; color: var(--text-3);">부분</div><div style="font-size: 18px; font-weight: 600;">8</div><div style="font-size: 10px; color: var(--text-3);">잔액 1,400만</div></div>
+      <div style="background: var(--danger-bg); padding: 8px; border-radius: 6px; text-align: center;"><div style="font-size: 10px; color: var(--danger-fg);">🔴 연체</div><div style="font-size: 18px; font-weight: 600; color: var(--danger-fg);">7</div><div style="font-size: 10px; color: var(--danger-fg);">2,800만</div></div>
+      <div style="background: var(--success-bg); padding: 8px; border-radius: 6px; text-align: center;"><div style="font-size: 10px; color: var(--success-fg);">완납</div><div style="font-size: 18px; font-weight: 600; color: var(--success-fg);">23</div><div style="font-size: 10px; color: var(--success-fg);">1.2억</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 12px;">
+    <h3>👥 담당자 Workload</h3>
+    <div class="row"><div>양변호사 (대표)</div><div class="row-meta">사건 18 · Action 12 · 오늘 마감 3 · 지연 1</div></div>
+    <div class="row"><div>김상담 (상담팀)</div><div class="row-meta">Lead 23 · Action 5 · 오늘 마감 2</div></div>
+    <div class="row"><div>박서기 (서류팀)</div><div class="row-meta">사건 12 · Action 14 · 오늘 마감 2 · 지연 0</div></div>
+    <div class="row"><div>이재무 (재무팀)</div><div class="row-meta">사건 47 · Action 8 · 연체 7건</div></div>
+  </div>
+</section>
+
+<section class="view" data-view="confirms">
+  <h1 class="h1">수임 컨펌 대기 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">3건</span></h1>
+  <p class="sub">상담팀이 수임 확정 → 담당자 3명·stage 지정 → 자동 Action 배포</p>
+
+  <div style="display: grid; gap: 10px;">
+    <div class="card">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 10px; padding: 2px 7px; background: var(--warn-bg); color: var(--warn-fg); border-radius: 4px; font-weight: 500;">대기</span>
+        <span style="font-size: 12px; color: var(--text-3);">상담팀 김상담 · 2시간 전</span>
+      </div>
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">김OO · 개인회생 · 채무 8,200만 · 가용소득 월 65만</div>
+      <div style="font-size: 11px; color: var(--text-3); margin-bottom: 10px;">Lead 출처: 네이버 검색 "개인회생 변호사 서초" · 수임료 350만 (착수 200만 + 분납 150만)</div>
+      <div style="display: flex; gap: 6px;">
+        <button class="btn-warn" onclick="openSignup('수임 컨펌 — 김OO')">컨펌 모달 열기</button>
+        <button class="btn-2">상담 기록 보기</button>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 10px; padding: 2px 7px; background: var(--warn-bg); color: var(--warn-fg); border-radius: 4px; font-weight: 500;">대기</span>
+        <span style="font-size: 12px; color: var(--text-3);">상담팀 김상담 · 5시간 전</span>
+      </div>
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">이OO · 이혼 · 위자료 청구 + 양육권</div>
+      <div style="font-size: 11px; color: var(--text-3); margin-bottom: 10px;">Lead 출처: 카톡 채널 · 수임료 500만 일시불</div>
+      <div style="display: flex; gap: 6px;">
+        <button class="btn-warn" onclick="openSignup('수임 컨펌 — 이OO')">컨펌 모달 열기</button>
+        <button class="btn-2">상담 기록 보기</button>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+        <span style="font-size: 10px; padding: 2px 7px; background: var(--warn-bg); color: var(--warn-fg); border-radius: 4px; font-weight: 500;">대기</span>
+        <span style="font-size: 12px; color: var(--text-3);">상담팀 김상담 · 1일 전</span>
+      </div>
+      <div style="font-size: 14px; font-weight: 500; margin-bottom: 4px;">박OO · 음주운전 약식기소 · 면허 취소 위기</div>
+      <div style="font-size: 11px; color: var(--text-3); margin-bottom: 10px;">Lead 출처: 로톡 · 수임료 300만 (착수 100만 + 성공보수 200만)</div>
+      <div style="display: flex; gap: 6px;">
+        <button class="btn-warn" onclick="openSignup('수임 컨펌 — 박OO')">컨펌 모달 열기</button>
+        <button class="btn-2">상담 기록 보기</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="view" data-view="consultant">
+  <h1 class="h1">상담 (Lead) 파이프라인 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">총 50건</span></h1>
+  <p class="sub">상담팀 6열 칸반 — Lead 카드 클릭 시 상담기록·수임확정 모달</p>
+
+  <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px;">
+    <div style="background: var(--surface-2); border-radius: 8px; padding: 10px; min-height: 400px;">
+      <div style="font-size: 11px; font-weight: 500; margin-bottom: 8px; color: var(--text-2);">신규 (12)</div>
+      <div style="background: var(--surface); padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; border: 1px solid var(--border);"><div style="font-size: 12px; font-weight: 500;">김OO</div><div style="font-size: 10px; color: var(--text-3);">개인회생 · 검색 · 2h 전</div></div>
+      <div style="background: var(--surface); padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; border: 1px solid var(--border);"><div style="font-size: 12px; font-weight: 500;">이OO</div><div style="font-size: 10px; color: var(--text-3);">이혼 · 카톡 · 5h 전</div></div>
+      <div style="background: var(--surface); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border);"><div style="font-size: 12px; font-weight: 500;">정OO</div><div style="font-size: 10px; color: var(--text-3);">상속 · 광고 · 1d 전</div></div>
+    </div>
+    <div style="background: var(--surface-2); border-radius: 8px; padding: 10px; min-height: 400px;">
+      <div style="font-size: 11px; font-weight: 500; margin-bottom: 8px; color: var(--text-2);">접촉중 (8)</div>
+      <div style="background: var(--surface); padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; border: 1px solid var(--border);"><div style="font-size: 12px; font-weight: 500;">최OO</div><div style="font-size: 10px; color: var(--text-3);">형사 · 소개 · 통화중</div></div>
+      <div style="background: var(--surface); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border);"><div style="font-size: 12px; font-weight: 500;">한OO</div><div style="font-size: 10px; color: var(--text-3);">임대차 · 검색 · 답변 대기</div></div>
+    </div>
+    <div style="background: var(--surface-2); border-radius: 8px; padding: 10px; min-height: 400px;">
+      <div style="font-size: 11px; font-weight: 500; margin-bottom: 8px; color: var(--text-2);">적격 (5)</div>
+      <div style="background: var(--surface); padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; border: 1px solid var(--border);"><div style="font-size: 12px; font-weight: 500;">윤OO</div><div style="font-size: 10px; color: var(--text-3);">개인회생 · 가능</div></div>
+      <div style="background: var(--surface); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border);"><div style="font-size: 12px; font-weight: 500;">서OO</div><div style="font-size: 10px; color: var(--text-3);">이혼 · 견적 검토</div></div>
+    </div>
+    <div style="background: var(--success-bg); border-radius: 8px; padding: 10px; min-height: 400px;">
+      <div style="font-size: 11px; font-weight: 500; margin-bottom: 8px; color: var(--success-fg);">✓ 전환 (8)</div>
+      <div style="background: var(--surface); padding: 8px 10px; border-radius: 6px; margin-bottom: 6px; border: 1px solid var(--border);"><div style="font-size: 12px; font-weight: 500;">강OO</div><div style="font-size: 10px; color: var(--text-3);">개인회생 · 350만</div></div>
+      <div style="background: var(--surface); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border);"><div style="font-size: 12px; font-weight: 500;">조OO</div><div style="font-size: 10px; color: var(--text-3);">이혼 · 500만 · 컨펌 대기</div></div>
+    </div>
+    <div style="background: var(--danger-bg); border-radius: 8px; padding: 10px; min-height: 400px;">
+      <div style="font-size: 11px; font-weight: 500; margin-bottom: 8px; color: var(--danger-fg);">✗ 실패 (14)</div>
+      <div style="background: var(--surface); padding: 8px 10px; border-radius: 6px; border: 1px solid var(--border);"><div style="font-size: 12px; font-weight: 500;">임OO</div><div style="font-size: 10px; color: var(--text-3);">가격 협상 결렬</div></div>
+    </div>
+    <div style="background: var(--surface-2); border-radius: 8px; padding: 10px; min-height: 400px;">
+      <div style="font-size: 11px; font-weight: 500; margin-bottom: 8px; color: var(--text-2);">보류 (3)</div>
+    </div>
+  </div>
+</section>
+
+<section class="view" data-view="writer-pipe">
+  <h1 class="h1">작성 (Stage) 파이프라인 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">활성 47건 · 🛑 Hold 2 · ⚠ 병목 보정루프</span></h1>
+  <p class="sub">개인회생 8단계 칸반 — 사건 카드 클릭 시 사건 상세</p>
+
+  <div style="display: grid; grid-template-columns: repeat(8, 150px); gap: 6px; overflow-x: auto;">
+    <div style="background: var(--surface-2); border-radius: 6px; padding: 8px; min-height: 350px;">
+      <div style="font-size: 10px; font-weight: 500; margin-bottom: 6px;">서류준비 (9)</div>
+      <div style="background: var(--surface); padding: 6px 8px; border-radius: 5px; margin-bottom: 4px; border: 1px solid var(--border); font-size: 11px;">김OO · 8.2천만</div>
+      <div style="background: var(--surface); padding: 6px 8px; border-radius: 5px; margin-bottom: 4px; border: 1px solid var(--border); font-size: 11px;">이OO · 5.7천만</div>
+    </div>
+    <div style="background: var(--surface-2); border-radius: 6px; padding: 8px; min-height: 350px;">
+      <div style="font-size: 10px; font-weight: 500; margin-bottom: 6px;">신청접수 (6)</div>
+      <div style="background: var(--surface); padding: 6px 8px; border-radius: 5px; margin-bottom: 4px; border: 1px solid var(--border); font-size: 11px;">박OO · 9.1천만</div>
+    </div>
+    <div style="background: var(--warn-bg); border-radius: 6px; padding: 8px; min-height: 350px;">
+      <div style="font-size: 10px; font-weight: 500; margin-bottom: 6px; color: var(--warn-fg);">⚠ 보정루프 (4)</div>
+      <div style="background: var(--surface); padding: 6px 8px; border-radius: 5px; margin-bottom: 4px; border: 1px solid var(--warn-border); font-size: 11px;">최OO · 21일째 🔒</div>
+    </div>
+    <div style="background: var(--surface-2); border-radius: 6px; padding: 8px; min-height: 350px;">
+      <div style="font-size: 10px; font-weight: 500; margin-bottom: 6px;">개시결정 (8)</div>
+    </div>
+    <div style="background: var(--surface-2); border-radius: 6px; padding: 8px; min-height: 350px;">
+      <div style="font-size: 10px; font-weight: 500; margin-bottom: 6px;">채권신고 (5)</div>
+    </div>
+    <div style="background: var(--surface-2); border-radius: 6px; padding: 8px; min-height: 350px;">
+      <div style="font-size: 10px; font-weight: 500; margin-bottom: 6px;">채권집회 (3)</div>
+    </div>
+    <div style="background: var(--success-bg); border-radius: 6px; padding: 8px; min-height: 350px;">
+      <div style="font-size: 10px; font-weight: 500; margin-bottom: 6px; color: var(--success-fg);">✓ 인가결정 (7)</div>
+    </div>
+    <div style="background: var(--surface-2); border-radius: 6px; padding: 8px; min-height: 350px;">
+      <div style="font-size: 10px; font-weight: 500; margin-bottom: 6px;">변제수행 (5)</div>
+    </div>
+  </div>
+</section>
+
+<section class="view" data-view="billing-pipe">
+  <h1 class="h1">재무 (Payment) 파이프라인 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">미수금 2.8억</span></h1>
+  <p class="sub">계약 회차별 4열 — 연체 시 Finance Hold 걸기</p>
+
+  <div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+    <div class="kpi-card"><div class="kpi-label">미수금</div><div class="kpi-value">2.8억</div><div class="kpi-delta">총액</div></div>
+    <div class="kpi-card"><div class="kpi-label">이번달 예정</div><div class="kpi-value">3,200만</div><div class="kpi-delta">12회차</div></div>
+    <div class="kpi-card"><div class="kpi-label">연체</div><div class="kpi-value" style="color: #EF4444;">7건</div><div class="kpi-delta delta-down">2,800만</div></div>
+    <div class="kpi-card"><div class="kpi-label">활성 Hold</div><div class="kpi-value">2</div><div class="kpi-delta">writer 칸반 차단</div></div>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 14px;">
+    <div style="background: var(--surface-2); border-radius: 8px; padding: 12px; min-height: 400px;">
+      <div style="font-size: 12px; font-weight: 500; margin-bottom: 10px;">예정 (12)</div>
+      <div style="background: var(--surface); padding: 10px; border-radius: 6px; margin-bottom: 6px; border: 1px solid var(--border);"><div style="font-size: 12px; font-weight: 500;">김OO 2회차</div><div style="font-size: 10px; color: var(--text-3);">150만 · D+5</div></div>
+    </div>
+    <div style="background: var(--surface-2); border-radius: 8px; padding: 12px; min-height: 400px;">
+      <div style="font-size: 12px; font-weight: 500; margin-bottom: 10px;">부분 (8)</div>
+      <div style="background: var(--surface); padding: 10px; border-radius: 6px; border: 1px solid var(--border);"><div style="font-size: 12px; font-weight: 500;">이OO 1회차</div><div style="font-size: 10px; color: var(--text-3);">200/350만 · 잔 150만</div></div>
+    </div>
+    <div style="background: var(--danger-bg); border-radius: 8px; padding: 12px; min-height: 400px;">
+      <div style="font-size: 12px; font-weight: 500; margin-bottom: 10px; color: var(--danger-fg);">🔴 연체 (7)</div>
+      <div style="background: var(--surface); padding: 10px; border-radius: 6px; margin-bottom: 6px; border: 1px solid var(--danger-fg);"><div style="font-size: 12px; font-weight: 500;">박OO 2회차 🛑</div><div style="font-size: 10px; color: var(--danger-fg);">200만 · D+12 · 독촉 2차</div></div>
+      <div style="background: var(--surface); padding: 10px; border-radius: 6px; border: 1px solid var(--danger-fg);"><div style="font-size: 12px; font-weight: 500;">최OO 3회차</div><div style="font-size: 10px; color: var(--danger-fg);">100만 · D+8</div></div>
+    </div>
+    <div style="background: var(--success-bg); border-radius: 8px; padding: 12px; min-height: 400px;">
+      <div style="font-size: 12px; font-weight: 500; margin-bottom: 10px; color: var(--success-fg);">✓ 완납 (23)</div>
+    </div>
+  </div>
+</section>
+
+<section class="view" data-view="case-detail">
+  <h1 class="h1">사건 상세 — 김OO (서울회생법원 · 2024개회X) <span class="pill pill-mine" style="font-size: 11px;">개시결정 단계</span></h1>
+  <p class="sub">10개 섹션 통합 — Stage 진행·Action·전략·상담일지·재무·서류·타임라인</p>
+
+  <div class="card" style="margin-bottom: 12px;">
+    <h3>📍 Stage 진행 (11단계 SVG 가로 플로우)</h3>
+    <div style="display: flex; gap: 4px; padding: 12px 0; overflow-x: auto;">
+      <div style="background: var(--success-bg); padding: 8px 10px; border-radius: 5px; font-size: 10px; color: var(--success-fg); white-space: nowrap;">✓ 상담</div>
+      <div style="background: var(--success-bg); padding: 8px 10px; border-radius: 5px; font-size: 10px; color: var(--success-fg); white-space: nowrap;">✓ 수임</div>
+      <div style="background: var(--success-bg); padding: 8px 10px; border-radius: 5px; font-size: 10px; color: var(--success-fg); white-space: nowrap;">✓ 서류준비</div>
+      <div style="background: var(--success-bg); padding: 8px 10px; border-radius: 5px; font-size: 10px; color: var(--success-fg); white-space: nowrap;">✓ 신청접수</div>
+      <div style="background: var(--text); color: #fff; padding: 8px 10px; border-radius: 5px; font-size: 10px; white-space: nowrap; font-weight: 500;">● 개시결정 (현재)</div>
+      <div style="background: var(--surface-2); padding: 8px 10px; border-radius: 5px; font-size: 10px; color: var(--text-3); white-space: nowrap;">채권신고</div>
+      <div style="background: var(--surface-2); padding: 8px 10px; border-radius: 5px; font-size: 10px; color: var(--text-3); white-space: nowrap;">채권집회</div>
+      <div style="background: var(--surface-2); padding: 8px 10px; border-radius: 5px; font-size: 10px; color: var(--text-3); white-space: nowrap;">인가결정</div>
+      <div style="background: var(--surface-2); padding: 8px 10px; border-radius: 5px; font-size: 10px; color: var(--text-3); white-space: nowrap;">변제수행</div>
+      <div style="background: var(--surface-2); padding: 8px 10px; border-radius: 5px; font-size: 10px; color: var(--text-3); white-space: nowrap;">변제완료</div>
+      <div style="background: var(--surface-2); padding: 8px 10px; border-radius: 5px; font-size: 10px; color: var(--text-3); white-space: nowrap;">면책결정</div>
+    </div>
+    <button class="btn-warn">다음 stage로 전이 →</button>
+  </div>
+
+  <div class="card" style="margin-bottom: 12px;">
+    <h3>🎯 진행 중 Action (팀별 4열) <button class="btn-2" style="margin-left: auto;">+ Action</button></h3>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 8px;">
+      <div style="background: var(--surface-2); padding: 10px; border-radius: 6px; min-height: 100px;"><div style="font-size: 11px; font-weight: 500; margin-bottom: 6px;">📞 상담</div><div style="background: var(--surface); padding: 6px; border-radius: 4px; font-size: 10px;">진행 안내 통화</div></div>
+      <div style="background: var(--surface-2); padding: 10px; border-radius: 6px; min-height: 100px;"><div style="font-size: 11px; font-weight: 500; margin-bottom: 6px;">✍️ 작성</div><div style="background: var(--surface); padding: 6px; border-radius: 4px; font-size: 10px;">채권자 명세 작성</div></div>
+      <div style="background: var(--surface-2); padding: 10px; border-radius: 6px; min-height: 100px;"><div style="font-size: 11px; font-weight: 500; margin-bottom: 6px;">💰 재무</div><div style="background: var(--surface); padding: 6px; border-radius: 4px; font-size: 10px;">2회차 입금 확인</div></div>
+      <div style="background: var(--surface-2); padding: 10px; border-radius: 6px; min-height: 100px;"><div style="font-size: 11px; font-weight: 500; margin-bottom: 6px;">🗂 행정</div></div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h3>🎲 전략 상태</h3>
+      <div class="row"><div>추천 절차</div><div class="row-meta">개인회생 (적격)</div></div>
+      <div class="row"><div>적격성</div><div class="row-meta">청산가치보장 충족</div></div>
+      <div class="row"><div>변제 기간</div><div class="row-meta">36개월 → 24개월 단축 가능</div></div>
+      <div class="row"><div>월 변제액</div><div class="row-meta">65만</div></div>
+      <div class="row"><div>변제율</div><div class="row-meta">28.6%</div></div>
+    </div>
+    <div class="card">
+      <h3>💰 수임료 계약</h3>
+      <div class="row"><div>총액</div><div class="row-meta">350만 (착수 200 + 분납 150)</div></div>
+      <div class="row"><div>수금</div><div class="row-meta" style="color: var(--success-fg);">200만 (1회차)</div></div>
+      <div class="row"><div>잔액</div><div class="row-meta">150만 (2회차 D+5 예정)</div></div>
+      <div class="row"><div>Gate</div><div class="row-meta">Soft Gate · 보정루프 차단</div></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 12px;">
+    <h3>📋 상담일지 6섹션 (확정)</h3>
+    <div style="font-size: 12px; color: var(--text-2); padding: 8px 0;">인적 사항 · 채무 내역 · 재산 내역 · 소득 진술 · 진술서 · 수임 정보 — 모두 작성 완료, 변호사 확정</div>
+  </div>
+
+  <div class="card" style="margin-top: 12px;">
+    <h3>🗂 서류 체크리스트</h3>
+    <div class="row"><div>✓ 채권자 목록</div><div class="row-meta">완료</div></div>
+    <div class="row"><div>✓ 재산 목록</div><div class="row-meta">완료</div></div>
+    <div class="row"><div>○ 가용소득 입증서류</div><div class="row-meta">2/3</div></div>
+    <div class="row"><div>○ 진술서</div><div class="row-meta">초안 작성중</div></div>
+  </div>
+
+  <div class="card" style="margin-top: 12px;">
+    <h3>📜 통합 타임라인 (전체 활동)</h3>
+    <div class="row"><div>오늘 09:30 · 박서기</div><div class="row-meta">채권자 명세 작성 시작</div></div>
+    <div class="row"><div>어제 16:42 · 양변호사</div><div class="row-meta">개시결정 stage 전이</div></div>
+    <div class="row"><div>2일 전 · 김상담</div><div class="row-meta">진행 안내 통화 (15분)</div></div>
+    <div class="row"><div>5일 전 · 시스템</div><div class="row-meta">2회차 입금 예정 알림</div></div>
+  </div>
+</section>
+
+<section class="view" data-view="cases-list">
+  <h1 class="h1">사건 목록 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">활성 47 · 종결 23</span></h1>
+  <p class="sub">전체 사건 검색·필터·정렬</p>
+  <div class="card">
+    <div style="font-size: 12px; color: var(--text-3); padding: 16px;">사건 테이블 — 의뢰인·사건유형·stage·담당자·D-day·미수금·우선순위. 클릭 시 사건 상세.</div>
+  </div>
+</section>
+
+<section class="view" data-view="my-tasks">
+  <h1 class="h1">내 업무 (workbench) <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">7건</span></h1>
+  <p class="sub">개인 To-Do 큐 — 지연·오늘·이번주·마감없음</p>
+
+  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;">
+    <div class="card" style="border-color: var(--danger-fg);">
+      <h3 style="color: var(--danger-fg);">🔴 지연 (2)</h3>
+      <div class="row"><div>채권 명세 작성 · 김OO</div><div class="row-meta">D+3</div></div>
+      <div class="row"><div>2회차 입금 확인 · 박OO</div><div class="row-meta">D+5</div></div>
+    </div>
+    <div class="card">
+      <h3>오늘 (3)</h3>
+      <div class="row"><div>진행 안내 통화 · 김OO</div><div class="row-meta">17:00</div></div>
+      <div class="row"><div>서류 검토 · 이OO</div><div class="row-meta">14:00</div></div>
+      <div class="row"><div>수임 컨펌 · 강OO</div><div class="row-meta">즉시</div></div>
+    </div>
+    <div class="card">
+      <h3>이번주 (1)</h3>
+      <div class="row"><div>진술서 검수 · 최OO</div><div class="row-meta">금요일</div></div>
+    </div>
+    <div class="card">
+      <h3>마감 없음 (1)</h3>
+      <div class="row"><div>판례 리서치</div><div class="row-meta">언제든</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="view" data-view="case-archive">
+  <h1 class="h1">사건 아카이브 <span style="font-size: 12px; color: var(--text-3); font-weight: 400;">종결 23건 · 검색·필터</span></h1>
+  <p class="sub">종결된 사건 + 판례 참고 자료</p>
+  <div class="card">
+    <div style="font-size: 12px; color: var(--text-3); padding: 16px;">종결 사건 테이블 — 의뢰인·사건유형·종결사유(인가/면책/기각/취하)·기간·수임료. 검색·필터·관련 판례 링크.</div>
+  </div>
+</section>
+
 </main>
 </div>
 </div>
@@ -1617,7 +2015,7 @@ function goView(name) {
   const btn = document.querySelector('.sidebar-nav-item[data-view="' + name + '"]');
   if (view) view.classList.add('active');
   if (btn) btn.classList.add('active');
-  const labels = { dashboard: '대시보드', alerts: '알림 센터', websites: '웹사이트 성과', sns: 'SNS 성과', calls: '콜·전화', diagnose: '사이트 진단', writer: '콘텐츠 작성', review: '검수 큐', inbox: '인입 통합', qualify: '리드 자격검증', keywords: '키워드 추적', feed: '컨텐츠 피드', agents: 'Agent 마켓', models: '사업모델 마켓', bpo: 'BPO·대행 마켓', ops: '업무 워크플로우', billing: '플랜·결제', settings: '설정' };
+  const labels = { dashboard: '대시보드', alerts: '알림 센터', websites: '웹사이트 성과', sns: 'SNS 성과', calls: '콜·전화', diagnose: '사이트 진단', writer: '콘텐츠 작성', review: '검수 큐', inbox: '인입 통합', qualify: '리드 자격검증', keywords: '키워드 추적', feed: '컨텐츠 피드', agents: 'Agent 마켓', models: '사업모델 마켓', bpo: 'BPO·대행 마켓', ops: '업무 워크플로우', billing: '플랜·결제', settings: '설정', 'partner-board': '대표 대시보드', 'confirms': '수임 컨펌 대기', 'consultant': '상담 (Lead)', 'writer-pipe': '작성 (Stage)', 'billing-pipe': '재무 (Payment)', 'case-detail': '사건 상세', 'cases-list': '사건 목록', 'my-tasks': '내 업무', 'case-archive': '사건 아카이브' };
   document.getElementById('topbarCrumb').textContent = (state.currentSite && state.currentSite.name || 'welcome 법률사무소') + ' / ' + (labels[name] || name);
   if (name === 'review') renderReviewQueue();
   if (name === 'inbox') renderInboxOver();
@@ -1907,6 +2305,30 @@ function resetData() {
   location.reload();
 }
 
+function switchMode(mode) {
+  state.currentMode = mode;
+  saveState();
+  document.querySelectorAll('.mode-tab').forEach(t => {
+    if (t.dataset.mode === mode) {
+      t.style.background = 'var(--surface)';
+      t.style.color = 'var(--text)';
+      t.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)';
+      t.classList.add('active');
+    } else {
+      t.style.background = 'transparent';
+      t.style.color = 'var(--text-2)';
+      t.style.boxShadow = 'none';
+      t.classList.remove('active');
+    }
+  });
+  document.querySelectorAll('[data-group]').forEach(g => {
+    g.style.display = g.dataset.group === mode ? 'block' : 'none';
+  });
+  if (mode === 'ops') goView('dashboard');
+  else goView('partner-board');
+  showToast(mode === 'ops' ? '로펌 운영 관리 모드' : '상담 및 사건 관리 모드');
+}
+
 function toggleSiteMenu() {
   const m = document.getElementById('siteMenu');
   m.style.display = m.style.display === 'none' ? 'block' : 'none';
@@ -2079,6 +2501,25 @@ function escapeHtml(s) {
 }
 
 function init() {
+  state.currentMode = state.currentMode || 'ops';
+  if (state.currentMode === 'case') {
+    document.querySelectorAll('.mode-tab').forEach(t => {
+      if (t.dataset.mode === 'case') {
+        t.style.background = 'var(--surface)';
+        t.style.color = 'var(--text)';
+        t.style.boxShadow = '0 1px 2px rgba(0,0,0,0.04)';
+        t.classList.add('active');
+      } else {
+        t.style.background = 'transparent';
+        t.style.color = 'var(--text-2)';
+        t.style.boxShadow = 'none';
+        t.classList.remove('active');
+      }
+    });
+    document.querySelectorAll('[data-group]').forEach(g => {
+      g.style.display = g.dataset.group === 'case' ? 'block' : 'none';
+    });
+  }
   if (state.signedIn) {
     document.getElementById('userText').textContent = '양변호사';
     document.querySelector('#userPill .dot').classList.remove('d-warn');
